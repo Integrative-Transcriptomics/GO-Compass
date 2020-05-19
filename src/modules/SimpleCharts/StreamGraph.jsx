@@ -2,11 +2,11 @@ import React, {useCallback, useState} from 'react';
 import PropTypes from "prop-types";
 import * as d3 from "d3";
 import Axis from "./Axis";
+import LineHighlighter from "./LineHighlighter";
 
 
 function StackedBarChart(props) {
-    const [index, setIndex] = useState(0);
-    const highlightRef = React.createRef();
+    const [xPos, setXPos] = useState(0);
     const margins = {
         top: 20,
         right: 20,
@@ -34,22 +34,6 @@ function StackedBarChart(props) {
     const paths = series.map((d) =>
         <path key={d.key } fill={props.color(d.key)} d={area(d)}/>
     );
-    const highlighter = <line ref={highlightRef} x1={xScale(index)} x2={xScale(index)} y1={0} y2={height} fill='none'
-                              stroke='black' strokeWidth={1}/>;
-    const startAnimation = useCallback((index) => {
-        let el = d3.select(highlightRef.current);
-        el.transition()
-            .duration(props.duration)
-            .ease(d3.easeLinear)
-            .attr("x1", xScale(index))
-            .attr("x2", xScale(index))
-            .on("end", () =>
-                setIndex(index)
-            );
-    }, [highlightRef, xScale, props.duration]);
-    React.useEffect(() => {
-        startAnimation(props.index);
-    }, [props.index, startAnimation]);
     const xAxis = d3.axisBottom()
         .scale(xScale)
         .tickFormat(d => props.data.timepoints[d]);
@@ -57,12 +41,13 @@ function StackedBarChart(props) {
         .scale(yScale);
     return (
         <svg width={props.width}
-             height={props.height}>
+             height={props.height}
+                onMouseMove={(e)=>setXPos(e.pageX)}>
             <g transform={'translate(' + margins.left + ',' + margins.top + ')'}>
                 <Axis h={height} w={width} axis={xAxis} axisType={'x'} label={'Condition'}/>
                 <Axis h={height} w={width} axis={yAxis} axisType={'y'} label={'-log10pVal'}/>
                 {paths}
-                {highlighter}
+                <LineHighlighter width={width} height={height} xScale={xScale} xPos={xPos} index={props.index} setIndex={props.setIndex} duration={props.duration}/>
             </g>
         </svg>
     );

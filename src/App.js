@@ -1,7 +1,7 @@
 import React, {useEffect, useState} from 'react';
 import './App.css';
 import readData from './parseData';
-import Plots from "./modules/AnimatedTreemap/Plots";
+import Plots from "./modules/Plots";
 import Toolbar from "@material-ui/core/Toolbar";
 import AppBar from "@material-ui/core/AppBar";
 import Button from "@material-ui/core/Button";

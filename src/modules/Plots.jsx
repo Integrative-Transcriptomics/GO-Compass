@@ -1,18 +1,17 @@
 import React, {useEffect, useState} from "react";
 import PropTypes from 'prop-types';
 import * as d3 from "d3";
-import RadioButtonGroup from "./RadioButtonGroup";
 import Grid from "@material-ui/core/Grid";
-import LineChart from "./LineChart";
-import AnimatedTreemap from "./AnimatedTreemap";
+import LineChart from "./SimpleCharts/LineChart";
+import AnimatedTreemap from "./AnimatedTreemap/AnimatedTreemap";
 import PlayButton from "./PlayButton";
-import StackedBarChart from "./StackedBarChart";
+import StackedBarChart from "./SimpleCharts/StackedBarChart";
 import FormControl from "@material-ui/core/FormControl";
 import FormLabel from "@material-ui/core/FormLabel";
 import RadioGroup from "@material-ui/core/RadioGroup";
 import FormControlLabel from "@material-ui/core/FormControlLabel";
 import Radio from "@material-ui/core/Radio";
-import StreamGraph from "./StreamGraph";
+import StreamGraph from "./SimpleCharts/StreamGraph";
 
 
 /**
@@ -64,11 +63,11 @@ function Plots(props) {
             let timeseriesPlot;
             if (plottype === 'lineChart') {
                 timeseriesPlot = <LineChart width={plotWidth} data={{keys: props.data.keys, children: lineChartChildren}}
-                                            index={index} color={color} duration={duration}/>
+                                            index={index} setIndex={setIndex} color={color} duration={duration}/>
             } else {
                 timeseriesPlot =
                     <StreamGraph width={plotWidth} data={{timepoints: props.data.keys, keys: [...keys], values: stackedChildren}}
-                                 index={index} color={color} duration={duration}/>
+                                 index={index} setIndex={setIndex} color={color} duration={duration}/>
             }
             firstPlot =
                 <Grid item xs={6}>
@@ -84,14 +83,12 @@ function Plots(props) {
                 </Grid>
         }
         return (
-            <Grid ref={main} container spacing={3}>
+            <Grid ref={main} container spacing={0}>
+                <Grid item xs={12}>
+                    {props.datatype === "timeseries" ? <PlayButton keys={props.data.keys} duration={duration} setIndex={setIndex}/> : null}
+                </Grid>
                 <Grid item xs={6}>
                     {firstPlot}
-                </Grid>
-                <Grid item xs={2}>
-                    <RadioButtonGroup index={index} setIndex={setIndex} keys={props.data.keys}/>
-                    {props.datatype === "timeseries" ?
-                        <PlayButton keys={props.data.keys} duration={duration} setIndex={setIndex}/> : null}
                 </Grid>
                 <Grid item xs={6}>
                     <AnimatedTreemap width={plotWidth} index={index} data={props.data} color={color} duration={duration}/>

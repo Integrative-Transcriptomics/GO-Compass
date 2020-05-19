@@ -8,6 +8,14 @@ import * as d3 from "d3";
  */
 function AnimatedTreemap(props) {
     const [index, setIndex] = useState(0);
+    const margins = {
+        top: 20,
+        right: 20,
+        bottom: 20,
+        left: 20,
+    };
+    const width = props.width - margins.left - margins.right;
+    const height = props.height - margins.top - margins.bottom;
 
     const leafRef = React.createRef();
     const parentRef = React.createRef();
@@ -15,7 +23,7 @@ function AnimatedTreemap(props) {
 
     const treemap = d3.treemap()
         .tile(d3.treemapResquarify)
-        .size([props.width, props.height])
+        .size([width, height])
         .padding(d => d.height === 1 ? 1 : 0)
         .round(true);
     // Compute the structure using the average value.
@@ -27,16 +35,16 @@ function AnimatedTreemap(props) {
     const max = d3.max(props.data.keys.map((d, i) => d3.hierarchy(props.data).sum(d => d.values ? Math.round(d.values[i]) : 0).value));
     const layout = useCallback((index) => {
         const k = Math.sqrt(root.sum(d => d.values ? d.values[index] : 0).value / max);
-        const x = (1 - k) / 2 * props.width;
-        const y = (1 - k) / 2 * props.height;
-        return treemap.size([props.width * k, props.height * k])(root)
+        const x = (1 - k) / 2 * width;
+        const y = (1 - k) / 2 * height;
+        return treemap.size([width * k, height * k])(root)
             .each(d => {
                 d.x0 += x;
                 d.x1 += x;
                 d.y0 += y;
                 d.y1 += y
             })
-    }, [root, max, treemap, props.width, props.height]);
+    }, [root, max, treemap, width, height]);
 
     const startAnimation = useCallback((index) => {
         const formatNumber = d3.format(",d");
@@ -111,8 +119,10 @@ function AnimatedTreemap(props) {
     });
     return (
         <svg width={props.width} height={props.height}>
-            <g ref={leafRef}>{children}</g>
-            <g ref={parentRef}>{parents}</g>
+            <g transform={"translate("+ margins.left+"," + margins.top+")"}>
+                <g ref={leafRef}>{children}</g>
+                <g ref={parentRef}>{parents}</g>
+            </g>
         </svg>
     );
 }
