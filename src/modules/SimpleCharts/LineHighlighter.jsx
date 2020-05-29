@@ -1,4 +1,4 @@
-import React, {useCallback, useEffect, useState} from 'react';
+import React, {useCallback, useEffect, useRef, useState} from 'react';
 import PropTypes from "prop-types";
 import * as d3 from "d3";
 
@@ -8,8 +8,9 @@ function LineHighlighter(props) {
     const [x, setX] = useState(0);
     const [x0, setX0] = useState(0);
     const [hoverIndex, setHoverIndex] = useState(-1);
-    const highlightRef = React.createRef();
+    const highlightRef = useRef();
     const xScale = props.xScale;
+    const setIndex = props.setIndex;
 
 
     const mouseDown = useCallback((event) => {
@@ -43,18 +44,17 @@ function LineHighlighter(props) {
     });
     useEffect(() => {
         if (!dragging) {
-            console.log(props.index);
             let els = d3.selectAll([...highlightRef.current.childNodes]);
             els.transition()
                 .duration(props.duration)
                 .ease(d3.easeLinear)
-                .attr("x1", props.xScale(props.index))
-                .attr("x2", props.xScale(props.index))
+                .attr("x1", xScale(props.index))
+                .attr("x2", xScale(props.index))
                 .on('end', () => {
-                    setX(props.xScale(props.index))
+                    setX(xScale(props.index))
                 });
         }
-    }, [props.index, props.xScale, props.duration, dragging, highlightRef]);
+    }, [highlightRef, props.duration, props.index, props.index, dragging]);
     useEffect(() => {
         if (dragging) {
             const xDiff = x0 - props.xPos;
@@ -64,8 +64,8 @@ function LineHighlighter(props) {
     }, [x0, x, dragging, props.xPos]);
     const mouseUp = useCallback(() => {
         setDragging(false);
-        props.setIndex(inverseX(x))
-    }, [x, inverseX]);
+        setIndex(inverseX(x))
+    }, [x, inverseX, setIndex]);
     return (
         <g onMouseUp={() => mouseUp()}>
             {highlighters}

@@ -18,8 +18,6 @@ function AnimatedTreemap(props) {
     const height = props.height - margins.top - margins.bottom;
 
     const leafRef = React.createRef();
-    const parentRef = React.createRef();
-
 
     const treemap = d3.treemap()
         .tile(d3.treemapResquarify)
@@ -30,8 +28,7 @@ function AnimatedTreemap(props) {
     const root = treemap(d3.hierarchy(props.data)
         .sum(d => d.values ? d3.sum(d.values) : 0)
         .sort((a, b) => b.value - a.value));
-    const children = [];
-    const parents = [];
+
     const max = d3.max(props.data.keys.map((d, i) => d3.hierarchy(props.data).sum(d => d.values ? Math.round(d.values[i]) : 0).value));
     const layout = useCallback((index) => {
         const k = Math.sqrt(root.sum(d => d.values ? d.values[index] : 0).value / max);
@@ -67,46 +64,30 @@ function AnimatedTreemap(props) {
                         this.textContent = formatNumber(i(t));
                     };
                 }));
-        let parent = d3.selectAll([...parentRef.current.childNodes]);
-        parent.data(layout(index).children).transition()
-            .duration(props.duration)
-            .ease(d3.easeLinear)
-            .attr("transform", d => `translate(${d.x0 + 2},${(d.y1 + d.y0) / 2})`)
-            .on("end", () => {
-                setIndex(index);
-            })
-            .call(leaf => leaf.select("text tspan:last-child")
-                .tween("text", function (d) {
-                    const i = d3.interpolate(parseNumber(this.textContent), d.value);
-                    return function (t) {
-                        this.textContent = formatNumber(i(t));
-                    };
-                }));
-    }, [leafRef, parentRef, layout, props.duration]);
+    }, [leafRef, layout, props.duration]);
     React.useEffect(() => {
         startAnimation(props.index);
     }, [props.index, startAnimation]);
 
-    layout(index).children.forEach((parent, j) => {
-        parents.push(
-            <text key={parent.data.name}
-                  transform={'translate(' + (parent.x0 + 2) + ',' + (parent.y0 + parent.y1) / 2 + ')'} fontSize={20}
-                  fontWeight='bold' opacity={0.3}>
-                {parent.data.name}
-            </text>);
-        parent.children.forEach((child, i) => {
+    const children = layout(index).children.map((parent, j) =>
+        parent.children.map((child, i) => {
+            const isHighlighted = (props.parentHighlight === null | props.parentHighlight === parent.data.name)
+                & (props.childHighlight === null| props.childHighlight ===child.data.name);
             const fill = props.color(parent.data.name);
             const id = j + '-' + i;
-            children.push(
+            return(
                 <g key={child.data.name} transform={'translate(' + child.x0 + ',' + child.y0 + ')'}>
-                    <rect id={"rect" + id} width={child.x1 - child.x0} height={child.y1 - child.y0}
-                          fill={fill}/>
+                    <rect onMouseEnter={() => props.setChildHighlight(child.data.name)}
+                          onMouseLeave={()=>props.setChildHighlight(null)}
+                          id={"rect" + id}
+                          width={child.x1 - child.x0} height={child.y1 - child.y0}
+                          fill={fill}
+                          opacity={isHighlighted ? 1 : 0.5}/>
                     <defs>
                         <clipPath id={"clip" + id}>
                             <use xlinkHref={"#rect" + id}/>
                         </clipPath>
                     </defs>
-
                     <text clipPath={'url(#clip' + id + ')'} x={2} y={10} fontSize={10}>
                         {child.data.name}
                     </text>
@@ -116,12 +97,11 @@ function AnimatedTreemap(props) {
                 </g>
             );
         })
-    });
+    );
     return (
         <svg width={props.width} height={props.height}>
-            <g transform={"translate("+ margins.left+"," + margins.top+")"}>
+            <g transform={"translate(" + margins.left + "," + margins.top + ")"}>
                 <g ref={leafRef}>{children}</g>
-                <g ref={parentRef}>{parents}</g>
             </g>
         </svg>
     );

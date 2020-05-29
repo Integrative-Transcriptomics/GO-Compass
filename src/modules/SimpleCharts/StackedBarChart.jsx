@@ -27,17 +27,35 @@ function StackedBarChart(props) {
     })]).range([height, 0]);
     const highlighters = props.data.timepoints.map((timepoint, i) => {
         const max = d3.max(series.map(category => category[i][1]));
-        return <rect onClick={() => props.setIndex(i)} key={timepoint} opacity={i === index ? 1 : 0}
+        return <rect key={timepoint} opacity={i === index ? 1 : 0}
                      height={height - yScale(max)}
                      width={xScale.bandwidth()}
-                     x={xScale(i)} y={yScale(max)} fillOpacity='0' stroke='black' strokeWidth='2px'/>
+                     x={xScale(i)} y={yScale(max)} fill='none' stroke='black' strokeWidth='2px'/>
     });
-    const rects = series.map((category) =>
-        category.map((timepoint, i) => {
-            return <rect key={category.key + i} x={xScale(i)} y={yScale(timepoint[1])} width={xScale.bandwidth()}
-                         height={yScale(timepoint[0]) - yScale(timepoint[1])} fill={props.color(category.key)}/>
+    const rects = series.map((category) => {
+        const isHighlighted = (props.parentHighlight === null | props.parentHighlight === category.key) & props.childHighlight === null;
+        return category.map((timepoint, i) => {
+            let childHighlightRect = null;
+            if (props.childHighlight !== null && props.mapper.get(props.childHighlight).parent===category.key) {
+                const childHeight=height-yScale(props.mapper.get(props.childHighlight).values[i]);
+                childHighlightRect = <rect x={xScale(i)}
+                                           y={yScale(timepoint[0])-childHeight}
+                                           fill={props.color(category.key)}
+                                           width={xScale.bandwidth()}
+                                           height={childHeight}/>
+            }
+            return <g key={category.key + i}>
+                <rect onMouseEnter={() => props.setParentHighlight(category.key)}
+                      onMouseLeave={() => props.setParentHighlight(null)}
+                      onClick={() => props.setIndex(i)} x={xScale(i)}
+                      y={yScale(timepoint[1])} width={xScale.bandwidth()}
+                      height={yScale(timepoint[0]) - yScale(timepoint[1])}
+                      opacity={isHighlighted ? 1 : 0.5}
+                      fill={props.color(category.key)}/>
+                {childHighlightRect}
+            </g>
         })
-    );
+    });
     const startAnimation = useCallback((index) => {
         let els = d3.selectAll([...highlightRef.current.childNodes]);
         els.transition()

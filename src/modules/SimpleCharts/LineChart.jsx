@@ -13,18 +13,32 @@ function LineChart(props) {
         bottom: 40,
         left: 60,
     };
-
     const width = props.width - margins.left - margins.right;
     const height = props.height - margins.top - margins.bottom;
     const max = d3.max(props.data.children.map(d => d3.max(d.values)));
     const xScale = d3.scalePoint().domain([...Array(props.data.keys.length).keys()]).range([0, width]);
     const yScale = d3.scaleLinear().domain([0, max]).range([height, 0]);
+    let childHighlightLine = null;
     const lines = props.data.children.map(line => {
+        const isHighlighted = (props.parentHighlight === null | props.parentHighlight === line.name) & props.childHighlight === null;
+        if (props.childHighlight !== null && props.mapper.get(props.childHighlight).parent === line.name) {
+            let childLineString='';
+            props.mapper.get(props.childHighlight).values.forEach((value,i)=>{
+                childLineString += xScale(i) + ',' + yScale(value) + ' ';
+            });
+            childHighlightLine = <polyline fill='none'
+                                           stroke={props.color(line.name)} strokeWidth={2}
+                                       points={childLineString}/>
+        }
         let linestring = "";
         line.values.forEach((value, i) => {
             linestring += xScale(i) + ',' + yScale(value) + ' ';
         });
-        return <polyline fill='none' stroke={props.color(line.name)} key={line.name} points={linestring}/>
+        return <polyline onMouseEnter={() => props.setParentHighlight(line.name)}
+                         onMouseLeave={() => props.setParentHighlight(null)}
+                         fill='none'
+                         opacity={isHighlighted ? 1 : 0.3}
+                         stroke={props.color(line.name)} strokeWidth={2} key={line.name} points={linestring}/>
     });
     const xAxis = d3.axisBottom()
         .scale(xScale)
@@ -40,6 +54,7 @@ function LineChart(props) {
                 {lines}
                 <LineHighlighter width={width} height={height} xScale={xScale} xPos={xPos} index={props.index}
                                  setIndex={props.setIndex} duration={props.duration}/>
+                {childHighlightLine}
             </g>
         </svg>
     );

@@ -1,111 +1,119 @@
-import React, {useEffect, useState} from "react";
+import React, {useCallback, useEffect, useState} from "react";
 import PropTypes from 'prop-types';
 import * as d3 from "d3";
 import Grid from "@material-ui/core/Grid";
-import LineChart from "./SimpleCharts/LineChart";
 import AnimatedTreemap from "./AnimatedTreemap/AnimatedTreemap";
 import PlayButton from "./PlayButton";
-import StackedBarChart from "./SimpleCharts/StackedBarChart";
-import FormControl from "@material-ui/core/FormControl";
-import FormLabel from "@material-ui/core/FormLabel";
-import RadioGroup from "@material-ui/core/RadioGroup";
-import FormControlLabel from "@material-ui/core/FormControlLabel";
-import Radio from "@material-ui/core/Radio";
-import StreamGraph from "./SimpleCharts/StreamGraph";
+import Legend from "./Legend";
+import Button from "@material-ui/core/Button";
+import MenuItem from "@material-ui/core/MenuItem";
+import Menu from "@material-ui/core/Menu";
+import SimpleChart from "./SimpleCharts/SimpleChart";
+import SmallMultiples from "./AnimatedTreemap/SmallMultiples";
+import {makeStyles} from "@material-ui/core/styles";
+import {createStyles} from "@material-ui/core";
+import Paper from "@material-ui/core/Paper";
 
 
 /**
  * @return {null}
  */
 function Plots(props) {
+    const useStyles = makeStyles((theme: Theme) =>
+        createStyles({
+            root: {
+                flexGrow: 1,
+                backgroundColor: 'lightgray'
+            },
+            paper: {
+                padding: theme.spacing(0),
+                textAlign: 'left',
+                color: theme.palette.text.secondary,
+            },
+        }),
+    );
     const [index, setIndex] = useState(0);
     const [plottype, setPlottype] = useState('lineChart');
     const [plotWidth, setWidth] = useState(100);
     const [plotHeight, setHeight] = useState(100);
+    const [anchorEl, setAnchorEl] = useState(null);
+    const [parentHighlight, setParentHighlight] = useState(null);
+    const [childHighlight, setChildHighlight] = useState(null);
+
     const main = React.createRef();
-    useEffect(()=>{
-        if(main.current != null){
-            setWidth(main.current.getBoundingClientRect().width/2);
-            setHeight(main.current.getBoundingClientRect().height/2);
+    useEffect(() => {
+        if (main.current != null) {
+            setWidth(main.current.getBoundingClientRect().width);
+            setHeight(main.current.getBoundingClientRect().height / 2);
         }
-    },[main]);
-    if (props.data !== null) {
-        const duration = 1500;
-        const color = d3.scaleOrdinal(props.data.children.map(d => d.name), d3.schemeCategory10.map(d => d3.interpolateRgb(d, "white")(0.5)));
-        const lineChartChildren = props.data.children.map(parent => {
-            const values = props.data.keys.map((d, i) => {
-                let current = 0;
-                parent.children.forEach(child => {
-                    current += child.values[i];
-                });
-                return current;
-            });
-            return ({name: parent.name, values: values});
-        });
-        const keys = new Set();
-        const stackedChildren = props.data.keys.map((d, i) => {
-            const tpData = {};
-            tpData['index'] = i;
-            props.data.children.forEach(parent => {
-                keys.add(parent.name);
-                tpData[parent.name] = d3.sum(parent.children.map(child => child.values[i]));
-            });
-            return tpData
-        });
-        let firstPlot;
-        if (props.datatype === "conditions") {
-            firstPlot =
-                <Grid item xs={6}>
-                    <StackedBarChart width={plotWidth} data={{timepoints: props.data.keys, keys: [...keys], values: stackedChildren}}
-                                     index={index} setIndex={setIndex} color={color} duration={duration}/>
-                </Grid>
-        } else {
-            let timeseriesPlot;
-            if (plottype === 'lineChart') {
-                timeseriesPlot = <LineChart width={plotWidth} data={{keys: props.data.keys, children: lineChartChildren}}
-                                            index={index} setIndex={setIndex} color={color} duration={duration}/>
-            } else {
-                timeseriesPlot =
-                    <StreamGraph width={plotWidth} data={{timepoints: props.data.keys, keys: [...keys], values: stackedChildren}}
-                                 index={index} setIndex={setIndex} color={color} duration={duration}/>
-            }
-            firstPlot =
-                <Grid item xs={6}>
-                    <FormControl component="fieldset">
-                        <FormLabel component="legend">Plot Type</FormLabel>
-                        <RadioGroup aria-label="plottype" name="plottype" value={plottype}
-                                    onChange={(event) => setPlottype(event.target.value)}>
-                            <FormControlLabel value="lineChart" control={<Radio/>} label="Line Chart"/>
-                            <FormControlLabel value="streamGraph" control={<Radio/>} label="Stream Graph"/>
-                        </RadioGroup>
-                    </FormControl>
-                    {timeseriesPlot}
-                </Grid>
-        }
-        return (
-            <Grid ref={main} container spacing={0}>
-                <Grid item xs={12}>
-                    {props.datatype === "timeseries" ? <PlayButton keys={props.data.keys} duration={duration} setIndex={setIndex}/> : null}
-                </Grid>
-                <Grid item xs={6}>
-                    {firstPlot}
-                </Grid>
-                <Grid item xs={6}>
-                    <AnimatedTreemap width={plotWidth} index={index} data={props.data} color={color} duration={duration}/>
-                </Grid>
+    }, [main]);
+    const selectPlottype = useCallback((plotType) => {
+        setAnchorEl(null);
+        setPlottype(plotType);
+    });
+    const duration = 1500;
+    const color = d3.scaleOrdinal(props.data.children.map(d => d.name), d3.schemeCategory10.map(d => d3.interpolateRgb(d, "white")(0.5)));
+    const classes = useStyles();
+    return (
+        <Grid ref={main} className={classes.root} container spacing={1}>
+            <Grid item xs={4}>
+                <Paper className={classes.paper}>
+                    <Legend width={plotWidth / 3} height={100} color={color}/>
+                    {props.datatype === "timeseries" ?
+                        <div>
+                        <PlayButton keys={props.data.keys} duration={duration} setIndex={setIndex}/>
+                    <Button aria-controls="simple-menu" aria-haspopup="true"
+                                        onClick={(event) => setAnchorEl(event.currentTarget)}>
+                                    Plot Type
+                                </Button>
+                                <Menu
+                                    id="simple-menu"
+                                    anchorEl={anchorEl}
+                                    keepMounted
+                                    open={Boolean(anchorEl)}
+                                    onClose={() => setAnchorEl(null)}
+                                >
+                                    <MenuItem onClick={() => selectPlottype('lineChart')}>Line Chart</MenuItem>
+                                    <MenuItem onClick={() => selectPlottype('streamGraph')}>Streamgraph</MenuItem>
+                                </Menu></div>: null
+                    }
+                    <SimpleChart width={plotWidth / 3}
+                             parentHighlight={parentHighlight}
+                             childHighlight={childHighlight}
+                             setParentHighlight={setParentHighlight}
+                             plottype={plottype}
+                             data={props.data}
+                             datatype={props.datatype}
+                             index={index} setIndex={setIndex} color={color} duration={duration}/>
+                </Paper>
             </Grid>
-        );
-    } else return null;
+            <Grid item xs={4}>
+                <Paper className={classes.paper}>
+                <AnimatedTreemap parentHighlight={parentHighlight}
+                                 childHighlight={childHighlight}
+                                 setChildHighlight={setChildHighlight} width={plotWidth/3} index={index}
+                                 data={props.data} color={color}
+                                 duration={duration}/>
+                </Paper>
+            </Grid>
+            <Grid item xs={4}>
+                <Paper className={classes.paper}>
+                    <SmallMultiples parentHighlight={parentHighlight}
+                                    childHighlight={childHighlight}
+                                    setChildHighlight={setChildHighlight} width={plotWidth/3} index={index}
+                                    duration={duration}
+                                    data={props.data}
+                                    setIndex={setIndex}
+                                    color={color}/>
+                </Paper>
+            </Grid>
+        </Grid>
+    );
 
 }
 
 Plots.propTypes = {
-    width: PropTypes.number,
-    height: PropTypes.number,
-    data: PropTypes.objectOf(PropTypes.array)
-};
-Plots.defaultProps = {
-    width: 900,
-    height: 600,
+    data: PropTypes.objectOf(PropTypes.array).isRequired,
+    datatype: PropTypes.string.isRequired,
 };
 export default Plots;
