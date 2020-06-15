@@ -1,6 +1,5 @@
-import React, {useCallback, useState} from "react";
+import React from "react";
 import PropTypes from 'prop-types';
-import * as d3 from "d3";
 import Treemap from "./Treemap";
 
 
@@ -31,7 +30,7 @@ function SmallMultiples(props) {
                      color={props.color}
                      width={width} height={height}/>
         </g>);
-        if ((x + width) >= props.width) {
+        if (Math.round(x + width) >= Math.round(props.width)) {
             y += height;
             x = 0;
         } else {
@@ -46,7 +45,7 @@ function SmallMultiples(props) {
 SmallMultiples.propTypes = {
     width: PropTypes.number,
     height: PropTypes.number,
-    data: PropTypes.objectOf(PropTypes.array)
+    data: PropTypes.object
 };
 SmallMultiples.defaultProps = {
     width: 900,

@@ -65,14 +65,23 @@ function SimpleChart(props) {
 }
 
 SimpleChart.propTypes = {
-    width: PropTypes.number,
+    width: PropTypes.number.isRequired,
     height: PropTypes.number,
-    data: PropTypes.objectOf(PropTypes.array),
-    color: PropTypes.func.isRequired
+    data: PropTypes.object.isRequired,
+    color: PropTypes.func.isRequired,
+    parentHighlight: PropTypes.string,
+    childHighlight: PropTypes.string,
+    setParentHighlight: PropTypes.func.isRequired,
+    plottype: PropTypes.string.isRequired,
+    datatype: PropTypes.string.isRequired,
+    index: PropTypes.number.isRequired,
+    setIndex: PropTypes.func.isRequired,
+    duration: PropTypes.number.isRequired,
 };
 SimpleChart.defaultProps = {
-    width: 900,
     height: 350,
+    parentHighlight: null,
+    childHighlight: null,
 };
 export default SimpleChart;
 

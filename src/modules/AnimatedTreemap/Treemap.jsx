@@ -29,7 +29,7 @@ function Treemap(props) {
         .sum(d => d.values ? d3.sum(d.values) : 0)
         .sort((a, b) => b.value - a.value));
 
-    const max = d3.max(props.data.keys.map((d, i) => d3.hierarchy(props.data).sum(d => d.values ? Math.round(d.values[i]) : 0).value));
+    const max = d3.max(props.data.keys.map((d, i) => d3.hierarchy(props.data).sum(d => d.values ? d.values[i] : 0).value));
     const layout = useCallback((index) => {
         const k = Math.sqrt(root.sum(d => d.values ? d.values[index] : 0).value / max);
         const x = (1 - k) / 2 * width;
@@ -92,7 +92,7 @@ function Treemap(props) {
 Treemap.propTypes = {
     width: PropTypes.number,
     height: PropTypes.number,
-    data: PropTypes.objectOf(PropTypes.array)
+    data: PropTypes.object
 };
 Treemap.defaultProps = {
     width: 900,

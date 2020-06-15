@@ -29,7 +29,7 @@ function AnimatedTreemap(props) {
         .sum(d => d.values ? d3.sum(d.values) : 0)
         .sort((a, b) => b.value - a.value));
 
-    const max = d3.max(props.data.keys.map((d, i) => d3.hierarchy(props.data).sum(d => d.values ? Math.round(d.values[i]) : 0).value));
+    const max = d3.max(props.data.keys.map((d, i) => d3.hierarchy(props.data).sum(d => d.values ? d.values[i] : 0).value));
     const layout = useCallback((index) => {
         const k = Math.sqrt(root.sum(d => d.values ? d.values[index] : 0).value / max);
         const x = (1 - k) / 2 * width;
@@ -72,13 +72,13 @@ function AnimatedTreemap(props) {
     const children = layout(index).children.map((parent, j) =>
         parent.children.map((child, i) => {
             const isHighlighted = (props.parentHighlight === null | props.parentHighlight === parent.data.name)
-                & (props.childHighlight === null| props.childHighlight ===child.data.name);
+                & (props.childHighlight === null | props.childHighlight === child.data.name);
             const fill = props.color(parent.data.name);
             const id = j + '-' + i;
-            return(
+            return (
                 <g key={child.data.name} transform={'translate(' + child.x0 + ',' + child.y0 + ')'}>
                     <rect onMouseEnter={() => props.setChildHighlight(child.data.name)}
-                          onMouseLeave={()=>props.setChildHighlight(null)}
+                          onMouseLeave={() => props.setChildHighlight(null)}
                           id={"rect" + id}
                           width={child.x1 - child.x0} height={child.y1 - child.y0}
                           fill={fill}
@@ -110,7 +110,7 @@ function AnimatedTreemap(props) {
 AnimatedTreemap.propTypes = {
     width: PropTypes.number,
     height: PropTypes.number,
-    data: PropTypes.objectOf(PropTypes.array)
+    data: PropTypes.object.isRequired,
 };
 AnimatedTreemap.defaultProps = {
     width: 900,

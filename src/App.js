@@ -1,6 +1,6 @@
-import React, {useEffect, useState} from 'react';
+import React, {useCallback, useEffect, useState} from 'react';
 import './App.css';
-import readData from './parseData.jsx';
+import readRawData from './parseData.jsx';
 import Plots from "./modules/Plots";
 import Toolbar from "@material-ui/core/Toolbar";
 import AppBar from "@material-ui/core/AppBar";
@@ -10,6 +10,7 @@ import FormControlLabel from "@material-ui/core/FormControlLabel";
 import Typography from "@material-ui/core/Typography";
 import {createStyles} from "@material-ui/core";
 import {makeStyles} from "@material-ui/core/styles";
+import SelectData from "./modules/SelectData";
 
 
 function App() {
@@ -30,12 +31,16 @@ function App() {
 
     const [data, setData] = useState(null);
     const [file, setFile] = useState(null);
+    const [ontology, setOntology] = useState("BP");
+    const [cutoff, setCutoff] = useState(0.7);
     const [isTimeseries, setDatatype] = useState(false);
 
-    useEffect(() => {
-        readData(file, (newData) => setData(newData))
-    }, [file]);
-    const classes=useStyles();
+    const launch = useCallback(()=>{
+        if(file !== null){
+            readRawData(file, ontology, cutoff, (newData) => setData(newData));
+        }
+    },[file,ontology,cutoff]);
+    const classes = useStyles();
     return (
         <div className={classes.root}>
             <React.Fragment>
@@ -45,8 +50,8 @@ function App() {
                             GO Comparison Dashboard
                         </Typography>
                         <Button className={classes.menuButton}
-                            variant="contained"
-                            component="label"
+                                variant="contained"
+                                component="label"
                         >
                             Select File
                             <input
@@ -64,7 +69,13 @@ function App() {
                     </Toolbar>
                 </AppBar>
             </React.Fragment>
-            {data != null ? <Plots datatype={isTimeseries ? 'timeseries' : 'conditions'} data={data}/> : null}
+            {data != null ? <Plots datatype={isTimeseries ? 'timeseries' : 'conditions'} data={data}/> :
+                <SelectData setFile={setFile}
+                            ontology={ontology}
+                            setOntology={setOntology}
+                            cutoff={cutoff}
+                            setCutoff={setCutoff}
+                            launch={launch}/>}
         </div>
     );
 }

@@ -13,6 +13,7 @@ import SmallMultiples from "./AnimatedTreemap/SmallMultiples";
 import {makeStyles} from "@material-ui/core/styles";
 import {createStyles} from "@material-ui/core";
 import Paper from "@material-ui/core/Paper";
+import DataTable from "./DetailedTable/DataTable";
 
 
 /**
@@ -41,12 +42,17 @@ function Plots(props) {
     const [childHighlight, setChildHighlight] = useState(null);
 
     const main = React.createRef();
+    const simplePlot = React.createRef();
     useEffect(() => {
         if (main.current != null) {
             setWidth(main.current.getBoundingClientRect().width);
-            setHeight(main.current.getBoundingClientRect().height / 2);
         }
     }, [main]);
+    useEffect(() => {
+        if (simplePlot.current != null) {
+            setHeight(simplePlot.current.getBoundingClientRect().height);
+        }
+    }, [simplePlot]);
     const selectPlottype = useCallback((plotType) => {
         setAnchorEl(null);
         setPlottype(plotType);
@@ -57,7 +63,7 @@ function Plots(props) {
     return (
         <Grid ref={main} className={classes.root} container spacing={1}>
             <Grid item xs={4}>
-                <Paper className={classes.paper}>
+                <Paper ref={simplePlot} className={classes.paper}>
                     <Legend width={plotWidth / 3} height={100} color={color}/>
                     {props.datatype === "timeseries" ?
                         <div>
@@ -91,7 +97,7 @@ function Plots(props) {
                 <Paper className={classes.paper}>
                 <AnimatedTreemap parentHighlight={parentHighlight}
                                  childHighlight={childHighlight}
-                                 setChildHighlight={setChildHighlight} width={plotWidth/3} index={index}
+                                 setChildHighlight={setChildHighlight} width={plotWidth/3} height={plotHeight} index={index}
                                  data={props.data} color={color}
                                  duration={duration}/>
                 </Paper>
@@ -100,11 +106,17 @@ function Plots(props) {
                 <Paper className={classes.paper}>
                     <SmallMultiples parentHighlight={parentHighlight}
                                     childHighlight={childHighlight}
-                                    setChildHighlight={setChildHighlight} width={plotWidth/3} index={index}
+                                    setChildHighlight={setChildHighlight} width={plotWidth/3} height={plotHeight} index={index}
                                     duration={duration}
                                     data={props.data}
                                     setIndex={setIndex}
                                     color={color}/>
+                </Paper>
+            </Grid>
+            <Grid item xs={12}>
+                <Paper className={classes.paper}>
+                    <DataTable data={props.data} childHighlight={childHighlight}
+                               setChildHighlight={setChildHighlight}/>
                 </Paper>
             </Grid>
         </Grid>
@@ -113,7 +125,7 @@ function Plots(props) {
 }
 
 Plots.propTypes = {
-    data: PropTypes.objectOf(PropTypes.array).isRequired,
+    data: PropTypes.object.isRequired,
     datatype: PropTypes.string.isRequired,
 };
 export default Plots;
