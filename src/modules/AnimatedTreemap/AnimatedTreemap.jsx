@@ -16,6 +16,8 @@ function AnimatedTreemap(props) {
     };
     const width = props.width - margins.left - margins.right;
     const height = props.height - margins.top - margins.bottom;
+    const fontSize = 12;
+
 
     const leafRef = React.createRef();
 
@@ -44,8 +46,6 @@ function AnimatedTreemap(props) {
     }, [root, max, treemap, width, height]);
 
     const startAnimation = useCallback((index) => {
-        const formatNumber = d3.format(",d");
-        const parseNumber = string => +string.replace(/,/g, "");
         let leaf = d3.selectAll([...leafRef.current.childNodes]);
         leaf.data(layout(index).leaves()).transition()
             .duration(props.duration)
@@ -57,13 +57,6 @@ function AnimatedTreemap(props) {
             .call(leaf => leaf.select("rect")
                 .attr("width", d => d.x1 - d.x0)
                 .attr("height", d => d.y1 - d.y0))
-            .call(leaf => leaf.select("text tspan:last-child")
-                .tween("text", function (d) {
-                    const i = d3.interpolate(parseNumber(this.textContent), d.value);
-                    return function (t) {
-                        this.textContent = formatNumber(i(t));
-                    };
-                }));
     }, [leafRef, layout, props.duration]);
     React.useEffect(() => {
         startAnimation(props.index);
@@ -83,17 +76,22 @@ function AnimatedTreemap(props) {
                           width={child.x1 - child.x0} height={child.y1 - child.y0}
                           fill={fill}
                           opacity={isHighlighted ? 1 : 0.5}/>
-                    <defs>
-                        <clipPath id={"clip" + id}>
-                            <use xlinkHref={"#rect" + id}/>
-                        </clipPath>
-                    </defs>
-                    <text clipPath={'url(#clip' + id + ')'} x={2} y={10} fontSize={10}>
-                        {child.data.name}
-                    </text>
+                    <g>
+                        <defs>
+                            <clipPath id={"clip" + id}>
+                                <use xlinkHref={"#rect" + id}/>
+                            </clipPath>
+                        </defs>
+                        <text clipPath={'url(#clip' + id + ')'} x={2} y={10} fontSize={10}>
+                            {child.data.name}
+                        </text>
+                    </g>
                     <title>
                         {child.data.name}
                     </title>
+                    {-Math.log10(props.sigThreshold) < child.value ?
+                        <text clipPath={'url(#clip' + id + ')'} fontSize={fontSize} y={child.y1 - child.y0}
+                              x={child.x1 - child.x0 - fontSize}>*</text> : null}
                 </g>
             );
         })

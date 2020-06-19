@@ -22,13 +22,13 @@ function LineChart(props) {
     const lines = props.data.children.map(line => {
         const isHighlighted = (props.parentHighlight === null | props.parentHighlight === line.name) & props.childHighlight === null;
         if (props.childHighlight !== null && props.mapper.get(props.childHighlight).parent === line.name) {
-            let childLineString='';
-            props.mapper.get(props.childHighlight).values.forEach((value,i)=>{
+            let childLineString = '';
+            props.mapper.get(props.childHighlight).values.forEach((value, i) => {
                 childLineString += xScale(i) + ',' + yScale(value) + ' ';
             });
             childHighlightLine = <polyline fill='none'
                                            stroke={props.color(line.name)} strokeWidth={2}
-                                       points={childLineString}/>
+                                           points={childLineString}/>
         }
         let linestring = "";
         line.values.forEach((value, i) => {
@@ -40,6 +40,12 @@ function LineChart(props) {
                          opacity={isHighlighted ? 1 : 0.3}
                          stroke={props.color(line.name)} strokeWidth={2} key={line.name} points={linestring}/>
     });
+    let sigLine = null;
+    if (!props.showOverview && props.childHighlight !==  null) {
+        sigLine = <line x1={0} x2={width} y1={yScale(-Math.log10(props.sigThreshold))}
+                        y2={yScale(-Math.log10(props.sigThreshold))}
+                        fill="none" stroke="black" strokeDasharray="4"/>
+    }
     const xAxis = d3.axisBottom()
         .scale(xScale)
         .tickFormat(d => props.data.keys[d]);
@@ -55,6 +61,7 @@ function LineChart(props) {
                 <LineHighlighter width={width} height={height} xScale={xScale} xPos={xPos} index={props.index}
                                  setIndex={props.setIndex} duration={props.duration}/>
                 {childHighlightLine}
+                {sigLine}
             </g>
         </svg>
     );

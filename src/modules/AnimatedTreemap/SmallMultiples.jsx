@@ -8,8 +8,7 @@ import Treemap from "./Treemap";
  */
 function SmallMultiples(props) {
     let width, height;
-    if (props.data.keys.length === 2) {
-    } else if (props.data.keys.length < 5) {
+    if (props.data.keys.length < 5) {
         width = props.width / 2;
         height = props.height / 2;
     } else if (props.data.keys.length < 10) {
@@ -25,6 +24,7 @@ function SmallMultiples(props) {
             <Treemap parentHighlight={props.parentHighlight}
                      childHighlight={props.childHighlight}
                      setChildHighlight={props.setChildHighlight}
+                     sigThreshold={props.sigThreshold}
                      setIndex={props.setIndex}
                      data={props.data} index={i} duration={props.duration} highlightIndex={props.index}
                      color={props.color}

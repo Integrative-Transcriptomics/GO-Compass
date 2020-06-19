@@ -14,6 +14,8 @@ import {makeStyles} from "@material-ui/core/styles";
 import {createStyles} from "@material-ui/core";
 import Paper from "@material-ui/core/Paper";
 import DataTable from "./DetailedTable/DataTable";
+import CorrelationHeatmap from "./CorrelationHeatmap";
+import PCA from "./PCA";
 
 
 /**
@@ -62,51 +64,81 @@ function Plots(props) {
     const classes = useStyles();
     return (
         <Grid ref={main} className={classes.root} container spacing={1}>
+            <Grid item xs={6}>
+                <Paper className={classes.paper}>
+                    <PCA width={plotWidth / 3}
+                                        parentHighlight={parentHighlight}
+                                        childHighlight={childHighlight}
+                                        setParentHighlight={setParentHighlight}
+                                        data={props.data.pca}
+                                        conditions={props.data.keys}
+                    />
+                </Paper>
+            </Grid>
+            <Grid item xs={6}>
+                <Paper className={classes.paper}>
+
+                    <CorrelationHeatmap width={plotWidth / 3}
+                                        parentHighlight={parentHighlight}
+                                        childHighlight={childHighlight}
+                                        setParentHighlight={setParentHighlight}
+                                        correlation={props.data.correlation}
+                                        conditions={props.data.keys}
+                    />
+                </Paper>
+            </Grid>
             <Grid item xs={4}>
                 <Paper ref={simplePlot} className={classes.paper}>
                     <Legend width={plotWidth / 3} height={100} color={color}/>
                     {props.datatype === "timeseries" ?
                         <div>
-                        <PlayButton keys={props.data.keys} duration={duration} setIndex={setIndex}/>
-                    <Button aria-controls="simple-menu" aria-haspopup="true"
-                                        onClick={(event) => setAnchorEl(event.currentTarget)}>
-                                    Plot Type
-                                </Button>
-                                <Menu
-                                    id="simple-menu"
-                                    anchorEl={anchorEl}
-                                    keepMounted
-                                    open={Boolean(anchorEl)}
-                                    onClose={() => setAnchorEl(null)}
-                                >
-                                    <MenuItem onClick={() => selectPlottype('lineChart')}>Line Chart</MenuItem>
-                                    <MenuItem onClick={() => selectPlottype('streamGraph')}>Streamgraph</MenuItem>
-                                </Menu></div>: null
+                            <PlayButton keys={props.data.keys} duration={duration} setIndex={setIndex}/>
+                            <Button aria-controls="simple-menu" aria-haspopup="true"
+                                    onClick={(event) => setAnchorEl(event.currentTarget)}>
+                                Plot Type
+                            </Button>
+                            <Menu
+                                id="simple-menu"
+                                anchorEl={anchorEl}
+                                keepMounted
+                                open={Boolean(anchorEl)}
+                                onClose={() => setAnchorEl(null)}
+                            >
+                                <MenuItem onClick={() => selectPlottype('lineChart')}>Line Chart</MenuItem>
+                                <MenuItem onClick={() => selectPlottype('streamGraph')}>Streamgraph</MenuItem>
+                            </Menu></div> : null
                     }
                     <SimpleChart width={plotWidth / 3}
-                             parentHighlight={parentHighlight}
-                             childHighlight={childHighlight}
-                             setParentHighlight={setParentHighlight}
-                             plottype={plottype}
-                             data={props.data}
-                             datatype={props.datatype}
-                             index={index} setIndex={setIndex} color={color} duration={duration}/>
+                                 parentHighlight={parentHighlight}
+                                 childHighlight={childHighlight}
+                                 setParentHighlight={setParentHighlight}
+                                 sigThreshold={props.sigThreshold}
+                                 plottype={plottype}
+                                 data={props.data}
+                                 datatype={props.datatype}
+                                 index={index} setIndex={setIndex} color={color} duration={duration}/>
                 </Paper>
             </Grid>
             <Grid item xs={4}>
                 <Paper className={classes.paper}>
-                <AnimatedTreemap parentHighlight={parentHighlight}
-                                 childHighlight={childHighlight}
-                                 setChildHighlight={setChildHighlight} width={plotWidth/3} height={plotHeight} index={index}
-                                 data={props.data} color={color}
-                                 duration={duration}/>
+                    <AnimatedTreemap parentHighlight={parentHighlight}
+                                     childHighlight={childHighlight}
+                                     setChildHighlight={setChildHighlight} width={plotWidth / 3}
+                                     sigThreshold={props.sigThreshold}
+                                     height={plotHeight}
+                                     index={index}
+                                     data={props.data} color={color}
+                                     duration={duration}/>
                 </Paper>
             </Grid>
             <Grid item xs={4}>
                 <Paper className={classes.paper}>
                     <SmallMultiples parentHighlight={parentHighlight}
                                     childHighlight={childHighlight}
-                                    setChildHighlight={setChildHighlight} width={plotWidth/3} height={plotHeight} index={index}
+                                    setChildHighlight={setChildHighlight}
+                                    sigThreshold={props.sigThreshold}
+                                    width={plotWidth / 3} height={plotHeight}
+                                    index={index}
                                     duration={duration}
                                     data={props.data}
                                     setIndex={setIndex}

@@ -7,25 +7,12 @@ import TableHead from "@material-ui/core/TableHead";
 import TableRow from "@material-ui/core/TableRow";
 import TableCell from "@material-ui/core/TableCell";
 import TableBody from "@material-ui/core/TableBody";
-import Typography from "@material-ui/core/Typography";
 import IconButton from "@material-ui/core/IconButton";
 import KeyboardArrowDownIcon from '@material-ui/icons/KeyboardArrowDown';
 import KeyboardArrowUpIcon from '@material-ui/icons/KeyboardArrowUp';
-import { withStyles, Theme, createStyles, makeStyles } from '@material-ui/core/styles';
+import { makeStyles } from '@material-ui/core/styles';
 
 
-const StyledTableCell = withStyles((theme: Theme) =>
-    createStyles({
-        head: {
-            backgroundColor: theme.palette.common.black,
-            color: theme.palette.common.white,
-            fontSize: 12,
-        },
-        body: {
-            fontSize: 10,
-        },
-    }),
-)(TableCell);
 const useStyles = makeStyles({
     table: {
         fontSize: 12,

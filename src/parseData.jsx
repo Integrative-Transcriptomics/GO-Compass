@@ -40,7 +40,7 @@ function readData(dataFile, callback) {
                             })
                         };
                     });
-                    console.log(hierarchy,pvalues);
+                    console.log(hierarchy, pvalues);
                     callback({keys, children: nest(pvalues, d => hierarchy.get(d.name))})
                 })
             }
@@ -65,25 +65,32 @@ function readRawData(dataFile, ontology, cutoff, callback) {
                             cutoff: cutoff
                         },
                     }).then(function (response) {
-                            const data = response.data;
-                            const goMap = new Map();
-
-                            Object.keys(data.treemapHierarchy).forEach(goTerm =>{
-                                data.treemapHierarchy[goTerm].forEach((d,i)=>{
-                                    goMap.set(data.data[d].description,data.data[goTerm].description)
-                                });
+                        const data = response.data;
+                        const goMap = new Map();
+                        console.log(data);
+                        Object.keys(data.treemapHierarchy).forEach(goTerm => {
+                            data.treemapHierarchy[goTerm].forEach((d, i) => {
+                                goMap.set(data.data[d].description, data.data[goTerm].description)
                             });
-                            const pvalues = [];
-                            Object.keys(data.data).forEach(goTerm => {
-                                if(goMap.has(data.data[goTerm].description)) {
-                                    pvalues.push({
-                                        name: data.data[goTerm].description,
-                                        values: data.data[goTerm].pvalues
-                                    })
-                                }
-                            });
-                        callback({keys: data.conditions, children: nest(pvalues, d => goMap.get(d.name)),tableData:response.data.data, hierarchy:data.hierarchy});
-                        })
+                        });
+                        const pvalues = [];
+                        Object.keys(data.data).forEach(goTerm => {
+                            if (goMap.has(data.data[goTerm].description)) {
+                                pvalues.push({
+                                    name: data.data[goTerm].description,
+                                    values: data.data[goTerm].pvalues
+                                })
+                            }
+                        });
+                        callback({
+                            keys: data.conditions,
+                            children: nest(pvalues, d => goMap.get(d.name)),
+                            tableData: data.data,
+                            hierarchy: data.hierarchy,
+                            correlation: data.correlation,
+                            pca: data.pca
+                        });
+                    })
                         .catch(function (error) {
                             console.log(error);
                         });

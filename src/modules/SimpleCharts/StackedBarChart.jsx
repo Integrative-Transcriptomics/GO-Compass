@@ -56,6 +56,12 @@ function StackedBarChart(props) {
             </g>
         })
     });
+    let sigLine = null;
+    if (!props.showOverview && props.childHighlight !==  null) {
+        sigLine = <line x1={0} x2={width} y1={yScale(-Math.log10(props.sigThreshold))}
+                        y2={yScale(-Math.log10(props.sigThreshold))}
+                        fill="none" stroke="black" strokeDasharray="4"/>
+    }
     const startAnimation = useCallback((index) => {
         let els = d3.selectAll([...highlightRef.current.childNodes]);
         els.transition()
@@ -79,6 +85,7 @@ function StackedBarChart(props) {
                 <Axis h={height} w={width} axis={yAxis} axisType={'y'} label={'-log10pVal'}/>
                 {rects}
                 <g ref={highlightRef}>{highlighters}</g>
+                {sigLine}
             </g>
         </svg>
     );

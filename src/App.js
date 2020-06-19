@@ -1,4 +1,4 @@
-import React, {useCallback, useEffect, useState} from 'react';
+import React, {useCallback, useState} from 'react';
 import './App.css';
 import readRawData from './parseData.jsx';
 import Plots from "./modules/Plots";
@@ -11,6 +11,8 @@ import Typography from "@material-ui/core/Typography";
 import {createStyles} from "@material-ui/core";
 import {makeStyles} from "@material-ui/core/styles";
 import SelectData from "./modules/SelectData";
+import InputLabel from "@material-ui/core/InputLabel";
+import TextField from "@material-ui/core/TextField";
 
 
 function App() {
@@ -33,6 +35,7 @@ function App() {
     const [file, setFile] = useState(null);
     const [ontology, setOntology] = useState("BP");
     const [cutoff, setCutoff] = useState(0.7);
+    const [sigThreshold, setSigThreshold] = useState(0.05);
     const [isTimeseries, setDatatype] = useState(false);
 
     const launch = useCallback(()=>{
@@ -49,18 +52,16 @@ function App() {
                         <Typography className={classes.title} variant="h6">
                             GO Comparison Dashboard
                         </Typography>
-                        <Button className={classes.menuButton}
-                                variant="contained"
-                                component="label"
-                        >
-                            Select File
-                            <input
-                                type="file"
-                                style={{display: "none"}}
-                                accept='.tsv'
-                                onChange={(event) => setFile(event.target.files[0])}
-                            />
-                        </Button>
+                        <TextField
+                            id="standard-number"
+                            label="Significance Threshold"
+                            type="number"
+                            value={sigThreshold}
+                            onChange={(e) => setSigThreshold(e.target.value)}
+                            InputLabelProps={{
+                                shrink: true,
+                            }}
+                        />
                         <FormControlLabel
                             control={<Switch checked={isTimeseries} onChange={() => setDatatype(!isTimeseries)}
                                              name="checkedA"/>}
@@ -69,7 +70,7 @@ function App() {
                     </Toolbar>
                 </AppBar>
             </React.Fragment>
-            {data != null ? <Plots datatype={isTimeseries ? 'timeseries' : 'conditions'} data={data}/> :
+            {data != null ? <Plots datatype={isTimeseries ? 'timeseries' : 'conditions'} data={data} sigThreshold={sigThreshold} /> :
                 <SelectData setFile={setFile}
                             ontology={ontology}
                             setOntology={setOntology}

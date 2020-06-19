@@ -16,6 +16,7 @@ function Treemap(props) {
     };
     const width = props.width - margins.left - margins.right;
     const height = props.height - margins.top - margins.bottom;
+    const fontSize = 10;
     const highlightRect = createRef();
 
 
@@ -63,6 +64,8 @@ function Treemap(props) {
                     <title>
                         {child.data.name}
                     </title>
+                    {-Math.log10(props.sigThreshold) < child.value ?
+                        <text fontSize={fontSize} y={(fontSize + child.y1 - child.y0) / 2}>*</text> : null}
                 </g>
             );
         })
@@ -72,7 +75,7 @@ function Treemap(props) {
         d3.select(highlightRect.current).transition()
             .duration(props.duration)
             .attr('opacity', willBeHighlighted ? 1 : 0)
-            .on('end',()=>setIsHighlighted(willBeHighlighted))
+            .on('end', () => setIsHighlighted(willBeHighlighted))
     }, [highlightRect, layout, props.duration]);
     React.useEffect(() => {
         startAnimation(props.index);
@@ -83,7 +86,7 @@ function Treemap(props) {
             <rect ref={highlightRect} x={currentLayout.x0} y={currentLayout.y0}
                   width={currentLayout.x1 - currentLayout.x0}
                   height={currentLayout.y1 - currentLayout.y0} stroke="black" strokeWidth={2} fill="none"
-                  opacity={highlighted? 1 : 0}/>
+                  opacity={highlighted ? 1 : 0}/>
             {children}
         </g>
     );
