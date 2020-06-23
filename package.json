@@ -19,6 +19,8 @@
     "react-scripts": "3.4.1"
   },
   "scripts": {
+    "dev": "concurrently \"npm run server\" \"npm run start\"",
+    "server": "Rscript server/runServer.R",
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
@@ -38,5 +40,8 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "concurrently": "^5.2.0"
   }
 }

@@ -14,18 +14,18 @@ function StackedBarChart(props) {
         left: 60,
     };
     const series = d3.stack()
-        .keys(props.data.keys)
+        .keys(props.data.parents)
         (props.data.values);
 
     const width = props.width - margins.left - margins.right;
     const height = props.height - margins.top - margins.bottom;
-    const xScale = d3.scaleBand().domain([...Array(props.data.timepoints.length).keys()]).range([0, width]).padding(0.25);
+    const xScale = d3.scaleBand().domain([...Array(props.data.conditions.length).keys()]).range([0, width]).padding(0.25);
     const yScale = d3.scaleLinear().domain([0, d3.max(series, function (d) {
         return d3.max(d, function (d) {
             return d[1];
         });
     })]).range([height, 0]);
-    const highlighters = props.data.timepoints.map((timepoint, i) => {
+    const highlighters = props.data.conditions.map((timepoint, i) => {
         const max = d3.max(series.map(category => category[i][1]));
         return <rect key={timepoint} opacity={i === index ? 1 : 0}
                      height={height - yScale(max)}
@@ -33,13 +33,13 @@ function StackedBarChart(props) {
                      x={xScale(i)} y={yScale(max)} fill='none' stroke='black' strokeWidth='2px'/>
     });
     const rects = series.map((category) => {
-        const isHighlighted = (props.parentHighlight === null | props.parentHighlight === category.key) & props.childHighlight === null;
+        const isHighlighted = ((props.parentHighlight === null | props.parentHighlight === category.key) & props.childHighlight === null) | !props.showOverview;
         return category.map((timepoint, i) => {
             let childHighlightRect = null;
-            if (props.childHighlight !== null && props.mapper.get(props.childHighlight).parent===category.key) {
-                const childHeight=height-yScale(props.mapper.get(props.childHighlight).values[i]);
+            if (props.showOverview && props.childHighlight !== null && props.mapper.get(props.childHighlight).parent === category.key) {
+                const childHeight = height - yScale(props.mapper.get(props.childHighlight).values[i]);
                 childHighlightRect = <rect x={xScale(i)}
-                                           y={yScale(timepoint[0])-childHeight}
+                                           y={yScale(timepoint[0]) - childHeight}
                                            fill={props.color(category.key)}
                                            width={xScale.bandwidth()}
                                            height={childHeight}/>
@@ -57,7 +57,7 @@ function StackedBarChart(props) {
         })
     });
     let sigLine = null;
-    if (!props.showOverview && props.childHighlight !==  null) {
+    if (!props.showOverview && props.childHighlight !== null) {
         sigLine = <line x1={0} x2={width} y1={yScale(-Math.log10(props.sigThreshold))}
                         y2={yScale(-Math.log10(props.sigThreshold))}
                         fill="none" stroke="black" strokeDasharray="4"/>
@@ -74,7 +74,7 @@ function StackedBarChart(props) {
     }, [props.index, startAnimation]);
     const xAxis = d3.axisBottom()
         .scale(xScale)
-        .tickFormat(d => props.data.timepoints[d]);
+        .tickFormat(d => props.data.conditions[d]);
     const yAxis = d3.axisLeft()
         .scale(yScale);
     return (

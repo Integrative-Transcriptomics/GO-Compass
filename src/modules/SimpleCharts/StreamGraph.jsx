@@ -14,7 +14,7 @@ function StackedBarChart(props) {
         left: 60,
     };
     const series = d3.stack()
-        .keys(props.data.keys)
+        .keys(props.data.parents)
         (props.data.values);
 
     const area = d3.area()
@@ -24,32 +24,32 @@ function StackedBarChart(props) {
 
     const width = props.width - margins.left - margins.right;
     const height = props.height - margins.top - margins.bottom;
-    const xScale = d3.scalePoint().domain([...Array(props.data.timepoints.length).keys()]).range([0, width]);
+    const xScale = d3.scalePoint().domain([...Array(props.data.conditions.length).keys()]).range([0, width]);
     const yScale = d3.scaleLinear().domain([0, d3.max(series, function (d) {
         return d3.max(d, function (d) {
             return d[1];
         });
     })]).range([height, 0]);
     let childHighlightPath = null;
-    const paths = series.map((d) => {
-            const isHighlighted = (props.parentHighlight === null | props.parentHighlight === d.key) & props.childHighlight === null;
-            if (props.childHighlight !== null && props.mapper.get(props.childHighlight).parent === d.key) {
-                const childD = props.data.timepoints.map((tp, i) => {
-                    return [d[i][0], d[i][0] + props.mapper.get(props.childHighlight).values[i]]
+    const paths = series.map((category) => {
+        const isHighlighted = ((props.parentHighlight === null | props.parentHighlight === category.key) & props.childHighlight === null) | !props.showOverview;
+            if (!props.showOverview && props.childHighlight !== null && props.mapper.get(props.childHighlight).parent === category.key) {
+                const childD = props.data.conditions.map((tp, i) => {
+                    return [category[i][0], category[i][0] + props.mapper.get(props.childHighlight).values[i]]
                 });
-                childHighlightPath = <path fill={props.color(d.key)}
+                childHighlightPath = <path fill={props.color(category.key)}
                                            d={area(childD)}/>
             }
-            return <path onMouseEnter={() => props.setParentHighlight(d.key)}
+            return <path onMouseEnter={() => props.setParentHighlight(category.key)}
                          onMouseLeave={() => props.setParentHighlight(null)}
-                         key={d.key} fill={props.color(d.key)}
+                         key={category.key} fill={props.color(category.key)}
                          opacity={isHighlighted ? 1 : 0.5}
-                         d={area(d)}/>
+                         d={area(category)}/>
         }
     );
     const xAxis = d3.axisBottom()
         .scale(xScale)
-        .tickFormat(d => props.data.timepoints[d]);
+        .tickFormat(d => props.data.conditions[d]);
     const yAxis = d3.axisLeft()
         .scale(yScale);
     return (

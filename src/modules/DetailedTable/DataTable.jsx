@@ -10,7 +10,7 @@ import TableBody from "@material-ui/core/TableBody";
 import IconButton from "@material-ui/core/IconButton";
 import KeyboardArrowDownIcon from '@material-ui/icons/KeyboardArrowDown';
 import KeyboardArrowUpIcon from '@material-ui/icons/KeyboardArrowUp';
-import { makeStyles } from '@material-ui/core/styles';
+import {makeStyles} from '@material-ui/core/styles';
 
 
 const useStyles = makeStyles({
@@ -19,14 +19,14 @@ const useStyles = makeStyles({
         minWidth: 650,
     },
 });
-function Row(props) {
 
+function Row(props) {
     const [open, setOpen] = React.useState(false);
     return (<React.Fragment>
-        <TableRow onClick={() => setOpen(!open)}
-                  onMouseEnter={() => props.setChildHighlight(props.mapper[props.goTerm].description)}
-                  onMouseLeave={() => props.setChildHighlight(null)}
-                    selected={props.childHighlight === props.mapper[props.goTerm].description}>
+        <TableRow
+            onMouseEnter={() => props.setChildHighlight(props.goTerm)}
+            onMouseLeave={() => props.setChildHighlight(null)}
+            selected={props.childHighlight === props.goTerm}>
             <TableCell>
                 {props.subTerms.length > 0 ?
                     <IconButton aria-label="expand row" size="small" onClick={() => setOpen(!open)}>
@@ -38,17 +38,19 @@ function Row(props) {
                     if (key === "term ID") {
                         align = "left";
                     }
-                    return <TableCell key={key} align={align}>
-                            {props.mapper[props.goTerm][key]}
+                    return <TableCell key={key} align={align}
+                                      onClick={() => window.open("https://www.ebi.ac.uk/QuickGO/term/" + props.goTerm)}>
+                        {props.mapper[props.goTerm][key]}
                     </TableCell>
                 }
             )}
         </TableRow>
-        {open && props.subTerms.length > 0 ? props.subTerms.map((subTerm) => (
+        {(props.open || open) && props.subTerms.length > 0 ? props.subTerms.map((subTerm) => (
             <TableRow hover key={subTerm}>
                 <TableCell/>
                 {props.keys.map(key =>
-                    <TableCell style={{color: "gray"}} key={key} align="right">
+                    <TableCell style={{color: "gray"}} key={key} align="right"
+                               onClick={() => window.open("https://www.ebi.ac.uk/QuickGO/term/" + subTerm)}>
                         {props.mapper[subTerm][key]}
                     </TableCell>)}
             </TableRow>
@@ -57,6 +59,7 @@ function Row(props) {
 }
 
 function DataTable(props) {
+    const [open, setOpen] = React.useState(false);
     const classes = useStyles();
     const mapper = {};
     Object.keys(props.data.tableData).forEach(goTerm => {
@@ -65,7 +68,7 @@ function DataTable(props) {
             if (key !== "pvalues") {
                 mapper[goTerm][key] = props.data.tableData[goTerm][key];
             } else {
-                props.data.keys.forEach((condition, i) => {
+                props.data.conditions.forEach((condition, i) => {
                     mapper[goTerm][condition] = props.data.tableData[goTerm]['pvalues'][i];
                 })
             }
@@ -74,20 +77,23 @@ function DataTable(props) {
     const content2 = [];
     let header2 = [];
     let keys = [];
+    let count = 0;
     Object.keys(props.data.hierarchy).forEach(goTerm => {
+        count = count + 1 + props.data.hierarchy[goTerm].length;
         if (header2.length === 0) {
-            keys = Object.keys(props.data.tableData[goTerm]).filter(d => d !== 'pvalues').concat(props.data.keys);
+            keys = Object.keys(props.data.tableData[goTerm]).filter(d => d !== 'pvalues').concat(props.data.conditions);
             header2 = keys.map(d => <TableCell key={d} align="right">{d}</TableCell>);
         }
-        content2.push(<Row key={goTerm} mapper={mapper} keys={keys} goTerm={goTerm}
-                           subTerms={props.data.hierarchy[goTerm]} setChildHighlight={props.setChildHighlight} childHighlight={props.childHighlight}/>);
+        content2.push(<Row key={goTerm} open={open} mapper={mapper} keys={keys} goTerm={goTerm}
+                           subTerms={props.data.hierarchy[goTerm]} setChildHighlight={props.setChildHighlight}
+                           childHighlight={props.childHighlight}/>);
     });
     return (
         <TableContainer component={Paper}>
             <Table size="small" aria-label="a dense table" className={classes.table} stickyHeader>
                 <TableHead>
                     <TableRow>
-                        <TableCell/>
+                        <TableCell onClick={()=>setOpen(!open)}> (Un)collapse all </TableCell>
                         {header2}
                     </TableRow>
                 </TableHead>

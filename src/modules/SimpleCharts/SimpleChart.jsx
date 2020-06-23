@@ -13,29 +13,29 @@ function SimpleChart(props) {
     const [showOverview, setShowOverview] = useState(true);
     const mapper = new Map();
     let chart;
-    const data = props.data.children.map(parent => {
-        const values = props.data.keys.map((d, i) => {
+    const data = props.data.nestedData.map(parent => {
+        const values = props.data.conditions.map((d, i) => {
             let current = 0;
             parent.children.forEach(child => {
-                if (showOverview || props.childHighlight === null || props.childHighlight === child.name) {
-                    mapper.set(child.name, {parent: parent.name, values: child.values});
+                if (showOverview || props.childHighlight === null || props.childHighlight === child.id) {
+                    mapper.set(child.id, {parent: parent.id, values: child.values});
                     current += child.values[i];
                 }
             });
             return current;
         });
-        return ({name: parent.name, values: values});
+        return ({id: parent.id, name: parent.name, values: values});
     });
-    const keys = new Set();
-    const stackedChildren = props.data.keys.map((d, i) => {
+    const parents = new Set();
+    const stackedChildren = props.data.conditions.map((d, i) => {
         const tpData = {};
-        props.data.children.forEach(parent => {
-            keys.add(parent.name);
+        props.data.nestedData.forEach(parent => {
+            parents.add(parent.id);
             if (showOverview || props.childHighlight === null) {
-                tpData[parent.name] = d3.sum(parent.children.map(child => child.values[i]));
+                tpData[parent.id] = d3.sum(parent.children.map(child => child.values[i]));
             } else {
-                tpData[parent.name] = d3.sum(parent.children
-                    .filter(child => props.childHighlight === child.name)
+                tpData[parent.id] = d3.sum(parent.children
+                    .filter(child => props.childHighlight === child.id)
                     .map(child => child.values[i]));
             }
         });
@@ -48,7 +48,7 @@ function SimpleChart(props) {
                                  parentHighlight={props.parentHighlight}
                                  childHighlight={props.childHighlight}
                                  setParentHighlight={props.setParentHighlight}
-                                 data={{keys: [...keys], timepoints: props.data.keys, values: stackedChildren}}
+                                 data={{parents: [...parents], conditions: props.data.conditions, values: stackedChildren}}
                                  mapper={mapper}
                                  index={props.index} setIndex={props.setIndex} color={props.color}
                                  duration={props.duration}/>
@@ -61,7 +61,7 @@ function SimpleChart(props) {
                            parentHighlight={props.parentHighlight}
                            childHighlight={props.childHighlight}
                            setParentHighlight={props.setParentHighlight}
-                           data={{keys: props.data.keys, children: data}}
+                           data={{keys: props.data.conditions, children: data}}
                            mapper={mapper}
                            index={props.index} setIndex={props.setIndex} color={props.color} duration={props.duration}/>
         } else {
@@ -72,7 +72,7 @@ function SimpleChart(props) {
                              parentHighlight={props.parentHighlight}
                              childHighlight={props.childHighlight}
                              setParentHighlight={props.setParentHighlight}
-                             data={{keys: [...keys], timepoints: props.data.keys, values: stackedChildren}}
+                             data={{parents: [...parents], conditions: props.data.conditions, values: stackedChildren}}
                              mapper={mapper} index={props.index} setIndex={props.setIndex} color={props.color}
                              duration={props.duration}/>
         }

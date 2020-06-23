@@ -60,18 +60,19 @@ function Plots(props) {
         setPlottype(plotType);
     });
     const duration = 1500;
-    const color = d3.scaleOrdinal(props.data.children.map(d => d.name), d3.schemeCategory10.map(d => d3.interpolateRgb(d, "white")(0.5)));
+    const names = props.data.nestedData.map(d => d.name);
+    const color = d3.scaleOrdinal(props.data.nestedData.map(d => d.id), d3.schemeCategory10.map(d => d3.interpolateRgb(d, "white")(0.5)));
     const classes = useStyles();
     return (
         <Grid ref={main} className={classes.root} container spacing={1}>
             <Grid item xs={6}>
                 <Paper className={classes.paper}>
                     <PCA width={plotWidth / 3}
-                                        parentHighlight={parentHighlight}
-                                        childHighlight={childHighlight}
-                                        setParentHighlight={setParentHighlight}
-                                        data={props.data.pca}
-                                        conditions={props.data.keys}
+                         parentHighlight={parentHighlight}
+                         childHighlight={childHighlight}
+                         setParentHighlight={setParentHighlight}
+                         data={props.data.pca}
+                         conditions={props.data.conditions}
                     />
                 </Paper>
             </Grid>
@@ -83,16 +84,16 @@ function Plots(props) {
                                         childHighlight={childHighlight}
                                         setParentHighlight={setParentHighlight}
                                         correlation={props.data.correlation}
-                                        conditions={props.data.keys}
+                                        conditions={props.data.conditions}
                     />
                 </Paper>
             </Grid>
             <Grid item xs={4}>
                 <Paper ref={simplePlot} className={classes.paper}>
-                    <Legend width={plotWidth / 3} height={100} color={color}/>
+                    <Legend width={plotWidth / 3} height={100} color={color} names={names}/>
                     {props.datatype === "timeseries" ?
                         <div>
-                            <PlayButton keys={props.data.keys} duration={duration} setIndex={setIndex}/>
+                            <PlayButton keys={props.data.conditions} duration={duration} setIndex={setIndex}/>
                             <Button aria-controls="simple-menu" aria-haspopup="true"
                                     onClick={(event) => setAnchorEl(event.currentTarget)}>
                                 Plot Type
@@ -127,7 +128,8 @@ function Plots(props) {
                                      sigThreshold={props.sigThreshold}
                                      height={plotHeight}
                                      index={index}
-                                     data={props.data} color={color}
+                                     data={{children: props.data.nestedData, keys: props.data.conditions}}
+                                     color={color}
                                      duration={duration}/>
                 </Paper>
             </Grid>
@@ -140,7 +142,7 @@ function Plots(props) {
                                     width={plotWidth / 3} height={plotHeight}
                                     index={index}
                                     duration={duration}
-                                    data={props.data}
+                                    data={{children: props.data.nestedData, keys: props.data.conditions}}
                                     setIndex={setIndex}
                                     color={color}/>
                 </Paper>

@@ -15,7 +15,7 @@ function Legend(props) {
         return <g key={key} transform={"translate(10," + i * 20 + ")"}>
             <rect width={10} height={10} x={0} y={0} fill={props.color(key)}/>
             <text x={15} y={10}>
-                {key}
+                {props.names[i]}
             </text>
             <title>{key}</title>
         </g>
@@ -32,5 +32,6 @@ function Legend(props) {
 Legend.propTypes = {
     width: PropTypes.number.isRequired,
     color: PropTypes.func.isRequired,
+    names: PropTypes.string.isRequired
 };
 export default Legend;

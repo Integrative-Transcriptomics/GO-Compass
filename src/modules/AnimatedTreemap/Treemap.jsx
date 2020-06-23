@@ -48,13 +48,13 @@ function Treemap(props) {
     const currentLayout = layout(props.index);
     const children = currentLayout.children.map((parent, j) =>
         parent.children.map((child, i) => {
-            const isHighlighted = (props.parentHighlight === null | props.parentHighlight === parent.data.name)
-                & (props.childHighlight === null | props.childHighlight === child.data.name);
-            const fill = props.color(parent.data.name);
+            const isHighlighted = (props.parentHighlight === null | props.parentHighlight === parent.data.id)
+                & (props.childHighlight === null | props.childHighlight === child.data.id);
+            const fill = props.color(parent.data.id);
             const id = j + '-' + i;
             return (
-                <g key={child.data.name} transform={'translate(' + child.x0 + ',' + child.y0 + ')'}>
-                    <rect onMouseEnter={() => props.setChildHighlight(child.data.name)}
+                <g key={child.data.id} transform={'translate(' + child.x0 + ',' + child.y0 + ')'}>
+                    <rect onMouseEnter={() => props.setChildHighlight(child.data.id)}
                           onMouseLeave={() => props.setChildHighlight(null)}
                           onClick={() => props.setIndex(props.index)}
                           id={"rect" + id}

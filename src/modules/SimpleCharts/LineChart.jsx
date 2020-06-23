@@ -20,25 +20,25 @@ function LineChart(props) {
     const yScale = d3.scaleLinear().domain([0, max]).range([height, 0]);
     let childHighlightLine = null;
     const lines = props.data.children.map(line => {
-        const isHighlighted = (props.parentHighlight === null | props.parentHighlight === line.name) & props.childHighlight === null;
-        if (props.childHighlight !== null && props.mapper.get(props.childHighlight).parent === line.name) {
+        const isHighlighted = (props.parentHighlight === null | props.parentHighlight === line.id) & props.childHighlight === null;
+        if (props.showOverview && props.childHighlight !== null && props.mapper.get(props.childHighlight).parent === line.id) {
             let childLineString = '';
             props.mapper.get(props.childHighlight).values.forEach((value, i) => {
                 childLineString += xScale(i) + ',' + yScale(value) + ' ';
             });
             childHighlightLine = <polyline fill='none'
-                                           stroke={props.color(line.name)} strokeWidth={2}
+                                           stroke={props.color(line.id)} strokeWidth={2}
                                            points={childLineString}/>
         }
         let linestring = "";
         line.values.forEach((value, i) => {
             linestring += xScale(i) + ',' + yScale(value) + ' ';
         });
-        return <polyline onMouseEnter={() => props.setParentHighlight(line.name)}
+        return <polyline onMouseEnter={() => props.setParentHighlight(line.id)}
                          onMouseLeave={() => props.setParentHighlight(null)}
                          fill='none'
                          opacity={isHighlighted ? 1 : 0.3}
-                         stroke={props.color(line.name)} strokeWidth={2} key={line.name} points={linestring}/>
+                         stroke={props.color(line.id)} strokeWidth={2} key={line.id} points={linestring}/>
     });
     let sigLine = null;
     if (!props.showOverview && props.childHighlight !==  null) {

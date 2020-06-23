@@ -1,17 +1,15 @@
 import React, {useCallback, useState} from 'react';
 import './App.css';
-import readRawData from './parseData.jsx';
+import readData from './parseData.jsx';
 import Plots from "./modules/Plots";
 import Toolbar from "@material-ui/core/Toolbar";
 import AppBar from "@material-ui/core/AppBar";
-import Button from "@material-ui/core/Button";
 import Switch from "@material-ui/core/Switch";
 import FormControlLabel from "@material-ui/core/FormControlLabel";
 import Typography from "@material-ui/core/Typography";
 import {createStyles} from "@material-ui/core";
 import {makeStyles} from "@material-ui/core/styles";
 import SelectData from "./modules/SelectData";
-import InputLabel from "@material-ui/core/InputLabel";
 import TextField from "@material-ui/core/TextField";
 
 
@@ -40,7 +38,7 @@ function App() {
 
     const launch = useCallback(()=>{
         if(file !== null){
-            readRawData(file, ontology, cutoff, (newData) => setData(newData));
+            readData(file, ontology, cutoff, (newData) => setData(newData));
         }
     },[file,ontology,cutoff]);
     const classes = useStyles();
