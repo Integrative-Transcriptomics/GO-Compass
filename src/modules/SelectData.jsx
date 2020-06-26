@@ -1,10 +1,8 @@
 import React from 'react';
-import Typography from "@material-ui/core/Typography";
 import {createStyles} from "@material-ui/core";
 import {makeStyles} from "@material-ui/core/styles";
 import Grid from "@material-ui/core/Grid";
 import Button from "@material-ui/core/Button";
-import Toolbar from "@material-ui/core/Toolbar";
 import FormControl from "@material-ui/core/FormControl";
 import InputLabel from "@material-ui/core/InputLabel";
 import Select from "@material-ui/core/Select";
@@ -55,7 +53,7 @@ function SelectData(props) {
                                     <InputLabel>Ontology</InputLabel>
                                     <Select
                                         value={props.ontology}
-                                        onChange={(e)=>props.setOntology(e.target.value)}
+                                        onChange={(e) => props.setOntology(e.target.value)}
                                     >
                                         <MenuItem value="BP">Biological Process</MenuItem>
                                         <MenuItem value="MF">Molecular Function</MenuItem>
@@ -68,7 +66,7 @@ function SelectData(props) {
                                     <InputLabel>Result size</InputLabel>
                                     <Select
                                         value={props.cutoff}
-                                        onChange={(e)=>props.setCutoff(e.target.value)}
+                                        onChange={(e) => props.setCutoff(e.target.value)}
                                     >
                                         <MenuItem value={0.9}>Large (0.9)</MenuItem>
                                         <MenuItem value={0.7}>Medium (0.7)</MenuItem>

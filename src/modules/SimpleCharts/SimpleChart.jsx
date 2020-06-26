@@ -13,18 +13,23 @@ function SimpleChart(props) {
     const [showOverview, setShowOverview] = useState(true);
     const mapper = new Map();
     let chart;
-    const data = props.data.nestedData.map(parent => {
+    const lineData = [];
+    props.data.nestedData.forEach(parent => {
+        let add = false;
         const values = props.data.conditions.map((d, i) => {
             let current = 0;
             parent.children.forEach(child => {
                 if (showOverview || props.childHighlight === null || props.childHighlight === child.id) {
+                    add = true;
                     mapper.set(child.id, {parent: parent.id, values: child.values});
                     current += child.values[i];
                 }
             });
             return current;
         });
-        return ({id: parent.id, name: parent.name, values: values});
+        if (add) {
+            lineData.push({id: parent.id, name: parent.name, values: values});
+        }
     });
     const parents = new Set();
     const stackedChildren = props.data.conditions.map((d, i) => {
@@ -48,7 +53,11 @@ function SimpleChart(props) {
                                  parentHighlight={props.parentHighlight}
                                  childHighlight={props.childHighlight}
                                  setParentHighlight={props.setParentHighlight}
-                                 data={{parents: [...parents], conditions: props.data.conditions, values: stackedChildren}}
+                                 data={{
+                                     parents: [...parents],
+                                     conditions: props.data.conditions,
+                                     values: stackedChildren
+                                 }}
                                  mapper={mapper}
                                  index={props.index} setIndex={props.setIndex} color={props.color}
                                  duration={props.duration}/>
@@ -61,7 +70,7 @@ function SimpleChart(props) {
                            parentHighlight={props.parentHighlight}
                            childHighlight={props.childHighlight}
                            setParentHighlight={props.setParentHighlight}
-                           data={{keys: props.data.conditions, children: data}}
+                           data={{keys: props.data.conditions, children: lineData}}
                            mapper={mapper}
                            index={props.index} setIndex={props.setIndex} color={props.color} duration={props.duration}/>
         } else {

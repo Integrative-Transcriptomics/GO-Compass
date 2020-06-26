@@ -76,7 +76,7 @@ function Treemap(props) {
             .duration(props.duration)
             .attr('opacity', willBeHighlighted ? 1 : 0)
             .on('end', () => setIsHighlighted(willBeHighlighted))
-    }, [highlightRect, layout, props.duration]);
+    }, [highlightRect, props.duration, props.index, props.highlightIndex]);
     React.useEffect(() => {
         startAnimation(props.index);
     }, [props.index, startAnimation]);

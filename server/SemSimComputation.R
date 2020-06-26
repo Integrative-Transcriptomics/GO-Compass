@@ -121,16 +121,23 @@ iterateMatrix <- function(matrix, pvalues, cutoff) {
       if(max>0.1){
         if(toDelete %in% names(treemapHierarchy)){
           if(toKeep %in% names(treemapHierarchy)){
-            treemapHierarchy[[toKeep]]=c(treemapHierarchy[[toKeep]],treemapHierarchy[[toDelete]],toDelete)
+            treemapHierarchy[[toKeep]]=c(treemapHierarchy[[toKeep]],treemapHierarchy[[toDelete]])
             treemapHierarchy = treemapHierarchy[names(treemapHierarchy) != toDelete]
           } else{
-            treemapHierarchy[[toDelete]]=c(treemapHierarchy[[toDelete]],toDelete, toKeep)
+            treemapHierarchy[[toDelete]]=c(treemapHierarchy[[toDelete]], toKeep)
             names(treemapHierarchy)[names(treemapHierarchy)==toDelete] <- toKeep
           }
         } else if(toKeep %in% names(treemapHierarchy)){
           treemapHierarchy[[toKeep]]=c(treemapHierarchy[[toKeep]],toDelete)
         } else{
           treemapHierarchy[[toKeep]] <- list(toKeep, toDelete)
+        }
+      } else{
+        if(!toKeep %in% names(treemapHierarchy)){
+          treemapHierarchy[[toKeep]] <- list(toKeep)
+        }
+        if(!toDelete %in% names(treemapHierarchy)){
+          treemapHierarchy[[toDelete]] <- list(toDelete)
         }
       }
       
@@ -253,7 +260,6 @@ function(data, ontology, cutoff){
   row.names(data) <- gos
   row.filter <- apply(data, 1, function(x){all(x<0.5)})
   data <- data[row.filter,]
-  print(nrow(data))
   print("create similarity matrix")
   similarityMatrix <-
     mgoSim(row.names(data),

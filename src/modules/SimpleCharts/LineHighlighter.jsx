@@ -54,7 +54,7 @@ function LineHighlighter(props) {
                     setX(xScale(props.index))
                 });
         }
-    }, [highlightRef, props.duration, props.index, props.index, dragging]);
+    }, [highlightRef, props.duration, props.index, dragging, xScale]);
     useEffect(() => {
         if (dragging) {
             const xDiff = x0 - props.xPos;

@@ -20,7 +20,7 @@ function LineChart(props) {
     const yScale = d3.scaleLinear().domain([0, max]).range([height, 0]);
     let childHighlightLine = null;
     const lines = props.data.children.map(line => {
-        const isHighlighted = (props.parentHighlight === null | props.parentHighlight === line.id) & props.childHighlight === null;
+        const isHighlighted = ((props.parentHighlight === null | props.parentHighlight === line.id) & props.childHighlight === null) | !props.showOverview;
         if (props.showOverview && props.childHighlight !== null && props.mapper.get(props.childHighlight).parent === line.id) {
             let childLineString = '';
             props.mapper.get(props.childHighlight).values.forEach((value, i) => {

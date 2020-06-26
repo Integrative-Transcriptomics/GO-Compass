@@ -32,6 +32,6 @@ function Legend(props) {
 Legend.propTypes = {
     width: PropTypes.number.isRequired,
     color: PropTypes.func.isRequired,
-    names: PropTypes.string.isRequired
+    names: PropTypes.arrayOf(PropTypes.string).isRequired
 };
 export default Legend;

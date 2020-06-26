@@ -38,9 +38,8 @@ function readData(dataFile, ontology, cutoff, callback) {
                     }).then(function (response) {
                         const data = response.data;
                         const goMap = new Map();
-                        console.log(data);
                         Object.keys(data.treemapHierarchy).forEach(goTerm => {
-                            data.treemapHierarchy[goTerm].forEach((d, i) => {
+                            data.treemapHierarchy[goTerm].forEach(d => {
                                 goMap.set(d, goTerm)
                             });
                         });
@@ -54,7 +53,6 @@ function readData(dataFile, ontology, cutoff, callback) {
                                 })
                             }
                         });
-                        console.log(nest(pvalues, d => goMap.get(d.id)));
                         callback({
                             conditions: data.conditions,
                             nestedData: nest(pvalues, d => goMap.get(d.id)),

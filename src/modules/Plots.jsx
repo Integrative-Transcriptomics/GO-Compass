@@ -58,7 +58,7 @@ function Plots(props) {
     const selectPlottype = useCallback((plotType) => {
         setAnchorEl(null);
         setPlottype(plotType);
-    });
+    }, [setAnchorEl, setPlottype]);
     const duration = 1500;
     const names = props.data.nestedData.map(d => d.name);
     const color = d3.scaleOrdinal(props.data.nestedData.map(d => d.id), d3.schemeCategory10.map(d => d3.interpolateRgb(d, "white")(0.5)));
@@ -150,6 +150,7 @@ function Plots(props) {
             <Grid item xs={12}>
                 <Paper className={classes.paper}>
                     <DataTable data={props.data} childHighlight={childHighlight}
+                               sigThreshold={props.sigThreshold}
                                setChildHighlight={setChildHighlight}/>
                 </Paper>
             </Grid>

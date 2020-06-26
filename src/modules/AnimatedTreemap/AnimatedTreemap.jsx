@@ -20,6 +20,8 @@ function AnimatedTreemap(props) {
 
 
     const leafRef = React.createRef();
+    const starRef = React.createRef();
+
 
     const treemap = d3.treemap()
         .tile(d3.treemapResquarify)
@@ -56,19 +58,33 @@ function AnimatedTreemap(props) {
             })
             .call(leaf => leaf.select("rect")
                 .attr("width", d => d.x1 - d.x0)
-                .attr("height", d => d.y1 - d.y0))
-    }, [leafRef, layout, props.duration]);
+                .attr("height", d => d.y1 - d.y0));
+        let star = d3.selectAll([...starRef.current.childNodes]);
+        star.data(layout(index).leaves()).transition()
+            .duration(props.duration)
+            .ease(d3.easeLinear)
+            .attr("transform", d => `translate(${d.x0},${d.y0})`)
+            .on("end", () => {
+                setIndex(index);
+            })
+            .call(leaf => leaf.select("text")
+                .attr("x", d => d.x1 - d.x0 - fontSize)
+                .attr("y", d => d.y1 - d.y0)
+                .attr("opacity", d => d.value > (-Math.log10(props.sigThreshold)) ? 1 : 0));
+
+    }, [leafRef, starRef, layout, props.duration, props.sigThreshold]);
     React.useEffect(() => {
         startAnimation(props.index);
     }, [props.index, startAnimation]);
-
-    const children = layout(index).children.map((parent, j) =>
-        parent.children.map((child, i) => {
+    const rects = [];
+    const stars = [];
+    layout(index).children.forEach((parent, j) =>
+        parent.children.forEach((child, i) => {
             const isHighlighted = (props.parentHighlight === null | props.parentHighlight === parent.data.id)
                 & (props.childHighlight === null | props.childHighlight === child.data.id);
             const fill = props.color(parent.data.id);
             const id = j + '-' + i;
-            return (
+            rects.push(
                 <g key={child.data.id} transform={'translate(' + child.x0 + ',' + child.y0 + ')'}>
                     <rect onMouseEnter={() => props.setChildHighlight(child.data.id)}
                           onMouseLeave={() => props.setChildHighlight(null)}
@@ -89,17 +105,21 @@ function AnimatedTreemap(props) {
                     <title>
                         {child.data.name}
                     </title>
-                    {-Math.log10(props.sigThreshold) < child.value ?
-                        <text clipPath={'url(#clip' + id + ')'} fontSize={fontSize} y={child.y1 - child.y0}
-                              x={child.x1 - child.x0 - fontSize}>*</text> : null}
                 </g>
             );
+            stars.push(<g key={child.data.name} transform={'translate(' + child.x0 + ',' + child.y0 + ')'}>
+                <text clipPath={'url(#clip' + id + ')'} opacity={-Math.log10(props.sigThreshold) < child.value ? 1 : 0}
+                      fontSize={fontSize} y={child.y1 - child.y0}
+                      x={child.x1 - child.x0 - fontSize}>*
+                </text>
+            </g>)
         })
     );
     return (
         <svg width={props.width} height={props.height}>
             <g transform={"translate(" + margins.left + "," + margins.top + ")"}>
-                <g ref={leafRef}>{children}</g>
+                <g ref={leafRef}>{rects}</g>
+                <g ref={starRef}>{stars}</g>
             </g>
         </svg>
     );
