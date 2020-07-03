@@ -8,6 +8,7 @@ import TableRow from "@material-ui/core/TableRow";
 import TableCell from "@material-ui/core/TableCell";
 import TableBody from "@material-ui/core/TableBody";
 import IconButton from "@material-ui/core/IconButton";
+import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import KeyboardArrowDownIcon from '@material-ui/icons/KeyboardArrowDown';
 import KeyboardArrowUpIcon from '@material-ui/icons/KeyboardArrowUp';
 import {makeStyles} from '@material-ui/core/styles';
@@ -32,7 +33,7 @@ const useStyles = makeStyles({
 function Cell(props) {
     let content;
     if (props.visualize) {
-        content = <svg width={props.scale.range()[1]} height={10}>
+        content = <svg key="content" width={props.scale.range()[1]} height={10}>
             <rect fill={props.color} height={10} width={props.scale(props.value)}/>
             {props.significant ?
                 <text y={15} fontSize={20} fill="white">*</text> : <text/>}
@@ -43,18 +44,24 @@ function Cell(props) {
             content += "*"
         }
     }
+    if (props.isTerm) {
+        content = [content,
+            <IconButton key="icon" onClick={() => window.open("https://www.ebi.ac.uk/QuickGO/term/" + props.value)}><OpenInNewIcon
+                fontSize="small"
+            /></IconButton>]
+    }
     return <TableCell style={{color: props.color}} align={props.align}>{content}</TableCell>;
 }
 
 function Row(props) {
     const mainRow = props.keys.map(key => {
         let align = "right";
-        if (key === "term ID") {
+        if (key === "termID") {
             align = "left";
         }
         let visualize = props.visualize && props.conditions.includes(key);
         return <Cell key={key} color="black" align={align} value={props.mapper[props.goTerm][key]} scale={props.scale}
-                     visualize={visualize}
+                     visualize={visualize} isTerm={key === "termID"}
                      significant={props.conditions.includes(key) && props.mapper[props.goTerm][key] > -Math.log10(props.sigThreshold)}/>;
     });
     let subRows = null;
@@ -64,8 +71,9 @@ function Row(props) {
                 <TableCell/>
                 {props.keys.map(key => {
                     const visualize = props.visualize && props.conditions.includes(key);
-                    return <Cell key={key} color="gray" align="right" value={props.mapper[subTerm][key]} scale={props.scale}
-                                 visualize={visualize}
+                    return <Cell key={key} color="gray" align="right" value={props.mapper[subTerm][key]}
+                                 scale={props.scale}
+                                 visualize={visualize} isTerm={key === "termID"}
                                  significant={props.conditions.includes(key) && props.mapper[props.goTerm][key] > -Math.log10(props.sigThreshold)}/>
                 })}
             </TableRow>

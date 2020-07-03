@@ -19,57 +19,69 @@ function nest(data, ...keys) {
     return nest.entries(data).map(d => hierarchy(d, 0));
 }
 
+function prepareData(data, callback) {
+    const goMap = new Map();
+    Object.keys(data.treemapHierarchy).forEach(goTerm => {
+        data.treemapHierarchy[goTerm].forEach(d => {
+            goMap.set(d, goTerm)
+        });
+    });
+    const pvalues = [];
+    Object.keys(data.data).forEach(goTerm => {
+        if (goMap.has(goTerm)) {
+            pvalues.push({
+                id: goTerm,
+                name: data.data[goTerm].description,
+                values: data.data[goTerm].pvalues
+            })
+        }
+    });
+    callback({
+        conditions: data.conditions,
+        nestedData: nest(pvalues, d => goMap.get(d.id)),
+        tableData: data.data,
+        hierarchy: data.hierarchy,
+        correlation: data.correlation,
+        pca: data.pca
+    });
+}
 
-function readData(dataFile, ontology, cutoff, callback) {
+function getSupportedGenomes(callback) {
+    axios.get("http://pantherdb.org/services/oai/pantherdb/supportedgenomes")
+        .then(response => callback(response.data.search.output.genomes.genome))
+}
+
+function multiRevigoGeneLists(dataFiles, conditions, genome, ontology, cutoff, pvalueFilter, callback) {
+    if (dataFiles.length > 0) {
+        let counter = 0;
+        dataFiles.forEach((file, i) => {
+            const formData = new FormData();
+            formData.append("file", file);
+            axios.post("/sendFile?condition=" + conditions[i], formData).then(() => {
+                counter += 1;
+                if (counter === dataFiles.length) {
+                    axios.post("/MultiRevigoGeneLists?genome=" + genome + "&ontology=" + ontology + "&cutoff=" + cutoff + "&pvalueFilter=" + pvalueFilter)
+                        .then(response => prepareData(response.data, callback));
+                }
+            })
+        })
+    }
+
+}
+
+function readData(dataFile, ontology, cutoff, pvalueFilter, callback) {
     if (dataFile != null) {
-        const reader = new FileReader();
-        reader.onload = function (event) {
-            const f = event.target.result;
-            if (f !== null) {
-                d3.tsv(f).then(data => {
-                    axios({
-                        method: 'post',
-                        url: '/MultiRevigo',
-                        data: {
-                            data: data,
-                            ontology: ontology,
-                            cutoff: cutoff
-                        },
-                    }).then(function (response) {
-                        const data = response.data;
-                        const goMap = new Map();
-                        Object.keys(data.treemapHierarchy).forEach(goTerm => {
-                            data.treemapHierarchy[goTerm].forEach(d => {
-                                goMap.set(d, goTerm)
-                            });
-                        });
-                        const pvalues = [];
-                        Object.keys(data.data).forEach(goTerm => {
-                            if (goMap.has(goTerm)) {
-                                pvalues.push({
-                                    id: goTerm,
-                                    name: data.data[goTerm].description,
-                                    values: data.data[goTerm].pvalues
-                                })
-                            }
-                        });
-                        callback({
-                            conditions: data.conditions,
-                            nestedData: nest(pvalues, d => goMap.get(d.id)),
-                            tableData: data.data,
-                            hierarchy: data.hierarchy,
-                            correlation: data.correlation,
-                            pca: data.pca
-                        });
-                    })
-                        .catch(function (error) {
-                            console.log(error);
-                        });
-                })
-            }
-        };
-        reader.readAsDataURL(dataFile);
+        console.log(dataFile);
+        const formData = new FormData();
+        formData.append("data", dataFile);
+        axios.post("/MultiRevigoGoList?ontology=" + ontology + "&cutoff=" + cutoff + "&pvalueFilter=" + pvalueFilter, formData)
+            .then(response => {
+                prepareData(response.data, callback)
+            })
+            .catch(function (error) {
+                console.log(error);
+            });
     }
 }
 
-export default readData;
+export {readData, multiRevigoGeneLists, getSupportedGenomes};

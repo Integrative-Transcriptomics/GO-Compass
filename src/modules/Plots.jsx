@@ -65,7 +65,12 @@ function Plots(props) {
     const classes = useStyles();
     return (
         <Grid ref={main} className={classes.root} container spacing={1}>
-            <Grid item xs={6}>
+            <Grid item xs={4}>
+                <Paper className={classes.paper}>
+                    Bla
+                </Paper>
+            </Grid>
+            <Grid item xs={4}>
                 <Paper className={classes.paper}>
                     <PCA width={plotWidth / 3}
                          parentHighlight={parentHighlight}
@@ -76,7 +81,7 @@ function Plots(props) {
                     />
                 </Paper>
             </Grid>
-            <Grid item xs={6}>
+            <Grid item xs={4}>
                 <Paper className={classes.paper}>
 
                     <CorrelationHeatmap width={plotWidth / 3}
