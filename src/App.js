@@ -1,5 +1,4 @@
 import React, {useState} from 'react';
-import './App.css';
 import Plots from "./modules/Plots";
 import Toolbar from "@material-ui/core/Toolbar";
 import AppBar from "@material-ui/core/AppBar";
@@ -29,6 +28,9 @@ function App() {
     );
 
     const [data, setData] = useState(null);
+    const [selectedSpecies, selectSpecies] = useState(null);
+    const [dispCutoff, setDispCutoff] = useState(0.7);
+    const [pvalueFilter, setPvalueFilter] = useState(0.5);
     const [sigThreshold, setSigThreshold] = useState(0.05);
     const [isTimeseries, setDatatype] = useState(false);
 
@@ -64,8 +66,18 @@ function App() {
                 </AppBar>
             </React.Fragment>
             {data != null ?
-                <Plots datatype={isTimeseries ? 'timeseries' : 'conditions'} data={data} sigThreshold={sigThreshold}/> :
-                <SelectData setData={setData}/>}
+                <Plots selectedSpecies={selectedSpecies}
+                       pvalueFilter={pvalueFilter}
+                       dispCutoff={dispCutoff}
+                       datatype={isTimeseries ? 'timeseries' : 'conditions'} data={data}
+                       sigThreshold={sigThreshold}/> :
+                <SelectData setData={setData}
+                            selectSpecies={selectSpecies}
+                            setPvalueFilter={setPvalueFilter}
+                            setDispCutoff={setDispCutoff}
+                            selectedSpecies={selectedSpecies}
+                            pvalueFilter={pvalueFilter}
+                            dispCutoff={dispCutoff}/>}
         </div>
     );
 }

@@ -5,7 +5,6 @@ import Button from "@material-ui/core/Button";
 import FormControl from "@material-ui/core/FormControl";
 import InputLabel from "@material-ui/core/InputLabel";
 import Select from "@material-ui/core/Select";
-import ReactSelect from 'react-select'
 import MenuItem from "@material-ui/core/MenuItem";
 import List from "@material-ui/core/List";
 import ListItem from "@material-ui/core/ListItem";
@@ -26,14 +25,11 @@ import Autocomplete from '@material-ui/lab/Autocomplete';
 
 function SelectData(props) {
     const [supportedGenomes, setSupportedGenomes] = useState([]);
-    const [selectedGenome, setSelectedGenome] = useState(null);
     const [goFile, setGoFile] = useState(null);
     const [geneFiles, setGeneFiles] = useState([]);
     const [conditions, setConditions] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
     const [ontology, setOntology] = useState("BP");
-    const [pvalueFilter, setPvalueFilter] = useState(0.5);
-    const [cutoff, setCutoff] = useState(0.7);
     const [selectedTab, selectTab] = useState(0);
     const useStyles = makeStyles((theme: Theme) =>
         createStyles({
@@ -51,17 +47,17 @@ function SelectData(props) {
     const launch = useCallback(() => {
         setIsLoading(true);
         if (goFile !== null) {
-            readData(goFile, ontology, cutoff, pvalueFilter, (newData) => {
+            readData(goFile, ontology, props.dispCutoff, props.pvalueFilter, (newData) => {
                 setIsLoading(false);
                 props.setData(newData);
             });
-        } else if (geneFiles.length > 0 && selectedGenome !== null) {
-            multiRevigoGeneLists(geneFiles, conditions, selectedGenome.value, ontology, cutoff, pvalueFilter, (newData) => {
+        } else if (geneFiles.length > 0 && props.selectedSpecies !== null) {
+            multiRevigoGeneLists(geneFiles, conditions, props.selectedSpecies.value, ontology, props.dispCutoff, props.pvalueFilter, (newData) => {
                 setIsLoading(false);
                 props.setData(newData);
             })
         }
-    }, [goFile, conditions, selectedGenome, geneFiles, ontology, cutoff, pvalueFilter]);
+    }, [goFile, conditions, props.selectedSpecies, geneFiles, ontology, props.dispCutoff, props.pvalueFilter]);
     const getGenomes = useCallback(() => {
         if (supportedGenomes.length === 0) {
             getSupportedGenomes((genomes) => setSupportedGenomes(genomes))
@@ -78,7 +74,7 @@ function SelectData(props) {
             alignItems="center"
             justify="center"
         >
-            <Grid item xs="4">
+            <Grid item xs={4}>
                 <List>
                     <ListItem>
                         <Tabs
@@ -117,21 +113,6 @@ function SelectData(props) {
                     </div>
                     <div hidden={selectedTab !== 1} role="tabpanel">
                         <Paper variant="outlined">
-                            <ListSubheader>Select Species</ListSubheader>
-                            <ListItem onClick={() => getGenomes()}>
-                                <Autocomplete
-                                    id="combo-box-demo"
-                                    options={speciesOptions}
-                                    getOptionLabel={(option) => option.label}
-                                    value={selectedGenome}
-                                    style={{ width: 300 }}
-                                    onChange={(event: any, newValue: FilmOptionType | null) => {
-                                        setSelectedGenome(newValue);
-                                    }}
-                                    renderInput={(params) => <TextField {...params} label="Select Species"
-                                                                        variant="outlined"/>}
-                                />
-                            </ListItem>
                             <ListSubheader>Select Gene Lists</ListSubheader>
                             <ListItem>
                                 <Typography>
@@ -213,7 +194,21 @@ function SelectData(props) {
                             </ListItem>)}
                         </Paper>
                     </div>
-                    <ListSubheader>Parameters</ListSubheader>
+                    <ListSubheader>Select Species</ListSubheader>
+                    <ListItem onClick={() => getGenomes()}>
+                        <Autocomplete
+                            id="combo-box-demo"
+                            options={speciesOptions}
+                            getOptionLabel={(option) => option.label}
+                            value={props.selectedSpecies}
+                            style={{width: 300}}
+                            onChange={(event, newValue) => {
+                                props.selectSpecies(newValue);
+                            }}
+                            renderInput={(params) => <TextField {...params} label="Select Species"
+                                                                variant="outlined"/>}
+                        />
+                    </ListItem>
                     <ListItem>
                         <FormControl className={classes.formControl}>
                             <InputLabel>Ontology</InputLabel>
@@ -232,9 +227,9 @@ function SelectData(props) {
                         <FormControl className={classes.formControl}>
                             <InputLabel>Result size</InputLabel>
                             <Select
-                                value={cutoff}
+                                value={props.dispCutoff}
                                 disabled={isLoading}
-                                onChange={(e) => setCutoff(e.target.value)}
+                                onChange={(e) => props.setDispCutoff(e.target.value)}
                             >
                                 <MenuItem value={0.9}>Large (0.9)</MenuItem>
                                 <MenuItem value={0.7}>Medium (0.7)</MenuItem>
@@ -248,9 +243,9 @@ function SelectData(props) {
                             id="standard-number"
                             label="P-value filter"
                             type="number"
-                            value={pvalueFilter}
+                            value={props.pvalueFilter}
                             disabled={isLoading}
-                            onChange={(e) => setPvalueFilter(e.target.value)}
+                            onChange={(e) => props.setPvalueFilter(e.target.value)}
                             InputLabelProps={{
                                 shrink: true,
                             }}

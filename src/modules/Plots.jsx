@@ -16,6 +16,11 @@ import Paper from "@material-ui/core/Paper";
 import DataTable from "./DetailedTable/DataTable";
 import CorrelationHeatmap from "./CorrelationHeatmap";
 import PCA from "./PCA";
+import TableContainer from "@material-ui/core/TableContainer";
+import Table from "@material-ui/core/Table";
+import TableRow from "@material-ui/core/TableRow";
+import TableCell from "@material-ui/core/TableCell";
+import TableBody from "@material-ui/core/TableBody";
 
 
 /**
@@ -67,7 +72,48 @@ function Plots(props) {
         <Grid ref={main} className={classes.root} container spacing={1}>
             <Grid item xs={4}>
                 <Paper className={classes.paper}>
-                    Bla
+                    <TableContainer component={Paper}>
+                        <Table className={classes.table} aria-label="simple table">
+                            <TableBody>
+                                <TableRow>
+                                    <TableCell component="th" scope="row">
+                                        Species
+                                    </TableCell>
+                                    <TableCell align="right">{props.selectedSpecies.label}</TableCell>
+                                </TableRow>
+                                <TableRow>
+                                    <TableCell component="th" scope="row">
+                                        Number of conditions
+                                    </TableCell>
+                                    <TableCell align="right">{props.data.conditions.length}</TableCell>
+                                </TableRow>
+                                <TableRow>
+                                    <TableCell component="th" scope="row">
+                                        Total number of GO terms
+                                    </TableCell>
+                                    <TableCell align="right">{Object.keys(props.data.tableData).length}</TableCell>
+                                </TableRow>
+                                <TableRow>
+                                    <TableCell component="th" scope="row">
+                                        Reduced number of GO terms
+                                    </TableCell>
+                                    <TableCell align="right">{Object.keys(props.data.hierarchy).length}</TableCell>
+                                </TableRow>
+                                <TableRow>
+                                    <TableCell component="th" scope="row">
+                                        Dispensability cutoff
+                                    </TableCell>
+                                    <TableCell align="right">{props.dispCutoff}</TableCell>
+                                </TableRow>
+                                <TableRow>
+                                    <TableCell component="th" scope="row">
+                                        P-value filter
+                                    </TableCell>
+                                    <TableCell align="right">{props.pvalueFilter}</TableCell>
+                                </TableRow>
+                            </TableBody>
+                        </Table>
+                    </TableContainer>
                 </Paper>
             </Grid>
             <Grid item xs={4}>
