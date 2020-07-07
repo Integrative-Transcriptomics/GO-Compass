@@ -32,7 +32,7 @@ function prepareData(data, callback) {
             pvalues.push({
                 id: goTerm,
                 name: data.data[goTerm].description,
-                values: data.data[goTerm].pvalues
+                values: data.data[goTerm].pvalues.map(d => d + 0.0000001)
             })
         }
     });
@@ -60,7 +60,7 @@ function multiRevigoGeneLists(dataFiles, conditions, genome, ontology, cutoff, p
             axios.post("/sendFile?condition=" + conditions[i], formData).then(() => {
                 counter += 1;
                 if (counter === dataFiles.length) {
-                    axios.post("/MultiRevigoGeneLists?genome=" + genome + "&ontology=" + ontology + "&cutoff=" + cutoff + "&pvalueFilter=" + pvalueFilter)
+                    axios.post("/MultiRevigoGeneLists?genome=" + genome + "&ontology=" + ontology + "&cutoff=" + cutoff + "&pvalueFilter=" + pvalueFilter, {conditions:conditions})
                         .then(response => prepareData(response.data, callback));
                 }
             })

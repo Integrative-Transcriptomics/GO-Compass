@@ -7,7 +7,7 @@ import Axis from "./SimpleCharts/Axis";
 function PCA(props) {
     const margins = {
         top: 20,
-        right: 20,
+        right: 60,
         bottom: 60,
         left: 60,
     };

@@ -11,7 +11,7 @@ library(data.table)
 # TODO: load background via API
 table <-
   read.table(
-    "/Users/harbig/Downloads/pantherGeneList (1).txt",
+    "/Users/harbig/Downloads/pantherGeneList (3).txt",
     sep = "\t",
     quote = ""
   )
@@ -92,7 +92,7 @@ getFrequency <- function(goid) {
 }
 
 pca <- function(pvalues) {
-  pca <- prcomp(t(pvalues), center = TRUE)
+  pca <- prcomp(t(pvalues), center = TRUE, scale. = TRUE)
   coords <- as.data.frame(pca$x)
   percentage <- round(pca$sdev / sum(pca$sdev) * 100, 2)
   return(list("coords" = coords[c("PC1", "PC2")], "percentage" = percentage[c(1, 2)]))
@@ -149,7 +149,7 @@ iterateMatrix <- function(matrix, pvalues, cutoff) {
       if (!toDelete %in% names(hierarchy)) {
         hierarchy[[toDelete]] <- vector()
       }
-      if (max > 0.15) {
+      if (max > 0.1) {
         if (toDelete %in% names(treemapHierarchy)) {
           if (toKeep %in% names(treemapHierarchy)) {
             treemapHierarchy[[toKeep]] = c(treemapHierarchy[[toKeep]], treemapHierarchy[[toDelete]])
@@ -323,26 +323,27 @@ function(file, condition) {
   geneLists[[condition]] <<- genes
 }
 #* Performs MultiRevio for gene lists
-#* @param genome genome tu use
+#* @param genome genome to use
 #* @param ontology ontology to consider
 #* @param cutoff similarity cutoff
 #* @param pvalueFilter filter for p-values
+#* @param conditions conditions
 #' @serializer unboxedJSON
 #* @post /MultiRevigoGeneLists
-geneListRevigo <- function(genome, ontology, cutoff, pvalueFilter) {
+geneListRevigo <- function(genome, ontology, cutoff, pvalueFilter, conditions) {
   setBackground(ontology)
-  
-  enrichments <- lapply(geneLists, function(genes) {
+
+  enrichments <- lapply(conditions, function(condition) {
     enrichmentCall <-
       GET(
         paste0(
           "http://pantherdb.org/services/oai/pantherdb/enrich/overrep?geneInputList=",
-          genes,
+          geneLists[[condition]],
           "&organism=",
           genome,
           "&annotDataSet=",
           ontologyId,
-          "&enrichmentTestType=FISHER&correction=NONE"
+          "&enrichmentTestType=FISHER&correction=FDR"
         )
       )
     result <-
@@ -351,18 +352,18 @@ geneListRevigo <- function(genome, ontology, cutoff, pvalueFilter) {
       result[unlist(lapply(result, function(d)
         ! is.null(d[["term"]][['id']])))]
     pvalues <- unlist(lapply(result, function(d)
-      d[['pValue']]))
+      d[['fdr']]))
     names <- unlist(lapply(result, function(d)
       d[['term']][['id']]))
     names(pvalues) <- names
     return(pvalues[order(names(pvalues))])
   })
   data <- do.call(cbind, enrichments)
+  colnames(data) <- conditions
   data <- cbind(data, GoTerm = rownames(data))
   rownames(data) <- NULL
   print("Finished GO enrichment")
   geneLists <<- list()
-  
   multiRevigo(as.data.frame(data), ontology, cutoff, pvalueFilter)
 }
 
@@ -394,10 +395,6 @@ multiRevigo <- function(data, ontology, cutoff, pvalueFilter) {
   data$GoTerm <- NULL
   data <- sapply(data, as.numeric)
   rownames(data) <- gos
-  row.filter <- apply(data, 1, function(x) {
-    all(x < 0.5)
-  })
-  data <- data[row.filter, ]
   row.filter <- apply(data, 1, function(x) {
     any(x < pvalueFilter)
   })
