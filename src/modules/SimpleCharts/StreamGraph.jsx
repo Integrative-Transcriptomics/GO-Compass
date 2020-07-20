@@ -1,11 +1,10 @@
 import React, {useState} from 'react';
-import PropTypes from "prop-types";
 import * as d3 from "d3";
 import Axis from "./Axis";
 import LineHighlighter from "./LineHighlighter";
+import {inject, observer} from "mobx-react";
 
-
-function StackedBarChart(props) {
+const StreamGraph = inject("dataStore", "visStore")(observer((props) => {
     const [xPos, setXPos] = useState(0);
     const margins = {
         top: 20,
@@ -32,17 +31,17 @@ function StackedBarChart(props) {
     })]).range([height, 0]);
     let childHighlightPath = null;
     const paths = series.map((category) => {
-        const isHighlighted = ((props.parentHighlight === null | props.parentHighlight === category.key) & props.childHighlight === null) | !props.showOverview;
-            if (!props.showOverview && props.childHighlight !== null && props.mapper.get(props.childHighlight).parent === category.key) {
+        const isHighlighted = ((props.visStore.parentHighlight === null | props.visStore.parentHighlight === category.key) & props.visStore.childHighlight === null) | !props.showOverview;
+            if (!props.showOverview && props.visStore.childHighlight !== null && props.mapper.get(props.visStore.childHighlight).parent === category.key) {
                 const childD = props.data.conditions.map((tp, i) => {
-                    return [category[i][0], category[i][0] + props.mapper.get(props.childHighlight).values[i]]
+                    return [category[i][0], category[i][0] + props.mapper.get(props.visStore.childHighlight).values[i]]
                 });
-                childHighlightPath = <path fill={props.color(category.key)}
+                childHighlightPath = <path fill={props.visStore.termColorScale(category.key)}
                                            d={area(childD)}/>
             }
-            return <path onMouseEnter={() => props.setParentHighlight(category.key)}
-                         onMouseLeave={() => props.setParentHighlight(null)}
-                         key={category.key} fill={props.color(category.key)}
+            return <path onMouseEnter={() => props.visStore.setParentHighlight(category.key)}
+                         onMouseLeave={() => props.visStore.setParentHighlight(null)}
+                         key={category.key} fill={props.visStore.termColorScale(category.key)}
                          opacity={isHighlighted ? 1 : 0.5}
                          d={area(category)}/>
         }
@@ -61,29 +60,16 @@ function StackedBarChart(props) {
                 <Axis h={height} w={width} axis={yAxis} axisType={'y'} label={'-log10pVal'}/>
                 {paths}
                 {childHighlightPath}
-                <LineHighlighter width={width} height={height} xScale={xScale} xPos={xPos} index={props.index}
-                                 setIndex={props.setIndex} duration={props.duration}/>
+                <LineHighlighter width={width} height={height} xScale={xScale} xPos={xPos} duration={props.visStore.animationDuration}/>
             </g>
         </svg>
     );
-}
-
-StackedBarChart.propTypes = {
-    width: PropTypes.number,
-    height: PropTypes.number,
-    data: PropTypes.objectOf(PropTypes.array).isRequired,
-    duration: PropTypes.number.isRequired,
-    index: PropTypes.number.isRequired,
-    color: PropTypes.func.isRequired,
-    parentHighlight: PropTypes.string,
-    childHighlight: PropTypes.string,
-    mapper: PropTypes.instanceOf(Map).isRequired,
-    setIndex: PropTypes.func.isRequired,
-    setParentHighlight: PropTypes.func.isRequired,
-};
-StackedBarChart.defaultProps = {
+}));
+StreamGraph.defaultProps = {
     width: 900,
     height: 350,
 };
-export default StackedBarChart;
+
+
+export default StreamGraph;
 

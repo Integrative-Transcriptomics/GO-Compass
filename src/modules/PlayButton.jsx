@@ -1,25 +1,26 @@
 import React from 'react';
 import Button from "@material-ui/core/Button";
 import PlayCircleOutlineIcon from '@material-ui/icons/PlayCircleOutline';
+import {inject, observer} from "mobx-react";
 
 
-function PlayButton(props) {
+const PlayButton = inject("dataStore", "visStore")(observer((props) => {
     const timeout = (index) => {
-        if (index < props.keys.length) {
-            let waitTime = props.duration + 200;
+        if (index < props.dataStore.conditions.length) {
+            let waitTime = props.visStore.duration + 200;
             setTimeout(() => {
-                props.setIndex(index);
+                props.visStore.setConditionIndex(index);
                 index++;
                 timeout(index);
             }, waitTime)
         }
     };
     const passConditions = () => {
-        props.setIndex(0);
+        props.visStore.setConditionIndex(0);
         timeout(1);
     };
     return (
         <Button onClick={passConditions}>Play <PlayCircleOutlineIcon color="primary"/></Button>
     );
-}
+}));
 export default PlayButton;

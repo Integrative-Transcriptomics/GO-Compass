@@ -2,9 +2,10 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import * as d3 from "d3";
 import Axis from "./SimpleCharts/Axis";
+import {inject, observer} from "mobx-react";
 
 
-function CorrelationHeatmap(props) {
+const CorrelationHeatmap = inject("dataStore", "visStore")(observer((props) => {
     const margins = {
         top: 20,
         right: 20,
@@ -14,15 +15,15 @@ function CorrelationHeatmap(props) {
     const width = props.width - margins.left - margins.right;
     const height = props.height - margins.top - margins.bottom;
 
-    const xScale = d3.scaleBand().range([0, width]).domain(props.conditions).padding(0.01);
-    const yScale = d3.scaleBand().range([0, height]).domain(props.conditions).padding(0.01);
+    const xScale = d3.scaleBand().range([0, width]).domain(props.dataStore.conditions).padding(0.01);
+    const yScale = d3.scaleBand().range([0, height]).domain(props.dataStore.conditions).padding(0.01);
     const color = d3.scaleDiverging().domain([1, 0, -1]).interpolator(d3.interpolateRdBu);
     const rects = [];
-    props.correlation.forEach((row, i) =>
+    props.dataStore.correlation.forEach((row, i) =>
         row.forEach((cor, j) => {
             if(j>=i) {
-                rects.push(<g key={props.conditions[j] + props.conditions[i]}>
-                    <rect fill={color(cor)} x={xScale(props.conditions[i])} y={yScale(props.conditions[j])}
+                rects.push(<g key={props.dataStore.conditions[j] + props.dataStore.conditions[i]}>
+                    <rect fill={color(cor)} x={xScale(props.dataStore.conditions[i])} y={yScale(props.dataStore.conditions[j])}
                           width={xScale.bandwidth()} height={yScale.bandwidth()}/>
                     <title>{cor}</title>
                 </g>)
@@ -43,13 +44,13 @@ function CorrelationHeatmap(props) {
             </g>
         </svg>
     );
-}
+}));
 
 CorrelationHeatmap.propTypes = {
     width: PropTypes.number,
 };
 CorrelationHeatmap.defaultProps = {
     width: 900,
-    height: 350,
+    height: 500,
 };
 export default CorrelationHeatmap;

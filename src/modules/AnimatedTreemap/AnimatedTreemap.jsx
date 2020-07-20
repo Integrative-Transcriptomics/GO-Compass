@@ -1,12 +1,13 @@
 import React, {useCallback, useState} from "react";
 import PropTypes from 'prop-types';
 import * as d3 from "d3";
+import {inject, observer} from "mobx-react";
 
 
 /**
  * @return {null}
  */
-function AnimatedTreemap(props) {
+const AnimatedTreemap = inject("dataStore", "visStore")(observer((props) => {
     const [index, setIndex] = useState(0);
     const margins = {
         top: 20,
@@ -29,11 +30,13 @@ function AnimatedTreemap(props) {
         .padding(d => d.height === 1 ? 1 : 0)
         .round(true);
     // Compute the structure using the average value.
-    const root = treemap(d3.hierarchy(props.data)
+    const root = treemap(d3.hierarchy({children: props.dataStore.nestedData, keys: props.dataStore.conditions})
         .sum(d => d.values ? d3.sum(d.values) : 0)
         .sort((a, b) => b.value - a.value));
 
-    const max = d3.max(props.data.keys.map((d, i) => d3.hierarchy(props.data).sum(d => d.values ? d.values[i] : 0).value));
+    const max = d3.max(props.dataStore.conditions
+        .map((d, i) => d3.hierarchy({children: props.dataStore.nestedData, keys: props.dataStore.conditions})
+            .sum(d => d.values ? d.values[i] : 0).value));
     const layout = useCallback((index) => {
         const k = Math.sqrt(root.sum(d => d.values ? d.values[index] : 0).value / max);
         const x = (1 - k) / 2 * width;
@@ -50,7 +53,7 @@ function AnimatedTreemap(props) {
     const startAnimation = useCallback((index) => {
         let leaf = d3.selectAll([...leafRef.current.childNodes]);
         leaf.data(layout(index).leaves()).transition()
-            .duration(props.duration)
+            .duration(props.visStore.animationDuration)
             .ease(d3.easeLinear)
             .attr("transform", d => `translate(${d.x0},${d.y0})`)
             .on("end", () => {
@@ -61,7 +64,7 @@ function AnimatedTreemap(props) {
                 .attr("height", d => d.y1 - d.y0));
         let star = d3.selectAll([...starRef.current.childNodes]);
         star.data(layout(index).leaves()).transition()
-            .duration(props.duration)
+            .duration(props.visStore.animationDuration)
             .ease(d3.easeLinear)
             .attr("transform", d => `translate(${d.x0},${d.y0})`)
             .on("end", () => {
@@ -70,24 +73,24 @@ function AnimatedTreemap(props) {
             .call(leaf => leaf.select("text")
                 .attr("x", d => d.x1 - d.x0 - fontSize)
                 .attr("y", d => d.y1 - d.y0)
-                .attr("opacity", d => d.value > (-Math.log10(props.sigThreshold)) ? 1 : 0));
+                .attr("opacity", d => d.value > (-Math.log10(props.visStore.sigThreshold)) ? 1 : 0));
 
-    }, [leafRef, starRef, layout, props.duration, props.sigThreshold]);
+    }, [leafRef, starRef, layout, props.visStore.animationDuration, props.visStore.sigThreshold]);
     React.useEffect(() => {
-        startAnimation(props.index);
-    }, [props.index, startAnimation]);
+        startAnimation(props.visStore.conditionIndex);
+    }, [props.visStore.conditionIndex, startAnimation]);
     const rects = [];
     const stars = [];
     layout(index).children.forEach((parent, j) =>
         parent.children.forEach((child, i) => {
-            const isHighlighted = (props.parentHighlight === null | props.parentHighlight === parent.data.id)
-                & (props.childHighlight === null | props.childHighlight === child.data.id);
-            const fill = props.color(parent.data.id);
+            const isHighlighted = (props.visStore.parentHighlight === null | props.visStore.parentHighlight === parent.data.id)
+                & (props.visStore.childHighlight === null | props.visStore.childHighlight === child.data.id);
+            const fill = props.visStore.termColorScale(parent.data.id);
             const id = j + '-' + i;
             rects.push(
                 <g key={child.data.id} transform={'translate(' + child.x0 + ',' + child.y0 + ')'}>
-                    <rect onMouseEnter={() => props.setChildHighlight(child.data.id)}
-                          onMouseLeave={() => props.setChildHighlight(null)}
+                    <rect onMouseEnter={() => props.visStore.setChildHighlight(child.data.id)}
+                          onMouseLeave={() => props.visStore.setChildHighlight(null)}
                           id={"rect" + id}
                           width={child.x1 - child.x0} height={child.y1 - child.y0}
                           fill={fill}
@@ -108,7 +111,7 @@ function AnimatedTreemap(props) {
                 </g>
             );
             stars.push(<g key={child.data.name} transform={'translate(' + child.x0 + ',' + child.y0 + ')'}>
-                <text clipPath={'url(#clip' + id + ')'} opacity={-Math.log10(props.sigThreshold) < child.value ? 1 : 0}
+                <text clipPath={'url(#clip' + id + ')'} opacity={-Math.log10(props.visStore.sigThreshold) < child.value ? 1 : 0}
                       fontSize={fontSize} y={child.y1 - child.y0}
                       x={child.x1 - child.x0 - fontSize}>*
                 </text>
@@ -123,12 +126,11 @@ function AnimatedTreemap(props) {
             </g>
         </svg>
     );
-}
+}));
 
 AnimatedTreemap.propTypes = {
     width: PropTypes.number,
     height: PropTypes.number,
-    data: PropTypes.object.isRequired,
 };
 AnimatedTreemap.defaultProps = {
     width: 900,

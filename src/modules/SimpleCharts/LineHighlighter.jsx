@@ -1,17 +1,16 @@
 import React, {useCallback, useEffect, useRef, useState} from 'react';
 import PropTypes from "prop-types";
 import * as d3 from "d3";
+import {inject, observer} from "mobx-react";
 
 
-function LineHighlighter(props) {
+const LineHighlighter = inject("visStore")(observer((props) => {
     const [dragging, setDragging] = useState(false);
     const [x, setX] = useState(0);
     const [x0, setX0] = useState(0);
     const [hoverIndex, setHoverIndex] = useState(-1);
     const highlightRef = useRef();
     const xScale = props.xScale;
-    const setIndex = props.setIndex;
-
 
     const mouseDown = useCallback((event) => {
         setDragging(true);
@@ -33,7 +32,7 @@ function LineHighlighter(props) {
                   y2={props.height}
                   fill='none'
                   stroke='black' opacity={hoverIndex === i ? 0.5 : 0} strokeWidth={1}/>
-            <line onClick={() => props.setIndex(i)} onMouseEnter={() => setHoverIndex(i)}
+            <line onClick={() => props.visStore.setConditionIndex(i)} onMouseEnter={() => setHoverIndex(i)}
                   onMouseLeave={() => setHoverIndex(-1)} x1={xScale(i)} x2={xScale(i)} y1={0}
                   y2={props.height}
                   fill='none'
@@ -48,13 +47,13 @@ function LineHighlighter(props) {
             els.transition()
                 .duration(props.duration)
                 .ease(d3.easeLinear)
-                .attr("x1", xScale(props.index))
-                .attr("x2", xScale(props.index))
+                .attr("x1", xScale(props.visStore.conditionIndex))
+                .attr("x2", xScale(props.visStore.conditionIndex))
                 .on('end', () => {
-                    setX(xScale(props.index))
+                    setX(xScale(props.visStore.conditionIndex))
                 });
         }
-    }, [highlightRef, props.duration, props.index, dragging, xScale]);
+    }, [highlightRef, props.duration, props.visStore.conditionIndex, dragging, xScale]);
     useEffect(() => {
         if (dragging) {
             const xDiff = x0 - props.xPos;
@@ -64,22 +63,20 @@ function LineHighlighter(props) {
     }, [x0, x, dragging, props.xPos]);
     const mouseUp = useCallback(() => {
         setDragging(false);
-        setIndex(inverseX(x))
-    }, [x, inverseX, setIndex]);
+        props.visStore.setConditionIndex(inverseX(x))
+    }, [x, inverseX, props.visStore]);
     return (
         <g onMouseUp={() => mouseUp()}>
             {highlighters}
             {highlighter}
         </g>
     );
-}
+}));
 
 LineHighlighter.propTypes = {
     width: PropTypes.number.isRequired,
     height: PropTypes.number.isRequired,
-    index: PropTypes.number.isRequired,
     xScale: PropTypes.func.isRequired,
-    setIndex: PropTypes.func.isRequired,
     duration: PropTypes.number.isRequired,
 };
 export default LineHighlighter;

@@ -2,9 +2,10 @@ import React, {useCallback, useState} from 'react';
 import PropTypes from "prop-types";
 import * as d3 from "d3";
 import Axis from "./Axis";
+import {inject, observer} from "mobx-react";
 
 
-function StackedBarChart(props) {
+const StackedBarChart = inject("dataStore", "visStore")(observer((props) => {
     const [index, setIndex] = useState(0);
     const highlightRef = React.createRef();
     const margins = {
@@ -33,45 +34,45 @@ function StackedBarChart(props) {
                      x={xScale(i)} y={yScale(max)} fill='none' stroke='black' strokeWidth='2px'/>
     });
     const rects = series.map((category) => {
-        const isHighlighted = ((props.parentHighlight === null | props.parentHighlight === category.key) & props.childHighlight === null) | !props.showOverview;
+        const isHighlighted = ((props.visStore.parentHighlight === null | props.visStore.parentHighlight === category.key) & props.visStore.childHighlight === null) | !props.showOverview;
         return category.map((timepoint, i) => {
             let childHighlightRect = null;
-            if (props.showOverview && props.childHighlight !== null && props.mapper.get(props.childHighlight).parent === category.key) {
-                const childHeight = height - yScale(props.mapper.get(props.childHighlight).values[i]);
+            if (props.showOverview && props.visStore.childHighlight !== null && props.mapper.get(props.visStore.childHighlight).parent === category.key) {
+                const childHeight = height - yScale(props.mapper.get(props.visStore.childHighlight).values[i]);
                 childHighlightRect = <rect x={xScale(i)}
                                            y={yScale(timepoint[0]) - childHeight}
-                                           fill={props.color(category.key)}
+                                           fill={props.visStore.termColorScale(category.key)}
                                            width={xScale.bandwidth()}
                                            height={childHeight}/>
             }
             return <g key={category.key + i}>
-                <rect onMouseEnter={() => props.setParentHighlight(category.key)}
-                      onMouseLeave={() => props.setParentHighlight(null)}
-                      onClick={() => props.setIndex(i)} x={xScale(i)}
+                <rect onMouseEnter={() => props.visStore.setParentHighlight(category.key)}
+                      onMouseLeave={() => props.visStore.setParentHighlight(null)}
+                      onClick={() => props.visStore.setConditionIndex(i)} x={xScale(i)}
                       y={yScale(timepoint[1])} width={xScale.bandwidth()}
                       height={yScale(timepoint[0]) - yScale(timepoint[1])}
                       opacity={isHighlighted ? 1 : 0.5}
-                      fill={props.color(category.key)}/>
+                      fill={props.visStore.termColorScale(category.key)}/>
                 {childHighlightRect}
             </g>
         })
     });
     let sigLine = null;
-    if (!props.showOverview && props.childHighlight !== null) {
-        sigLine = <line x1={0} x2={width} y1={yScale(-Math.log10(props.sigThreshold))}
-                        y2={yScale(-Math.log10(props.sigThreshold))}
+    if (!props.showOverview && props.visStore.childHighlight !== null) {
+        sigLine = <line x1={0} x2={width} y1={yScale(-Math.log10(props.visStore.sigThreshold))}
+                        y2={yScale(-Math.log10(props.visStore.sigThreshold))}
                         fill="none" stroke="black" strokeDasharray="4"/>
     }
     const startAnimation = useCallback((index) => {
         let els = d3.selectAll([...highlightRef.current.childNodes]);
         els.transition()
-            .duration(props.duration)
+            .duration(props.visStore.animationDuration)
             .attr('opacity', (d, i) => i === index ? 1 : 0)
             .on('end', () => setIndex(index));
-    }, [highlightRef, props.duration]);
+    }, [highlightRef, props.visStore.animationDuration]);
     React.useEffect(() => {
-        startAnimation(props.index);
-    }, [props.index, startAnimation]);
+        startAnimation(props.visStore.conditionIndex);
+    }, [props.visStore.conditionIndex, startAnimation]);
     const xAxis = d3.axisBottom()
         .scale(xScale)
         .tickFormat(d => props.data.conditions[d]);
@@ -89,13 +90,11 @@ function StackedBarChart(props) {
             </g>
         </svg>
     );
-}
+}));
 
 StackedBarChart.propTypes = {
     width: PropTypes.number,
     height: PropTypes.number,
-    data: PropTypes.objectOf(PropTypes.array).isRequired,
-    color: PropTypes.func.isRequired
 };
 StackedBarChart.defaultProps = {
     width: 900,

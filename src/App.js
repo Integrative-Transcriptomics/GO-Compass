@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useCallback, useState} from 'react';
 import Plots from "./modules/Plots";
 import Toolbar from "@material-ui/core/Toolbar";
 import AppBar from "@material-ui/core/AppBar";
@@ -9,10 +9,17 @@ import {createStyles} from "@material-ui/core";
 import {makeStyles} from "@material-ui/core/styles";
 import SelectData from "./modules/SelectData";
 import TextField from "@material-ui/core/TextField";
-import FormGroup from "@material-ui/core/FormGroup";
+import {inject, observer} from "mobx-react";
+import Slider from "@material-ui/core/Slider";
+import Drawer from "@material-ui/core/Drawer";
+import ListItem from "@material-ui/core/ListItem";
+import List from "@material-ui/core/List";
+import IconButton from "@material-ui/core/IconButton";
+import MenuIcon from '@material-ui/icons/Menu';
+import ListSubheader from "@material-ui/core/ListSubheader";
 
 
-function App() {
+const App = inject("dataStore", "visStore")(observer((props) => {
     const useStyles = makeStyles((theme: Theme) =>
         createStyles({
             root: {
@@ -26,13 +33,17 @@ function App() {
             },
         }),
     );
-
-    const [data, setData] = useState(null);
+    const [open, setOpen] = useState(false);
     const [selectedSpecies, selectSpecies] = useState(null);
-    const [dispCutoff, setDispCutoff] = useState(0.7);
     const [pvalueFilter, setPvalueFilter] = useState(0.5);
-    const [sigThreshold, setSigThreshold] = useState(0.05);
-    const [isTimeseries, setDatatype] = useState(false);
+
+    const handleChange = useCallback((e, value) => {
+        props.dataStore.setClusterCutoff(value[0]);
+        props.dataStore.setFilterCutoff(value[1]);
+    },[props.dataStore]);
+    const toggleDrawer = useCallback(() => {
+        setOpen(!open);
+    }, [open]);
 
     const classes = useStyles();
     return (
@@ -40,46 +51,63 @@ function App() {
             <React.Fragment>
                 <AppBar position="sticky">
                     <Toolbar>
+                        <IconButton onClick={toggleDrawer} disabled={!props.dataStore.isLoaded}>
+                            <MenuIcon/>
+                        </IconButton>
                         <Typography className={classes.title} variant="h6">
                             GO Comparison Dashboard
                         </Typography>
-                        <FormGroup row>
+
+                    </Toolbar>
+                </AppBar>
+            </React.Fragment>
+            <React.Fragment>
+                <Drawer anchor={"left"} open={open} onClose={toggleDrawer}>
+                    <List>
+                        <ListItem>
                             <TextField
                                 id="standard-number"
                                 label="Significance Threshold"
                                 type="number"
-                                value={sigThreshold}
-                                onChange={(e) => setSigThreshold(e.target.value)}
+                                value={props.visStore.sigThreshold}
+                                onChange={(e) => props.visStore.setSigThreshold(e.target.value)}
                                 InputLabelProps={{
                                     shrink: true,
                                 }}
                                 size="small"
                                 margin="dense"
                             />
+                        </ListItem>
+                        <ListItem>
                             <FormControlLabel
-                                control={<Switch checked={isTimeseries} onChange={() => setDatatype(!isTimeseries)}
+                                control={<Switch checked={props.visStore.isTimeSeries}
+                                                 onChange={() => props.visStore.toggleIsTimeSeries()}
                                                  name="checkedA"/>}
                                 label="Time Series Data"
                             />
-                        </FormGroup>
-                    </Toolbar>
-                </AppBar>
+                        </ListItem>
+                        <ListSubheader>
+                            Select cutoffs
+                        </ListSubheader>
+                        <ListItem>
+                            <Slider value={[props.dataStore.clusterCutoff, props.dataStore.filterCutoff]} min={0}
+                                    step={0.01}
+                                    max={1}
+                                    valueLabelDisplay="auto"
+                                    onChange={handleChange}/>
+                        </ListItem>
+                    </List>
+                </Drawer>
             </React.Fragment>
-            {data != null ?
+            {props.dataStore.isLoaded ?
                 <Plots selectedSpecies={selectedSpecies}
-                       pvalueFilter={pvalueFilter}
-                       dispCutoff={dispCutoff}
-                       datatype={isTimeseries ? 'timeseries' : 'conditions'} data={data}
-                       sigThreshold={sigThreshold}/> :
-                <SelectData setData={setData}
-                            selectSpecies={selectSpecies}
+                       pvalueFilter={pvalueFilter}/> :
+                <SelectData selectSpecies={selectSpecies}
                             setPvalueFilter={setPvalueFilter}
-                            setDispCutoff={setDispCutoff}
                             selectedSpecies={selectedSpecies}
-                            pvalueFilter={pvalueFilter}
-                            dispCutoff={dispCutoff}/>}
+                            pvalueFilter={pvalueFilter}/>}
         </div>
     );
-}
+}));
 
 export default App;

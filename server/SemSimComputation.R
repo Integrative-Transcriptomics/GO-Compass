@@ -46,6 +46,7 @@ geneBackground <- BP
 GOfrequencies <- prop.table(table(BP$values))
 parents <- as.list(GOBPPARENTS)
 offspring <- as.list(GOBPOFFSPRING)
+ancestors <<- as.list(GOBPANCESTOR)
 ontologyId <- "GO:0008150"
 
 
@@ -57,18 +58,21 @@ setBackground <- function(ontology) {
     GOfrequencies <<- prop.table(table(BP$values))
     parents <<- as.list(GOBPPARENTS)
     offspring <<- as.list(GOBPOFFSPRING)
+    ancestors <<- as.list(GOBPANCESTOR)
     ontologyId <<- "GO:0008150"
   } else if (ontology == "MF") {
     geneBackground <<- MF
     GOfrequencies <<- prop.table(table(MF$values))
     parents <<- as.list(GOMFPARENTS)
     offspring <<- as.list(GOMFOFFSPRING)
+    ancestors <<- as.list(GOMFANCESTOR)
     ontologyId <<- "GO:0003674"
   } else{
     geneBackground <<- CC
     GOfrequencies <<- prop.table(table(CC$values))
     parents <<- as.list(GOCCPARENTS)
     offspring <<- as.list(GOCCOFFSPRING)
+    ancestors <<- as.list(GOCCANCESTOR)
     ontologyId <<- "GO:0005575"
     
   }
@@ -91,19 +95,42 @@ getFrequency <- function(goid) {
   return(frequency)
 }
 
-pca <- function(pvalues) {
-  pca <- prcomp(t(pvalues), center = TRUE, scale. = TRUE)
+
+#* Performs PCA for data
+#* @param data the pvalues to perform pca on
+#' @serializer unboxedJSON
+#* @post /pca
+pca <- function(data) {
+  pvalues <- data.frame()
+  for (name in names(data)) {
+    if(name!="goTerm"){
+      pvalues <- rbind(pvalues,data[[name]])
+    }
+  }
+  rownames(pvalues)<-names(data)[names(data)!="goTerm"]
+  colnames(pvalues)<-data[["goTerm"]]
+  pca <- prcomp(pvalues, center = TRUE, scale. = TRUE)
   coords <- as.data.frame(pca$x)
   percentage <- round(pca$sdev / sum(pca$sdev) * 100, 2)
   return(list("coords" = coords[c("PC1", "PC2")], "percentage" = percentage[c(1, 2)]))
 }
+#* Performs correlation for data
+#* @param data the pvalues to perform pca on
+#' @serializer unboxedJSON
+#* @post /correlation
+function(data) {
+  pvalues <- data.frame()
+  for (name in names(data)) {
+    if(name!="goTerm"){
+      pvalues <- rbind(pvalues,data[[name]])
+    }
+  }
+  return(cor(t(pvalues)))
+}
 
-iterateMatrix <- function(matrix, pvalues, cutoff) {
+iterateMatrix <- function(matrix, pvalues) {
+  tree <- list()
   GOList <- list()
-  hierarchy <- list()
-  
-  treemapHierarchy <- list()
-  
   avg <- colMeans(matrix)
   max <- 1
   range <- range(pvalues)
@@ -128,52 +155,26 @@ iterateMatrix <- function(matrix, pvalues, cutoff) {
     if (toDelete == go1) {
       toKeep <- go2
     }
-    if (max > cutoff) {
-      if (toDelete %in% names(hierarchy)) {
-        if (toKeep %in% names(hierarchy)) {
-          hierarchy[[toKeep]] = c(hierarchy[[toKeep]], hierarchy[[toDelete]], toDelete)
-          hierarchy = hierarchy[names(hierarchy) != toDelete]
-        } else{
-          hierarchy[[toDelete]] = c(hierarchy[[toDelete]], toDelete)
-          names(hierarchy)[names(hierarchy) == toDelete] <- toKeep
-        }
-      } else if (toKeep %in% names(hierarchy)) {
-        hierarchy[[toKeep]] = c(hierarchy[[toKeep]], toDelete)
+    
+    if(toDelete %in% names(tree)){
+      # merge subtrees
+      if(toKeep %in% names(tree)){
+        tree[[toKeep]] <- c(tree[toKeep],tree[toDelete])
       } else{
-        hierarchy[[toKeep]] <- list(toDelete)
+        # add Keep as leaf and as representant
+        tree[[toKeep]] <-  c(tree[toDelete], toKeep)
       }
     } else {
-      if (!toKeep %in% names(hierarchy)) {
-        hierarchy[[toKeep]] <- vector()
-      }
-      if (!toDelete %in% names(hierarchy)) {
-        hierarchy[[toDelete]] <- vector()
-      }
-      if (max > 0.1) {
-        if (toDelete %in% names(treemapHierarchy)) {
-          if (toKeep %in% names(treemapHierarchy)) {
-            treemapHierarchy[[toKeep]] = c(treemapHierarchy[[toKeep]], treemapHierarchy[[toDelete]])
-            treemapHierarchy = treemapHierarchy[names(treemapHierarchy) != toDelete]
-          } else{
-            treemapHierarchy[[toDelete]] = c(treemapHierarchy[[toDelete]], toKeep)
-            names(treemapHierarchy)[names(treemapHierarchy) == toDelete] <-
-              toKeep
-          }
-        } else if (toKeep %in% names(treemapHierarchy)) {
-          treemapHierarchy[[toKeep]] = c(treemapHierarchy[[toKeep]], toDelete)
-        } else{
-          treemapHierarchy[[toKeep]] <- list(toKeep, toDelete)
-        }
+      if(toKeep %in% names(tree)){
+        # add delete as leaf
+        tree[[toKeep]] <- c(tree[toKeep], toDelete)
       } else{
-        if (!toKeep %in% names(treemapHierarchy)) {
-          treemapHierarchy[[toKeep]] <- list(toKeep)
-        }
-        if (!toDelete %in% names(treemapHierarchy)) {
-          treemapHierarchy[[toDelete]] <- list(toDelete)
-        }
+        # new subtree
+        tree[[toKeep]]=c(toKeep,toDelete)
       }
-      
     }
+    tree <- tree[names(tree)!=toDelete]
+    
     GOList[[toDelete]] <- list(
       "termID" = toDelete,
       "description" = Term(GOTERM[toDelete]),
@@ -199,20 +200,14 @@ iterateMatrix <- function(matrix, pvalues, cutoff) {
     max <- max(matrix)
   }
   print("finished iterating")
-  filtered <-
-    lapply(GOList, function(x)
-      x[x[["termID"]] %in% names(hierarchy)])
-  pvals <- -log10(pvalues[names(filtered), ])
+  pvals <- -log10(pvalues)
   names <- lapply(GOList, function(x)
     x[["termID"]])
   return(
     list(
+      "tree"=tree,
       "data" = GOList,
-      "conditions" = colnames(pvalues),
-      "hierarchy" = hierarchy,
-      "treemapHierarchy" = treemapHierarchy,
-      "correlation" = cor(pvals),
-      "pca" = pca(pvals)
+      "conditions" = colnames(pvalues)
     )
   )
 }
@@ -325,12 +320,11 @@ function(file, condition) {
 #* Performs MultiRevio for gene lists
 #* @param genome genome to use
 #* @param ontology ontology to consider
-#* @param cutoff similarity cutoff
 #* @param pvalueFilter filter for p-values
 #* @param conditions conditions
 #' @serializer unboxedJSON
 #* @post /MultiRevigoGeneLists
-geneListRevigo <- function(genome, ontology, cutoff, pvalueFilter, conditions) {
+geneListRevigo <- function(genome, ontology, pvalueFilter, conditions) {
   setBackground(ontology)
 
   enrichments <- lapply(conditions, function(condition) {
@@ -364,7 +358,7 @@ geneListRevigo <- function(genome, ontology, cutoff, pvalueFilter, conditions) {
   rownames(data) <- NULL
   print("Finished GO enrichment")
   geneLists <<- list()
-  multiRevigo(as.data.frame(data), ontology, cutoff, pvalueFilter)
+  multiRevigo(as.data.frame(data), ontology, pvalueFilter)
 }
 
 # TODO: Provide multiple SemSim methods, provide multiple organisms
@@ -373,22 +367,20 @@ geneListRevigo <- function(genome, ontology, cutoff, pvalueFilter, conditions) {
 #* Performs MultiRevio for data
 #* @param data:file the data to analyze
 #* @param ontology ontology to consider
-#* @param cutoff similarity cutoff
 #* @param pvalueFilter filter for p-values
 #' @serializer unboxedJSON
 #* @post /MultiRevigoGoList
-function(data, ontology, cutoff, pvalueFilter) {
-  print(data);
+function(data, ontology, pvalueFilter) {
   setBackground(ontology)
   
   con <- textConnection(data)
   
   table <- read.table(con, header = T)
   
-  multiRevigo(table, ontology, cutoff, pvalueFilter)
+  multiRevigo(table, ontology, pvalueFilter)
 }
 
-multiRevigo <- function(data, ontology, cutoff, pvalueFilter) {
+multiRevigo <- function(data, ontology, pvalueFilter) {
   hsGO <-
     godata("org.EcK12.eg.db", ont = ontology, computeIC = FALSE)
   gos <- data[, "GoTerm"]
@@ -410,5 +402,5 @@ multiRevigo <- function(data, ontology, cutoff, pvalueFilter) {
       combine = NULL
     )
   print("finished creating similarity matrix")
-  iterateMatrix(similarityMatrix, data, cutoff)
+  iterateMatrix(similarityMatrix, data)
 }

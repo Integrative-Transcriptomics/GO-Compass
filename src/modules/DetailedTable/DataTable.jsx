@@ -15,6 +15,7 @@ import {makeStyles} from '@material-ui/core/styles';
 import TableSortLabel from "@material-ui/core/TableSortLabel";
 import Button from "@material-ui/core/Button";
 import * as d3 from "d3";
+import {inject, observer} from "mobx-react";
 
 
 const useStyles = makeStyles({
@@ -53,7 +54,7 @@ function Cell(props) {
     return <TableCell style={{color: props.color}} align={props.align}>{content}</TableCell>;
 }
 
-function Row(props) {
+const Row = inject("visStore")(observer((props) => {
     const mainRow = props.keys.map(key => {
         let align = "right";
         if (key === "termID") {
@@ -81,9 +82,9 @@ function Row(props) {
     }
     return (<React.Fragment>
         <TableRow
-            onMouseEnter={() => props.setChildHighlight(props.goTerm)}
-            onMouseLeave={() => props.setChildHighlight(null)}
-            selected={props.childHighlight === props.goTerm}>
+            onMouseEnter={() => props.visStore.setChildHighlight(props.goTerm)}
+            onMouseLeave={() => props.visStore.setChildHighlight(null)}
+            selected={props.visStore.childHighlight === props.goTerm}>
             <TableCell>
                 {props.subTerms.length > 0 ?
                     <IconButton aria-label="expand row" size="small" onClick={() => props.setOpen()}>
@@ -94,27 +95,23 @@ function Row(props) {
         </TableRow>
         {subRows}
     </React.Fragment>)
-}
+}));
 
-function DataTable(props) {
+const DataTable = inject("dataStore")(observer((props) => {
     const [globalOpen, setGlobalOpen] = useState('closed');
-    const [isOpen, setIsOpen] = useState(Object.keys(props.data.hierarchy).map(d => {
-        return ({goTerm: d, open: false})
-    }));
-    const [order, setOrder] = useState(Object.keys(props.data.hierarchy));
     const [sortKey, setSortKey] = useState(null);
     const [sortDir, setSortDir] = useState('desc');
     const [visualize, setVisualize] = useState(false);
     const classes = useStyles();
     const mapper = {};
-    Object.keys(props.data.tableData).forEach(goTerm => {
+    Object.keys(props.dataStore.dataTable).forEach(goTerm => {
         mapper[goTerm] = {};
-        Object.keys(props.data.tableData[goTerm]).forEach(key => {
+        Object.keys(props.dataStore.dataTable[goTerm]).forEach(key => {
             if (key !== "pvalues") {
-                mapper[goTerm][key] = props.data.tableData[goTerm][key];
+                mapper[goTerm][key] = props.dataStore.dataTable[goTerm][key];
             } else {
-                props.data.conditions.forEach((condition, i) => {
-                    mapper[goTerm][condition] = props.data.tableData[goTerm]['pvalues'][i];
+                props.dataStore.conditions.forEach((condition, i) => {
+                    mapper[goTerm][condition] = props.dataStore.dataTable[goTerm]['pvalues'][i];
                 })
             }
         })
@@ -123,46 +120,46 @@ function DataTable(props) {
     let header = [];
     let keys = [];
     const toggleGlobalOpen = useCallback(() => {
-        setIsOpen(isOpen.map((d, i) => {
+        props.dataStore.tableStore.setTermOrder(props.dataStore.tableStore.termState.map((d, i) => {
             if (globalOpen === "open" || globalOpen === "any") {
                 setGlobalOpen("closed");
-                return ({goTerm: isOpen[i].goTerm, open: false});
+                return ({goTerm: props.dataStore.tableStore.termState[i].goTerm, open: false});
             } else {
                 setGlobalOpen("open");
-                return ({goTerm: isOpen[i].goTerm, open: true});
+                return ({goTerm: props.dataStore.tableStore.termState[i].goTerm, open: true});
             }
         }));
-    }, [globalOpen, isOpen]);
+    }, [globalOpen, props.dataStore.tableStore]);
     const toggleOpen = useCallback((goTerm) => {
-        let open2Copy = isOpen.slice();
+        let open2Copy = props.dataStore.tableStore.termState.slice();
         const goTermIndex = open2Copy.map(d => d.goTerm).indexOf(goTerm);
         open2Copy[goTermIndex].open = !open2Copy[goTermIndex].open;
-        setIsOpen(open2Copy);
+        props.dataStore.tableStore.setTermOrder(open2Copy);
         if (globalOpen !== "any") {
             setGlobalOpen("any");
         }
-    }, [globalOpen, isOpen]);
+    }, [globalOpen, props.dataStore.tableStore]);
     const sort = useCallback((key) => {
-        let elements = Object.keys(props.data.hierarchy);
+        let elements = props.dataStore.tableStore.termState.slice();
         let dir = sortKey === key && sortDir === 'desc' ? 1 : -1;
         elements.sort((a, b) => {
-            if (mapper[a][key] < mapper[b][key]) {
+            if (mapper[a.goTerm][key] < mapper[b.goTerm][key]) {
                 return -dir;
-            } else if (mapper[a][key] > mapper[b][key]) {
+            } else if (mapper[a.goTerm][key] > mapper[b.goTerm][key]) {
                 return dir;
             } else return 0;
         });
-        setOrder(elements);
+        props.dataStore.tableStore.setTermOrder(elements);
         setSortKey(key);
         setSortDir(sortKey === key && sortDir === 'desc' ? 'asc' : 'desc');
-    }, [props.data.hierarchy, sortKey, sortDir, mapper]);
-    const max = d3.max(props.data.conditions.map(condition => {
+    }, [props.dataStore.tableStore, sortKey, sortDir, mapper]);
+    const max = d3.max(props.dataStore.conditions.map(condition => {
         return d3.max((Object.keys(mapper).map(d => mapper[d][condition])));
     }));
     const scale = (d3.scaleLinear().domain([0, max]).range([0, 60]));
-    order.forEach(goTerm => {
+    props.dataStore.tableStore.termState.map(d=>d.goTerm).forEach(goTerm => {
         if (header.length === 0) {
-            keys = Object.keys(props.data.tableData[goTerm]).filter(d => d !== 'pvalues').concat(props.data.conditions);
+            keys = Object.keys(props.dataStore.dataTable[goTerm]).filter(d => d !== 'pvalues').concat(props.dataStore.conditions);
             header = keys.map(d => <TableCell key={d} onClick={() => sort(d)} align="right">
                 <TableSortLabel
                     active={sortKey === d}
@@ -172,13 +169,12 @@ function DataTable(props) {
                     {d}
                 </TableSortLabel></TableCell>);
         }
-        content.push(<Row key={goTerm} open={isOpen.filter(d => d.goTerm === goTerm)[0].open}
+        content.push(<Row key={goTerm} open={props.dataStore.tableStore.termState.filter(d => d.goTerm === goTerm)[0].open}
                           setOpen={() => toggleOpen(goTerm)}
-                          scale={scale} conditions={props.data.conditions}
+                          scale={scale} conditions={props.dataStore.conditions}
                           sigThreshold={props.sigThreshold}
                           visualize={visualize} mapper={mapper} keys={keys} goTerm={goTerm}
-                          subTerms={props.data.hierarchy[goTerm]} setChildHighlight={props.setChildHighlight}
-                          childHighlight={props.childHighlight}/>);
+                          subTerms={props.dataStore.filterHierarchy[goTerm]} />);
     });
     return (
         <Paper className={classes.root}>
@@ -201,7 +197,7 @@ function DataTable(props) {
             </TableContainer>
         </Paper>
     );
-}
+}));
 
 DataTable.propTypes = {
     data: PropTypes.object,

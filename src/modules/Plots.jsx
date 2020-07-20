@@ -1,6 +1,4 @@
 import React, {useCallback, useEffect, useState} from "react";
-import PropTypes from 'prop-types';
-import * as d3 from "d3";
 import Grid from "@material-ui/core/Grid";
 import AnimatedTreemap from "./AnimatedTreemap/AnimatedTreemap";
 import PlayButton from "./PlayButton";
@@ -16,17 +14,13 @@ import Paper from "@material-ui/core/Paper";
 import DataTable from "./DetailedTable/DataTable";
 import CorrelationHeatmap from "./CorrelationHeatmap";
 import PCA from "./PCA";
-import TableContainer from "@material-ui/core/TableContainer";
-import Table from "@material-ui/core/Table";
-import TableRow from "@material-ui/core/TableRow";
-import TableCell from "@material-ui/core/TableCell";
-import TableBody from "@material-ui/core/TableBody";
-
+import Tree from "./Tree";
+import {inject, observer} from "mobx-react";
 
 /**
  * @return {null}
  */
-function Plots(props) {
+const Plots = inject("dataStore", "visStore")(observer((props) => {
     const useStyles = makeStyles((theme: Theme) =>
         createStyles({
             root: {
@@ -40,21 +34,16 @@ function Plots(props) {
             },
         }),
     );
-    const [index, setIndex] = useState(0);
-    const [plottype, setPlottype] = useState('lineChart');
-    const [plotWidth, setWidth] = useState(100);
     const [plotHeight, setHeight] = useState(100);
     const [anchorEl, setAnchorEl] = useState(null);
-    const [parentHighlight, setParentHighlight] = useState(null);
-    const [childHighlight, setChildHighlight] = useState(null);
 
     const main = React.createRef();
     const simplePlot = React.createRef();
     useEffect(() => {
         if (main.current != null) {
-            setWidth(main.current.getBoundingClientRect().width);
+            props.visStore.setScreenWidth(main.current.getBoundingClientRect().width);
         }
-    }, [main]);
+    }, [main, props.visStore]);
     useEffect(() => {
         if (simplePlot.current != null) {
             setHeight(simplePlot.current.getBoundingClientRect().height);
@@ -62,89 +51,41 @@ function Plots(props) {
     }, [simplePlot]);
     const selectPlottype = useCallback((plotType) => {
         setAnchorEl(null);
-        setPlottype(plotType);
-    }, [setAnchorEl, setPlottype]);
-    const duration = 1500;
-    const names = props.data.nestedData.map(d => d.name);
-    const color = d3.scaleOrdinal(props.data.nestedData.map(d => d.id), d3.schemeCategory10.map(d => d3.interpolateRgb(d, "white")(0.5)));
+        props.visStore.setTsPlotType(plotType);
+    }, [props.visStore, setAnchorEl]);
+    const names = props.dataStore.nestedData.map(d => d.name);
     const classes = useStyles();
     return (
         <Grid ref={main} className={classes.root} container spacing={1}>
-            <Grid item xs={4}>
+            <Grid item xs={6}>
                 <Paper className={classes.paper}>
-                    <TableContainer component={Paper}>
-                        <Table className={classes.table} aria-label="simple table">
-                            <TableBody>
-                                <TableRow>
-                                    <TableCell component="th" scope="row">
-                                        Species
-                                    </TableCell>
-                                    <TableCell align="right">{props.selectedSpecies.label}</TableCell>
-                                </TableRow>
-                                <TableRow>
-                                    <TableCell component="th" scope="row">
-                                        Number of conditions
-                                    </TableCell>
-                                    <TableCell align="right">{props.data.conditions.length}</TableCell>
-                                </TableRow>
-                                <TableRow>
-                                    <TableCell component="th" scope="row">
-                                        Total number of GO terms
-                                    </TableCell>
-                                    <TableCell align="right">{Object.keys(props.data.tableData).length}</TableCell>
-                                </TableRow>
-                                <TableRow>
-                                    <TableCell component="th" scope="row">
-                                        Reduced number of GO terms
-                                    </TableCell>
-                                    <TableCell align="right">{Object.keys(props.data.hierarchy).length}</TableCell>
-                                </TableRow>
-                                <TableRow>
-                                    <TableCell component="th" scope="row">
-                                        Dispensability cutoff
-                                    </TableCell>
-                                    <TableCell align="right">{props.dispCutoff}</TableCell>
-                                </TableRow>
-                                <TableRow>
-                                    <TableCell component="th" scope="row">
-                                        P-value filter
-                                    </TableCell>
-                                    <TableCell align="right">{props.pvalueFilter}</TableCell>
-                                </TableRow>
-                            </TableBody>
-                        </Table>
-                    </TableContainer>
-                </Paper>
-            </Grid>
-            <Grid item xs={4}>
-                <Paper className={classes.paper}>
-                    <PCA width={plotWidth / 3}
-                         parentHighlight={parentHighlight}
-                         childHighlight={childHighlight}
-                         setParentHighlight={setParentHighlight}
-                         data={props.data.pca}
-                         conditions={props.data.conditions}
+                    <Tree width={props.visStore.screenWidth / 2} height={400}
                     />
                 </Paper>
             </Grid>
-            <Grid item xs={4}>
+            <Grid item xs={3}>
                 <Paper className={classes.paper}>
+                    {props.dataStore.pcaLoaded?
+                        <PCA width={props.visStore.screenWidth / 4}
+                             height={400}
+                        /> : null
+                    }
+                </Paper>
+            </Grid>
+            <Grid item xs={3}>
+                <Paper className={classes.paper}>
+                    <CorrelationHeatmap width={props.visStore.screenWidth / 4}
+                                        height={400}
+                    />
+                </Paper>
+            </Grid>
 
-                    <CorrelationHeatmap width={plotWidth / 3}
-                                        parentHighlight={parentHighlight}
-                                        childHighlight={childHighlight}
-                                        setParentHighlight={setParentHighlight}
-                                        correlation={props.data.correlation}
-                                        conditions={props.data.conditions}
-                    />
-                </Paper>
-            </Grid>
             <Grid item xs={4}>
                 <Paper ref={simplePlot} className={classes.paper}>
-                    <Legend width={plotWidth / 3} height={100} color={color} names={names}/>
-                    {props.datatype === "timeseries" ?
+                    <Legend width={props.visStore.screenWidth / 3} height={100} names={names}/>
+                    {props.visStore.isTimeSeries ?
                         <div>
-                            <PlayButton keys={props.data.conditions} duration={duration} setIndex={setIndex}/>
+                            <PlayButton/>
                             <Button aria-controls="simple-menu" aria-haspopup="true"
                                     onClick={(event) => setAnchorEl(event.currentTarget)}>
                                 Plot Type
@@ -160,58 +101,28 @@ function Plots(props) {
                                 <MenuItem onClick={() => selectPlottype('streamGraph')}>Streamgraph</MenuItem>
                             </Menu></div> : null
                     }
-                    <SimpleChart width={plotWidth / 3}
-                                 parentHighlight={parentHighlight}
-                                 childHighlight={childHighlight}
-                                 setParentHighlight={setParentHighlight}
-                                 sigThreshold={props.sigThreshold}
-                                 plottype={plottype}
-                                 data={props.data}
-                                 datatype={props.datatype}
-                                 index={index} setIndex={setIndex} color={color} duration={duration}/>
+                    <SimpleChart width={props.visStore.screenWidth / 3}/>
                 </Paper>
             </Grid>
             <Grid item xs={4}>
                 <Paper className={classes.paper}>
-                    <AnimatedTreemap parentHighlight={parentHighlight}
-                                     childHighlight={childHighlight}
-                                     setChildHighlight={setChildHighlight} width={plotWidth / 3}
-                                     sigThreshold={props.sigThreshold}
-                                     height={plotHeight}
-                                     index={index}
-                                     data={{children: props.data.nestedData, keys: props.data.conditions}}
-                                     color={color}
-                                     duration={duration}/>
+                    <AnimatedTreemap width={props.visStore.screenWidth / 3}
+                                     height={plotHeight}/>
                 </Paper>
             </Grid>
             <Grid item xs={4}>
                 <Paper className={classes.paper}>
-                    <SmallMultiples parentHighlight={parentHighlight}
-                                    childHighlight={childHighlight}
-                                    setChildHighlight={setChildHighlight}
-                                    sigThreshold={props.sigThreshold}
-                                    width={plotWidth / 3} height={plotHeight}
-                                    index={index}
-                                    duration={duration}
-                                    data={{children: props.data.nestedData, keys: props.data.conditions}}
-                                    setIndex={setIndex}
-                                    color={color}/>
+                    <SmallMultiples width={props.visStore.screenWidth / 3} height={plotHeight}/>
                 </Paper>
             </Grid>
             <Grid item xs={12}>
                 <Paper className={classes.paper}>
-                    <DataTable data={props.data} childHighlight={childHighlight}
-                               sigThreshold={props.sigThreshold}
-                               setChildHighlight={setChildHighlight}/>
+                    <DataTable/>
                 </Paper>
             </Grid>
         </Grid>
     );
 
-}
+}));
 
-Plots.propTypes = {
-    data: PropTypes.object.isRequired,
-    datatype: PropTypes.string.isRequired,
-};
 export default Plots;

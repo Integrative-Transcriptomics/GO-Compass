@@ -18,12 +18,13 @@ import Paper from "@material-ui/core/Paper";
 import Grid from "@material-ui/core/Grid";
 import KeyboardArrowDownIcon from '@material-ui/icons/KeyboardArrowDown';
 import KeyboardArrowUpIcon from '@material-ui/icons/KeyboardArrowUp';
-import {getSupportedGenomes, multiRevigoGeneLists, readData} from "../parseData";
+import {getSupportedGenomes} from "../parseData";
 import IconButton from "@material-ui/core/IconButton";
 import Autocomplete from '@material-ui/lab/Autocomplete';
+import {inject, observer} from "mobx-react";
 
 
-function SelectData(props) {
+const SelectData = inject("dataStore")(observer((props) => {
     const [supportedGenomes, setSupportedGenomes] = useState([]);
     const [goFile, setGoFile] = useState(null);
     const [geneFiles, setGeneFiles] = useState([]);
@@ -47,17 +48,11 @@ function SelectData(props) {
     const launch = useCallback(() => {
         setIsLoading(true);
         if (goFile !== null) {
-            readData(goFile, ontology, props.dispCutoff, props.pvalueFilter, (newData) => {
-                setIsLoading(false);
-                props.setData(newData);
-            });
+            props.dataStore.loadGOListData(goFile, ontology, props.pvalueFilter);
         } else if (geneFiles.length > 0 && props.selectedSpecies !== null) {
-            multiRevigoGeneLists(geneFiles, conditions, props.selectedSpecies.value, ontology, props.dispCutoff, props.pvalueFilter, (newData) => {
-                setIsLoading(false);
-                props.setData(newData);
-            })
+            props.dataStore.loadGeneListData(geneFiles, conditions, props.selectedSpecies.value, ontology, props.pvalueFilter)
         }
-    }, [goFile, conditions, props.selectedSpecies, geneFiles, ontology, props.dispCutoff, props.pvalueFilter]);
+    }, [props.dataStore, goFile, conditions, props.selectedSpecies, geneFiles, ontology, props.pvalueFilter]);
     const getGenomes = useCallback(() => {
         if (supportedGenomes.length === 0) {
             getSupportedGenomes((genomes) => setSupportedGenomes(genomes))
@@ -184,6 +179,7 @@ function SelectData(props) {
                                 </IconButton>
                                 <TextField required
                                            label={d.name}
+                                           disabled={isLoading}
                                            onChange={(e) => {
                                                let conditionsCopy = conditions.slice();
                                                conditionsCopy[i] = e.target.value;
@@ -199,6 +195,7 @@ function SelectData(props) {
                         <Autocomplete
                             id="combo-box-demo"
                             options={speciesOptions}
+                            disabled={isLoading}
                             getOptionLabel={(option) => option.label}
                             value={props.selectedSpecies}
                             style={{width: 300}}
@@ -220,21 +217,6 @@ function SelectData(props) {
                                 <MenuItem value="BP">Biological Process</MenuItem>
                                 <MenuItem value="MF">Molecular Function</MenuItem>
                                 <MenuItem value="CC">Cellular Component</MenuItem>
-                            </Select>
-                        </FormControl>
-                    </ListItem>
-                    <ListItem>
-                        <FormControl className={classes.formControl}>
-                            <InputLabel>Result size</InputLabel>
-                            <Select
-                                value={props.dispCutoff}
-                                disabled={isLoading}
-                                onChange={(e) => props.setDispCutoff(e.target.value)}
-                            >
-                                <MenuItem value={0.9}>Large (0.9)</MenuItem>
-                                <MenuItem value={0.7}>Medium (0.7)</MenuItem>
-                                <MenuItem value={0.5}>Small (0.5)</MenuItem>
-                                <MenuItem value={0.4}>Tiny (0.4)</MenuItem>
                             </Select>
                         </FormControl>
                     </ListItem>
@@ -270,6 +252,6 @@ function SelectData(props) {
             </Grid>
         </Grid>
     );
-}
+}));
 
 export default SelectData;

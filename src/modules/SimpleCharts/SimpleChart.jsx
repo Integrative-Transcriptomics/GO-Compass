@@ -7,19 +7,20 @@ import * as d3 from "d3";
 import Box from "@material-ui/core/Box";
 import FormControlLabel from "@material-ui/core/FormControlLabel";
 import Switch from "@material-ui/core/Switch";
+import {inject, observer} from "mobx-react";
 
 
-function SimpleChart(props) {
+const SimpleChart = inject("dataStore", "visStore")(observer((props) => {
     const [showOverview, setShowOverview] = useState(true);
     const mapper = new Map();
     let chart;
     const lineData = [];
-    props.data.nestedData.forEach(parent => {
+    props.dataStore.nestedData.forEach(parent => {
         let add = false;
-        const values = props.data.conditions.map((d, i) => {
+        const values = props.dataStore.conditions.map((d, i) => {
             let current = 0;
             parent.children.forEach(child => {
-                if (showOverview || props.childHighlight === null || props.childHighlight === child.id) {
+                if (showOverview || props.visStore.childHighlight === null || props.visStore.childHighlight === child.id) {
                     add = true;
                     mapper.set(child.id, {parent: parent.id, values: child.values});
                     current += child.values[i];
@@ -32,58 +33,42 @@ function SimpleChart(props) {
         }
     });
     const parents = new Set();
-    const stackedChildren = props.data.conditions.map((d, i) => {
+    const stackedChildren = props.dataStore.conditions.map((d, i) => {
         const tpData = {};
-        props.data.nestedData.forEach(parent => {
+        props.dataStore.nestedData.forEach(parent => {
             parents.add(parent.id);
-            if (showOverview || props.childHighlight === null) {
+            if (showOverview || props.visStore.childHighlight === null) {
                 tpData[parent.id] = d3.sum(parent.children.map(child => child.values[i]));
             } else {
                 tpData[parent.id] = d3.sum(parent.children
-                    .filter(child => props.childHighlight === child.id)
+                    .filter(child => props.visStore.childHighlight === child.id)
                     .map(child => child.values[i]));
             }
         });
         return tpData
     });
-    if (props.datatype === "conditions") {
+    if (!props.visStore.isTimeSeries) {
         chart = <StackedBarChart width={props.width}
                                  showOverview={showOverview}
-                                 sigThreshold={props.sigThreshold}
-                                 parentHighlight={props.parentHighlight}
-                                 childHighlight={props.childHighlight}
-                                 setParentHighlight={props.setParentHighlight}
                                  data={{
                                      parents: [...parents],
-                                     conditions: props.data.conditions,
+                                     conditions: props.dataStore.conditions,
                                      values: stackedChildren
                                  }}
-                                 mapper={mapper}
-                                 index={props.index} setIndex={props.setIndex} color={props.color}
-                                 duration={props.duration}/>
+                                 mapper={mapper}/>
     } else {
-        if (props.plottype === 'lineChart') {
+        if (props.visStore.tsPlotType === 'lineChart') {
             chart =
                 <LineChart width={props.width}
                            showOverview={showOverview}
-                           sigThreshold={props.sigThreshold}
-                           parentHighlight={props.parentHighlight}
-                           childHighlight={props.childHighlight}
-                           setParentHighlight={props.setParentHighlight}
-                           data={{keys: props.data.conditions, children: lineData}}
-                           mapper={mapper}
-                           index={props.index} setIndex={props.setIndex} color={props.color} duration={props.duration}/>
+                           data={{keys: props.dataStore.conditions, children: lineData}}
+                           mapper={mapper}/>
         } else {
             chart =
                 <StreamGraph width={props.width}
                              showOverview={showOverview}
-                             sigThreshold={props.sigThreshold}
-                             parentHighlight={props.parentHighlight}
-                             childHighlight={props.childHighlight}
-                             setParentHighlight={props.setParentHighlight}
-                             data={{parents: [...parents], conditions: props.data.conditions, values: stackedChildren}}
-                             mapper={mapper} index={props.index} setIndex={props.setIndex} color={props.color}
-                             duration={props.duration}/>
+                             data={{parents: [...parents], conditions: props.dataStore.conditions, values: stackedChildren}}
+                             mapper={mapper}/>
         }
     }
     return (
@@ -96,26 +81,14 @@ function SimpleChart(props) {
             {chart}
         </Box>
     );
-}
+}));
 
 SimpleChart.propTypes = {
     width: PropTypes.number.isRequired,
     height: PropTypes.number,
-    data: PropTypes.object.isRequired,
-    color: PropTypes.func.isRequired,
-    parentHighlight: PropTypes.string,
-    childHighlight: PropTypes.string,
-    setParentHighlight: PropTypes.func.isRequired,
-    plottype: PropTypes.string.isRequired,
-    datatype: PropTypes.string.isRequired,
-    index: PropTypes.number.isRequired,
-    setIndex: PropTypes.func.isRequired,
-    duration: PropTypes.number.isRequired,
 };
 SimpleChart.defaultProps = {
     height: 350,
-    parentHighlight: null,
-    childHighlight: null,
 };
 export default SimpleChart;
 
