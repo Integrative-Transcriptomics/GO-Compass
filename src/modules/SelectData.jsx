@@ -18,13 +18,13 @@ import Paper from "@material-ui/core/Paper";
 import Grid from "@material-ui/core/Grid";
 import KeyboardArrowDownIcon from '@material-ui/icons/KeyboardArrowDown';
 import KeyboardArrowUpIcon from '@material-ui/icons/KeyboardArrowUp';
-import {getSupportedGenomes} from "../parseData";
+import {getSupportedGenomes, multiRevigoGeneLists, multiRevigoGoLists} from "../parseData";
 import IconButton from "@material-ui/core/IconButton";
 import Autocomplete from '@material-ui/lab/Autocomplete';
-import {inject, observer} from "mobx-react";
+import {DataStore} from "./stores/DataStore";
 
 
-const SelectData = inject("dataStore")(observer((props) => {
+const SelectData = (props) => {
     const [supportedGenomes, setSupportedGenomes] = useState([]);
     const [goFile, setGoFile] = useState(null);
     const [geneFiles, setGeneFiles] = useState([]);
@@ -48,11 +48,15 @@ const SelectData = inject("dataStore")(observer((props) => {
     const launch = useCallback(() => {
         setIsLoading(true);
         if (goFile !== null) {
-            props.dataStore.loadGOListData(goFile, ontology, props.pvalueFilter);
+            multiRevigoGoLists(goFile, ontology, props.pvalueFilter, response=>{
+                props.setDataStore(new DataStore(response.data, response.tree, response.conditions));
+            });
         } else if (geneFiles.length > 0 && props.selectedSpecies !== null) {
-            props.dataStore.loadGeneListData(geneFiles, conditions, props.selectedSpecies.value, ontology, props.pvalueFilter)
+            multiRevigoGeneLists(goFile, ontology, props.pvalueFilter, response=>{
+                props.setDataStore(new DataStore(response.data, response.tree, response.conditions));
+            });
         }
-    }, [props.dataStore, goFile, conditions, props.selectedSpecies, geneFiles, ontology, props.pvalueFilter]);
+    }, [goFile, geneFiles, ontology, props]);
     const getGenomes = useCallback(() => {
         if (supportedGenomes.length === 0) {
             getSupportedGenomes((genomes) => setSupportedGenomes(genomes))
@@ -252,6 +256,6 @@ const SelectData = inject("dataStore")(observer((props) => {
             </Grid>
         </Grid>
     );
-}));
+};
 
 export default SelectData;

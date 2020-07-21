@@ -12,7 +12,7 @@ const SmallMultiples = inject("dataStore", "visStore")(observer((props) => {
     if (props.dataStore.conditions.length < 5) {
         width = props.width / 2;
         height = props.height / 2;
-    } else if (props.data.keys.length < 10) {
+    } else if (props.dataStore.conditions.length < 10) {
         width = props.width / 3;
         height = props.height / 3;
     } else {

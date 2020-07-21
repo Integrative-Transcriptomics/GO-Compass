@@ -34,7 +34,7 @@ function multiRevigoGeneLists(dataFiles, conditions, genome, ontology, pvalueFil
 
 }
 
-function readData(dataFile, ontology, pvalueFilter, callback) {
+function multiRevigoGoLists(dataFile, ontology, pvalueFilter, callback) {
     if (dataFile != null) {
         const formData = new FormData();
         formData.append("data", dataFile);
@@ -48,4 +48,4 @@ function readData(dataFile, ontology, pvalueFilter, callback) {
     }
 }
 
-export {readData, multiRevigoGeneLists, getSupportedGenomes,performPCA, performCorrelation};
+export {multiRevigoGoLists, multiRevigoGeneLists, getSupportedGenomes,performPCA, performCorrelation};

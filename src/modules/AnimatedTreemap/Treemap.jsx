@@ -85,7 +85,7 @@ const Treemap = inject("dataStore", "visStore")(observer((props) => {
     }, [props.index, startAnimation]);
     return (
         <g transform={"translate(" + margins.left + "," + margins.top + ")"}>
-            <text>{props.dataStore.nestedData[props.index].name}</text>
+            <text>{props.dataStore.conditions[props.index]}</text>
             <rect ref={highlightRect} x={currentLayout.x0} y={currentLayout.y0}
                   width={currentLayout.x1 - currentLayout.x0}
                   height={currentLayout.y1 - currentLayout.y0} stroke="black" strokeWidth={2} fill="none"

@@ -65,7 +65,7 @@ const Plots = inject("dataStore", "visStore")(observer((props) => {
             </Grid>
             <Grid item xs={3}>
                 <Paper className={classes.paper}>
-                    {props.dataStore.pcaLoaded?
+                    {props.dataStore.pcaLoaded ?
                         <PCA width={props.visStore.screenWidth / 4}
                              height={400}
                         /> : null
@@ -74,9 +74,11 @@ const Plots = inject("dataStore", "visStore")(observer((props) => {
             </Grid>
             <Grid item xs={3}>
                 <Paper className={classes.paper}>
-                    <CorrelationHeatmap width={props.visStore.screenWidth / 4}
-                                        height={400}
-                    />
+                    {props.dataStore.correlationLoaded ?
+                        <CorrelationHeatmap width={props.visStore.screenWidth / 4}
+                                            height={400}
+                        /> : null
+                    }
                 </Paper>
             </Grid>
 

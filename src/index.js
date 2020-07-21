@@ -3,16 +3,11 @@ import ReactDOM from 'react-dom';
 import './index.css';
 import App from './App';
 import * as serviceWorker from './serviceWorker';
-import {DataStore} from "./modules/stores/DataStore";
-import {Provider} from "mobx-react";
 
-const dataStore = new DataStore();
 ReactDOM.render(
-    <React.StrictMode>
-        <Provider dataStore={dataStore} visStore={dataStore.visStore}>
+    <React.Fragment>
             <App/>
-        </Provider>
-    </React.StrictMode>,
+    </React.Fragment>,
     document.getElementById('root')
 );
 

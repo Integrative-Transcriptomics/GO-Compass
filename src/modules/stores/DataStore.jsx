@@ -1,5 +1,5 @@
 import {action, extendObservable, reaction} from "mobx"
-import {multiRevigoGeneLists, performCorrelation, performPCA, readData} from "../../parseData";
+import {performCorrelation, performPCA} from "../../parseData";
 import * as d3 from "d3";
 import {TableStore} from "../DetailedTable/TableStore";
 import {VisStore} from "./VisStore";
@@ -7,24 +7,20 @@ import {VisStore} from "./VisStore";
 
 export class DataStore {
     /* some observable state */
-    constructor() {
+    constructor(dataTable, tree, conditions) {
         this.tableStore = new TableStore();
-        this.visStore=new VisStore(this);
+        this.visStore = new VisStore(this);
         extendObservable(this, {
             filterCutoff: 0.7,
             clusterCutoff: 0.1,
-            tree: null,
-            dataTable: null,
-            termOrder: [],
-            conditions: null,
+            tree: this.traverse(tree)[0],
+            dataTable: dataTable,
+            conditions: conditions,
             dataLoaded: false,
             pcaLoaded: false,
             correlationLoaded: false,
 
 
-            get isLoaded() {
-                return this.dataLoaded && this.pcaLoaded && this.correlationLoaded
-            },
             get filteredTree() {
                 return this.filterTree(this.tree);
             },
@@ -78,25 +74,6 @@ export class DataStore {
             setClusterCutoff: action((cutoff) => {
                 this.clusterCutoff = cutoff;
             }),
-
-            loadGOListData: action((dataFile, ontology, pvalueFilter) => {
-                readData(dataFile, ontology, pvalueFilter, (response) => {
-                    this.dataTable = response.data;
-                    this.tree = this.traverse(response.tree)[0];
-                    this.conditions = response.conditions;
-                    this.dataLoaded = true;
-
-                })
-            }),
-
-            loadGeneListData: action((dataFiles, conditions, genome, ontology, pvalueFilter) => {
-                multiRevigoGeneLists(dataFiles, conditions, genome, ontology, pvalueFilter, (response) => {
-                    this.dataTable = response.data;
-                    this.tree = this.traverse(response.tree)[0];
-                    this.conditions = response.conditions;
-                    this.dataLoaded = true;
-                })
-            })
         });
         reaction(
             () => this.filterCutoff,
@@ -113,23 +90,18 @@ export class DataStore {
                 }
             });
         reaction(
-            () => this.dataLoaded,
-            () => {
-                performPCA(this.filteredPvalues, response => {
-                    this.pca = response;
-                    this.pcaLoaded = true;
-                });
-                performCorrelation(this.filteredPvalues, response => {
-                    this.correlation = response;
-                    this.correlationLoaded = true;
-                })
-            });
-        reaction(
             () => Object.keys(this.filterHierarchy),
             (keys) => {
                 this.tableStore.initTermState(keys);
             });
-
+        performPCA(this.filteredPvalues, response => {
+            this.pca = response;
+            this.pcaLoaded = true;
+        });
+        performCorrelation(this.filteredPvalues, response => {
+            this.correlation = response;
+            this.correlationLoaded = true;
+        })
     }
 
     getFilterParent(goTerm) {
@@ -151,10 +123,10 @@ export class DataStore {
                     if (this.dataTable[child.name].dispensability >= cutoff) {
                         toReturn[tree.name].push(...this.flattenTree(child))
                     } else {
-                        const hierarchy= this.extractHierarchy(child, cutoff, includeRep);
-                        Object.keys(hierarchy).forEach(key=>{
-                            if(!(key in toReturn)){
-                                toReturn[key]=[]
+                        const hierarchy = this.extractHierarchy(child, cutoff, includeRep);
+                        Object.keys(hierarchy).forEach(key => {
+                            if (!(key in toReturn)) {
+                                toReturn[key] = []
                             }
                             toReturn[key].push(...hierarchy[key])
                         });
