@@ -22,6 +22,7 @@ import {getSupportedGenomes, multiRevigoGeneLists, multiRevigoGoLists} from "../
 import IconButton from "@material-ui/core/IconButton";
 import Autocomplete from '@material-ui/lab/Autocomplete';
 import {DataStore} from "./stores/DataStore";
+import PropTypes from "prop-types";
 
 
 const SelectData = (props) => {
@@ -31,6 +32,8 @@ const SelectData = (props) => {
     const [conditions, setConditions] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
     const [ontology, setOntology] = useState("BP");
+    const [selectedSpecies, selectSpecies] = useState(null);
+    const [pvalueFilter, setPvalueFilter] = useState(0.5);
     const [selectedTab, selectTab] = useState(0);
     const useStyles = makeStyles((theme: Theme) =>
         createStyles({
@@ -48,15 +51,15 @@ const SelectData = (props) => {
     const launch = useCallback(() => {
         setIsLoading(true);
         if (goFile !== null) {
-            multiRevigoGoLists(goFile, ontology, props.pvalueFilter, response=>{
+            multiRevigoGoLists(goFile, ontology, pvalueFilter, response=>{
                 props.setDataStore(new DataStore(response.data, response.tree, response.conditions));
             });
-        } else if (geneFiles.length > 0 && props.selectedSpecies !== null) {
-            multiRevigoGeneLists(goFile, ontology, props.pvalueFilter, response=>{
+        } else if (geneFiles.length > 0 && selectedSpecies !== null) {
+            multiRevigoGeneLists(geneFiles, conditions, selectedSpecies.value, ontology, pvalueFilter, response=>{
                 props.setDataStore(new DataStore(response.data, response.tree, response.conditions));
             });
         }
-    }, [goFile, geneFiles, ontology, props]);
+    }, [goFile, selectedSpecies, conditions, pvalueFilter, geneFiles, ontology, props]);
     const getGenomes = useCallback(() => {
         if (supportedGenomes.length === 0) {
             getSupportedGenomes((genomes) => setSupportedGenomes(genomes))
@@ -201,10 +204,10 @@ const SelectData = (props) => {
                             options={speciesOptions}
                             disabled={isLoading}
                             getOptionLabel={(option) => option.label}
-                            value={props.selectedSpecies}
+                            value={selectedSpecies}
                             style={{width: 300}}
                             onChange={(event, newValue) => {
-                                props.selectSpecies(newValue);
+                                selectSpecies(newValue);
                             }}
                             renderInput={(params) => <TextField {...params} label="Select Species"
                                                                 variant="outlined"/>}
@@ -229,9 +232,9 @@ const SelectData = (props) => {
                             id="standard-number"
                             label="P-value filter"
                             type="number"
-                            value={props.pvalueFilter}
+                            value={pvalueFilter}
                             disabled={isLoading}
-                            onChange={(e) => props.setPvalueFilter(e.target.value)}
+                            onChange={(e) => setPvalueFilter(e.target.value)}
                             InputLabelProps={{
                                 shrink: true,
                             }}
@@ -256,6 +259,9 @@ const SelectData = (props) => {
             </Grid>
         </Grid>
     );
+};
+SelectData.propTypes = {
+    setDataStore:PropTypes.func.isRequired,
 };
 
 export default SelectData;

@@ -3,6 +3,7 @@ import * as d3 from "d3";
 import Axis from "./Axis";
 import LineHighlighter from "./LineHighlighter";
 import {inject, observer} from "mobx-react";
+import PropTypes from "prop-types";
 
 const StreamGraph = inject("dataStore", "visStore")(observer((props) => {
     const [xPos, setXPos] = useState(0);
@@ -13,8 +14,8 @@ const StreamGraph = inject("dataStore", "visStore")(observer((props) => {
         left: 60,
     };
     const series = d3.stack()
-        .keys(props.data.parents)
-        (props.data.values);
+        .keys(props.dataStore.clusterRepresentatives)
+        (props.data);
 
     const area = d3.area()
         .x((d, i) => xScale(i))
@@ -23,7 +24,7 @@ const StreamGraph = inject("dataStore", "visStore")(observer((props) => {
 
     const width = props.width - margins.left - margins.right;
     const height = props.height - margins.top - margins.bottom;
-    const xScale = d3.scalePoint().domain([...Array(props.data.conditions.length).keys()]).range([0, width]);
+    const xScale = d3.scalePoint().domain([...Array(props.dataStore.conditions.length).keys()]).range([0, width]);
     const yScale = d3.scaleLinear().domain([0, d3.max(series, function (d) {
         return d3.max(d, function (d) {
             return d[1];
@@ -31,9 +32,11 @@ const StreamGraph = inject("dataStore", "visStore")(observer((props) => {
     })]).range([height, 0]);
     let childHighlightPath = null;
     const paths = series.map((category) => {
-        const isHighlighted = ((props.visStore.parentHighlight === null | props.visStore.parentHighlight === category.key) & props.visStore.childHighlight === null) | !props.showOverview;
-            if (!props.showOverview && props.visStore.childHighlight !== null && props.mapper.get(props.visStore.childHighlight).parent === category.key) {
-                const childD = props.data.conditions.map((tp, i) => {
+        const isHighlighted = ((props.visStore.parentHighlight === null | props.visStore.parentHighlight === category.key)
+            & props.visStore.childHighlight === null) | !props.visStore.showOverview;
+            if (!props.visStore.showOverview && props.visStore.childHighlight !== null
+                && props.mapper.get(props.visStore.childHighlight).parent === category.key) {
+                const childD = props.dataStore.conditions.map((tp, i) => {
                     return [category[i][0], category[i][0] + props.mapper.get(props.visStore.childHighlight).values[i]]
                 });
                 childHighlightPath = <path fill={props.visStore.termColorScale(category.key)}
@@ -48,7 +51,7 @@ const StreamGraph = inject("dataStore", "visStore")(observer((props) => {
     );
     const xAxis = d3.axisBottom()
         .scale(xScale)
-        .tickFormat(d => props.data.conditions[d]);
+        .tickFormat(d => props.dataStore.conditions[d]);
     const yAxis = d3.axisLeft()
         .scale(yScale);
     return (
@@ -65,9 +68,11 @@ const StreamGraph = inject("dataStore", "visStore")(observer((props) => {
         </svg>
     );
 }));
-StreamGraph.defaultProps = {
-    width: 900,
-    height: 350,
+StreamGraph.propTypes = {
+    width: PropTypes.number.isRequired,
+    height: PropTypes.number.isRequired,
+    data: PropTypes.arrayOf(PropTypes.object).isRequired,
+    mapper: PropTypes.instanceOf(Map).isRequired,
 };
 
 

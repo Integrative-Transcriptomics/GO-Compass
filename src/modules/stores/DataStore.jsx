@@ -67,6 +67,9 @@ export class DataStore {
                 });
                 return this.nest(pvalues, d => goMap.get(d.id))
             },
+            get clusterRepresentatives(){
+                return Object.keys(this.clusterHierarchy)
+            },
             setFilterCutoff: action((cutoff) => {
                 this.filterCutoff = cutoff;
             }),
@@ -101,7 +104,8 @@ export class DataStore {
         performCorrelation(this.filteredPvalues, response => {
             this.correlation = response;
             this.correlationLoaded = true;
-        })
+        });
+        this.tableStore.initTermState(Object.keys(this.filterHierarchy));
     }
 
     getFilterParent(goTerm) {

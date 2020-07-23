@@ -1,5 +1,4 @@
 import React, {useCallback, useState} from 'react';
-import PropTypes from "prop-types";
 import TableContainer from "@material-ui/core/TableContainer";
 import Paper from "@material-ui/core/Paper";
 import Table from "@material-ui/core/Table";
@@ -198,10 +197,5 @@ const DataTable = inject("dataStore")(observer((props) => {
         </Paper>
     );
 }));
-
-DataTable.propTypes = {
-    data: PropTypes.object,
-};
-DataTable.defaultProps = {};
 export default DataTable;
 

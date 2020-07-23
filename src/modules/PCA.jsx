@@ -46,8 +46,6 @@ const PCA = inject("dataStore", "visStore")(observer((props) => {
 
 PCA.propTypes = {
     width: PropTypes.number.isRequired,
-};
-PCA.defaultProps = {
-    height: 500,
+    height:PropTypes.number.isRequired,
 };
 export default PCA;

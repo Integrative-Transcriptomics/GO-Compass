@@ -8,6 +8,7 @@ import Slider from "@material-ui/core/Slider";
 import Drawer from "@material-ui/core/Drawer";
 import React from "react";
 import {inject, observer} from "mobx-react";
+import PropTypes from "prop-types";
 
 const AppDrawer = inject("dataStore", "visStore")(observer((props) => {
     return (<Drawer anchor={"left"} open={props.open} onClose={props.toggleDrawer}>
@@ -50,4 +51,8 @@ const AppDrawer = inject("dataStore", "visStore")(observer((props) => {
         </List>
     </Drawer>)
 }));
+AppDrawer.propTypes = {
+    open: PropTypes.bool.isRequired,
+    toggleDrawer: PropTypes.func.isRequired
+};
 export default AppDrawer;

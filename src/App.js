@@ -1,4 +1,4 @@
-import React, {useCallback, useState} from 'react';
+import React, {useCallback, useEffect, useState} from 'react';
 import Plots from "./modules/Plots";
 import Toolbar from "@material-ui/core/Toolbar";
 import AppBar from "@material-ui/core/AppBar";
@@ -27,9 +27,15 @@ const App = () => {
         }),
     );
     const [open, setOpen] = useState(false);
-    const [selectedSpecies, selectSpecies] = useState(null);
-    const [pvalueFilter, setPvalueFilter] = useState(0.5);
     const [dataStore, setDataStore] = useState(null);
+
+    const appBar = React.createRef();
+
+    useEffect(() => {
+        if (appBar.current != null && dataStore !== null) {
+            dataStore.visStore.setPlotHeight(window.innerHeight - appBar.current.getBoundingClientRect().height);
+        }
+    }, [appBar, dataStore]);
 
 
     const toggleDrawer = useCallback(() => {
@@ -39,7 +45,7 @@ const App = () => {
     return (
         <div className={classes.root}>
             <React.Fragment>
-                <AppBar position="sticky">
+                <AppBar ref={appBar} position="sticky">
                     <Toolbar>
                         <IconButton onClick={toggleDrawer} disabled={dataStore === null}>
                             <MenuIcon/>
@@ -53,15 +59,10 @@ const App = () => {
             </React.Fragment>
             {dataStore !== null ?
                 <Provider dataStore={dataStore} visStore={dataStore.visStore}>
-                    <Plots selectedSpecies={selectedSpecies}
-                           pvalueFilter={pvalueFilter}/>
+                    <Plots/>
                     <AppDrawer open={open} toggleDrawer={toggleDrawer}/>
                 </Provider> :
-                <SelectData setDataStore={setDataStore}
-                            selectSpecies={selectSpecies}
-                            setPvalueFilter={setPvalueFilter}
-                            selectedSpecies={selectedSpecies}
-                            pvalueFilter={pvalueFilter}/>}
+                <SelectData setDataStore={setDataStore}/>}
         </div>
     );
 };

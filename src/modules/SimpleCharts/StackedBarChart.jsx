@@ -3,6 +3,7 @@ import PropTypes from "prop-types";
 import * as d3 from "d3";
 import Axis from "./Axis";
 import {inject, observer} from "mobx-react";
+import SignificanceLine from "./SignificanceLine";
 
 
 const StackedBarChart = inject("dataStore", "visStore")(observer((props) => {
@@ -15,18 +16,18 @@ const StackedBarChart = inject("dataStore", "visStore")(observer((props) => {
         left: 60,
     };
     const series = d3.stack()
-        .keys(props.data.parents)
-        (props.data.values);
+        .keys(props.dataStore.clusterRepresentatives)
+        (props.data);
 
     const width = props.width - margins.left - margins.right;
     const height = props.height - margins.top - margins.bottom;
-    const xScale = d3.scaleBand().domain([...Array(props.data.conditions.length).keys()]).range([0, width]).padding(0.25);
+    const xScale = d3.scaleBand().domain([...Array(props.dataStore.conditions.length).keys()]).range([0, width]).padding(0.25);
     const yScale = d3.scaleLinear().domain([0, d3.max(series, function (d) {
         return d3.max(d, function (d) {
             return d[1];
         });
     })]).range([height, 0]);
-    const highlighters = props.data.conditions.map((timepoint, i) => {
+    const highlighters = props.dataStore.conditions.map((timepoint, i) => {
         const max = d3.max(series.map(category => category[i][1]));
         return <rect key={timepoint} opacity={i === index ? 1 : 0}
                      height={height - yScale(max)}
@@ -34,10 +35,11 @@ const StackedBarChart = inject("dataStore", "visStore")(observer((props) => {
                      x={xScale(i)} y={yScale(max)} fill='none' stroke='black' strokeWidth='2px'/>
     });
     const rects = series.map((category) => {
-        const isHighlighted = ((props.visStore.parentHighlight === null | props.visStore.parentHighlight === category.key) & props.visStore.childHighlight === null) | !props.showOverview;
+        const isHighlighted = ((props.visStore.parentHighlight === null | props.visStore.parentHighlight === category.key) & props.visStore.childHighlight === null) | !props.visStore.showOverview;
         return category.map((timepoint, i) => {
             let childHighlightRect = null;
-            if (props.showOverview && props.visStore.childHighlight !== null && props.mapper.get(props.visStore.childHighlight).parent === category.key) {
+            if (props.visStore.showOverview && props.visStore.childHighlight !== null
+                && props.mapper.get(props.visStore.childHighlight).parent === category.key) {
                 const childHeight = height - yScale(props.mapper.get(props.visStore.childHighlight).values[i]);
                 childHighlightRect = <rect x={xScale(i)}
                                            y={yScale(timepoint[0]) - childHeight}
@@ -58,10 +60,8 @@ const StackedBarChart = inject("dataStore", "visStore")(observer((props) => {
         })
     });
     let sigLine = null;
-    if (!props.showOverview && props.visStore.childHighlight !== null) {
-        sigLine = <line x1={0} x2={width} y1={yScale(-Math.log10(props.visStore.sigThreshold))}
-                        y2={yScale(-Math.log10(props.visStore.sigThreshold))}
-                        fill="none" stroke="black" strokeDasharray="4"/>
+    if (!props.visStore.showOverview && props.visStore.childHighlight !== null) {
+        sigLine = <SignificanceLine width={width} height={yScale(-Math.log10(props.visStore.sigThreshold))}/>
     }
     const startAnimation = useCallback((index) => {
         let els = d3.selectAll([...highlightRef.current.childNodes]);
@@ -75,7 +75,7 @@ const StackedBarChart = inject("dataStore", "visStore")(observer((props) => {
     }, [props.visStore.conditionIndex, startAnimation]);
     const xAxis = d3.axisBottom()
         .scale(xScale)
-        .tickFormat(d => props.data.conditions[d]);
+        .tickFormat(d => props.dataStore.conditions[d]);
     const yAxis = d3.axisLeft()
         .scale(yScale);
     return (
@@ -93,12 +93,10 @@ const StackedBarChart = inject("dataStore", "visStore")(observer((props) => {
 }));
 
 StackedBarChart.propTypes = {
-    width: PropTypes.number,
-    height: PropTypes.number,
-};
-StackedBarChart.defaultProps = {
-    width: 900,
-    height: 350,
+    width: PropTypes.number.isRequired,
+    height: PropTypes.number.isRequired,
+    data: PropTypes.arrayOf(PropTypes.object).isRequired,
+    mapper: PropTypes.instanceOf(Map).isRequired,
 };
 export default StackedBarChart;
 

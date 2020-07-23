@@ -47,10 +47,7 @@ const CorrelationHeatmap = inject("dataStore", "visStore")(observer((props) => {
 }));
 
 CorrelationHeatmap.propTypes = {
-    width: PropTypes.number,
-};
-CorrelationHeatmap.defaultProps = {
-    width: 900,
-    height: 500,
+    width: PropTypes.number.isRequired,
+    height:PropTypes.number.isRequired,
 };
 export default CorrelationHeatmap;

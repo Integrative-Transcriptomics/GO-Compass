@@ -1,6 +1,8 @@
 import React from 'react';
 import * as d3 from "d3";
 import {inject, observer} from "mobx-react";
+import Axis from "./SimpleCharts/Axis";
+import PropTypes from "prop-types";
 
 
 const Tree = inject("dataStore", "visStore")(observer((props) => {
@@ -8,7 +10,7 @@ const Tree = inject("dataStore", "visStore")(observer((props) => {
     const margins = {
         top: 20,
         right: 20,
-        bottom: 20,
+        bottom: 40,
         left: 20,
     };
     const height = props.height - margins.top - margins.bottom;
@@ -18,7 +20,7 @@ const Tree = inject("dataStore", "visStore")(observer((props) => {
     const rectSize = height / root.descendants().filter(d => !("children" in d)).length;
     const treeWidth = width - props.dataStore.conditions.length * rectSize - 200;
 
-    const dispScale = d3.scaleLinear().domain([0, props.dataStore.filterCutoff]).range([0, treeWidth]);
+    const dispScale = d3.scaleLinear().domain([0, 1]).range([0, treeWidth]);
     d3.cluster().size([height, treeWidth]).separation(function (a, b) {
         return 1;
     })(root);
@@ -41,11 +43,15 @@ const Tree = inject("dataStore", "visStore")(observer((props) => {
         if (!lengths) {
             y1 = node.y
         }
-        return (<g key={node.data.name}>
+        return (<g key={node.data.name} onMouseEnter={() => props.visStore.setChildHighlight(node.data.name)}
+                   onMouseLeave={() => props.visStore.setChildHighlight(null)}>
             <title>{props.dataStore.dataTable[node.data.name].description}</title>
             <line x1={node.x} x2={node.x} y1={y1} y2={treeWidth} strokeWidth={1} strokeDasharray="4 1"
                   stroke={strokeColor}/>
+            <line x1={node.x} x2={node.x} y1={y1} y2={treeWidth} strokeWidth={4} strokeDasharray="4 1"
+                  stroke="none"/>
             <circle cx={node.x} cy={y1} r={r} fill={fill} stroke="black"/>
+            <circle cx={node.x} cy={y1} r={r+3} fill="none" />
         </g>)
     });
     const links = root.links().map((link, i) => {
@@ -101,9 +107,12 @@ const Tree = inject("dataStore", "visStore")(observer((props) => {
                   fontWeight={fontWeight}>{props.dataStore.dataTable[descendant.data.name].description}</text>
         </g>
     });
+    const xAxis = d3.axisBottom()
+        .scale(dispScale);
     return (
         <svg width={props.width} height={props.height}>
-            <g transform={"translate(" + 0 + "," + (height + margins.top) + ")rotate(270)"}>
+            <g transform={"translate(" + margins.left + "," + margins.top + ")"}>
+                <g transform={"translate(" + 0 + "," + (height) + ")rotate(270)"}>
                 <g>
                     {links}
                     {nodes}
@@ -117,11 +126,14 @@ const Tree = inject("dataStore", "visStore")(observer((props) => {
                     {heatmapCells}
                 </g>
             </g>
+            <Axis h={height} w={width} axis={xAxis} axisType={'x'} label={'Dispensability'}/>
+            </g>
         </svg>
     );
 }));
-Tree.defaultProps = {
-    height: 500,
+Tree.propTypes = {
+    width: PropTypes.number.isRequired,
+    height:PropTypes.number.isRequired,
 };
 
 export default Tree;

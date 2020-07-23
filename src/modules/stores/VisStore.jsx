@@ -8,8 +8,10 @@ export class VisStore {
         this.animationDuration = 1500;
         extendObservable(this, {
             screenWidth: 1000,
+            plotHeight: 1000,
             tsPlotType: "lineChart",
             isTimeSeries: false,
+            showOverview: false,
             parentHighlight: null,
             childHighlight: null,
             conditionIndex: 0,
@@ -22,11 +24,17 @@ export class VisStore {
             setScreenWidth: action((width) => {
                 this.screenWidth = width;
             }),
+            setPlotHeight: action((height) => {
+                this.plotHeight = height - 16;
+            }),
             setTsPlotType: action((type) => {
                 this.tsPlotType = type;
             }),
             toggleIsTimeSeries: action(() => {
                 this.isTimeSeries = !this.isTimeSeries;
+            }),
+            toggleShowOverview: action(() => {
+                this.showOverview = !this.showOverview
             }),
             setChildHighlight: action((highlight) => {
                 this.childHighlight = highlight;

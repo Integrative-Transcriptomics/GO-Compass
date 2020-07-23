@@ -10,13 +10,17 @@ const Legend = inject("dataStore", "visStore")(observer((props) => {
         bottom: 20,
         left: 20,
     };
+    const rowHeight=15;
     const width = props.width - margins.left - margins.right;
-    let height = (props.visStore.termColorScale.domain().length + 1) * 20;
+    let height = (props.visStore.termColorScale.domain().length + 1) * rowHeight;
+
+    const names = props.dataStore.nestedData.map(d => d.name);
+
     const legend = props.visStore.termColorScale.domain().map((key, i) => {
-        return <g key={key} transform={"translate(10," + i * 20 + ")"}>
+        return <g key={key} transform={"translate(10," + i * rowHeight + ")"}>
             <rect width={10} height={10} x={0} y={0} fill={props.visStore.termColorScale(key)}/>
-            <text x={15} y={10}>
-                {props.names[i]}
+            <text x={15} y={8} fontSize={12}>
+                {names[i]}
             </text>
             <title>{key}</title>
         </g>
@@ -32,6 +36,5 @@ const Legend = inject("dataStore", "visStore")(observer((props) => {
 
 Legend.propTypes = {
     width: PropTypes.number.isRequired,
-    names: PropTypes.arrayOf(PropTypes.string).isRequired
 };
 export default Legend;
