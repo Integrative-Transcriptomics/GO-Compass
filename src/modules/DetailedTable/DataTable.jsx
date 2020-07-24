@@ -15,6 +15,7 @@ import TableSortLabel from "@material-ui/core/TableSortLabel";
 import Button from "@material-ui/core/Button";
 import * as d3 from "d3";
 import {inject, observer} from "mobx-react";
+import PropTypes from "prop-types";
 
 
 const useStyles = makeStyles({
@@ -52,29 +53,41 @@ function Cell(props) {
     }
     return <TableCell style={{color: props.color}} align={props.align}>{content}</TableCell>;
 }
+Cell.propTypes = {
+    visualize: PropTypes.bool.isRequired,
+    scale: PropTypes.func.isRequired,
+    color: PropTypes.string.isRequired,
+    value: PropTypes.number.isRequired,
+    significant: PropTypes.bool.isRequired,
+    isTerm: PropTypes.bool.isRequired,
+    align: PropTypes.string.isRequired,
+};
 
-const Row = inject("visStore")(observer((props) => {
+const Row = inject("visStore", "dataStore")(observer((props) => {
     const mainRow = props.keys.map(key => {
         let align = "right";
         if (key === "termID") {
             align = "left";
         }
-        let visualize = props.visualize && props.conditions.includes(key);
+        let visualize = props.visualize && props.dataStore.conditions.includes(key);
         return <Cell key={key} color="black" align={align} value={props.mapper[props.goTerm][key]} scale={props.scale}
                      visualize={visualize} isTerm={key === "termID"}
-                     significant={props.conditions.includes(key) && props.mapper[props.goTerm][key] > -Math.log10(props.sigThreshold)}/>;
+                     significant={props.dataStore.conditions.includes(key)
+                     && props.mapper[props.goTerm][key] > -Math.log10(props.visStore.sigThreshold)}/>;
     });
     let subRows = null;
-    if ((props.open) && props.subTerms.length > 0) {
-        subRows = props.subTerms.map((subTerm) => (
+    const subTerms = props.dataStore.filterHierarchy[props.goTerm];
+    if ((props.open) && subTerms.length > 0) {
+        subRows = subTerms.map((subTerm) => (
             <TableRow hover key={subTerm}>
                 <TableCell/>
                 {props.keys.map(key => {
-                    const visualize = props.visualize && props.conditions.includes(key);
+                    const visualize = props.visualize && props.dataStore.conditions.includes(key);
                     return <Cell key={key} color="gray" align="right" value={props.mapper[subTerm][key]}
                                  scale={props.scale}
                                  visualize={visualize} isTerm={key === "termID"}
-                                 significant={props.conditions.includes(key) && props.mapper[props.goTerm][key] > -Math.log10(props.sigThreshold)}/>
+                                 significant={props.dataStore.conditions.includes(key)
+                                 && props.mapper[props.goTerm][key] > -Math.log10(props.visStore.sigThreshold)}/>
                 })}
             </TableRow>
         ))
@@ -85,7 +98,7 @@ const Row = inject("visStore")(observer((props) => {
             onMouseLeave={() => props.visStore.setChildHighlight(null)}
             selected={props.visStore.childHighlight === props.goTerm}>
             <TableCell>
-                {props.subTerms.length > 0 ?
+                {subTerms.length > 0 ?
                     <IconButton aria-label="expand row" size="small" onClick={() => props.setOpen()}>
                         {props.open ? <KeyboardArrowUpIcon/> : <KeyboardArrowDownIcon/>}
                     </IconButton> : null}
@@ -95,6 +108,15 @@ const Row = inject("visStore")(observer((props) => {
         {subRows}
     </React.Fragment>)
 }));
+Row.propTypes = {
+    keys: PropTypes.arrayOf(PropTypes.string).isRequired,
+    visualize: PropTypes.bool.isRequired,
+    goTerm: PropTypes.string.isRequired,
+    mapper: PropTypes.objectOf(PropTypes.oneOfType([PropTypes.string, PropTypes.number])),
+    scale: PropTypes.func.isRequired,
+    open: PropTypes.bool.isRequired,
+    setOpen: PropTypes.func.isRequired
+};
 
 const DataTable = inject("dataStore")(observer((props) => {
     const [globalOpen, setGlobalOpen] = useState('closed');
@@ -169,11 +191,8 @@ const DataTable = inject("dataStore")(observer((props) => {
                 </TableSortLabel></TableCell>);
         }
         content.push(<Row key={goTerm} open={props.dataStore.tableStore.termState.filter(d => d.goTerm === goTerm)[0].open}
-                          setOpen={() => toggleOpen(goTerm)}
-                          scale={scale} conditions={props.dataStore.conditions}
-                          sigThreshold={props.sigThreshold}
-                          visualize={visualize} mapper={mapper} keys={keys} goTerm={goTerm}
-                          subTerms={props.dataStore.filterHierarchy[goTerm]} />);
+                          setOpen={() => toggleOpen(goTerm)} scale={scale} visualize={visualize} mapper={mapper}
+                          keys={keys} goTerm={goTerm}/>);
     });
     return (
         <Paper className={classes.root}>
