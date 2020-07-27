@@ -77,7 +77,9 @@ const AnimatedTreemap = inject("dataStore", "visStore")(observer((props) => {
 
     }, [leafRef, starRef, layout, props.visStore.animationDuration, props.visStore.sigThreshold]);
     React.useEffect(() => {
-        startAnimation(props.visStore.conditionIndex);
+        if(props.visStore.conditionIndex !== index) {
+            startAnimation(props.visStore.conditionIndex);
+        }
     }, [props.visStore.conditionIndex, startAnimation]);
     const rects = [];
     const stars = [];

@@ -57,7 +57,7 @@ Cell.propTypes = {
     visualize: PropTypes.bool.isRequired,
     scale: PropTypes.func.isRequired,
     color: PropTypes.string.isRequired,
-    value: PropTypes.number.isRequired,
+    value: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
     significant: PropTypes.bool.isRequired,
     isTerm: PropTypes.bool.isRequired,
     align: PropTypes.string.isRequired,
@@ -76,9 +76,8 @@ const Row = inject("visStore", "dataStore")(observer((props) => {
                      && props.mapper[props.goTerm][key] > -Math.log10(props.visStore.sigThreshold)}/>;
     });
     let subRows = null;
-    const subTerms = props.dataStore.filterHierarchy[props.goTerm];
-    if ((props.open) && subTerms.length > 0) {
-        subRows = subTerms.map((subTerm) => (
+    if ((props.open) && props.subTerms.length > 0) {
+        subRows = props.subTerms.map((subTerm) => (
             <TableRow hover key={subTerm}>
                 <TableCell/>
                 {props.keys.map(key => {
@@ -98,7 +97,7 @@ const Row = inject("visStore", "dataStore")(observer((props) => {
             onMouseLeave={() => props.visStore.setChildHighlight(null)}
             selected={props.visStore.childHighlight === props.goTerm}>
             <TableCell>
-                {subTerms.length > 0 ?
+                {props.subTerms.length > 0 ?
                     <IconButton aria-label="expand row" size="small" onClick={() => props.setOpen()}>
                         {props.open ? <KeyboardArrowUpIcon/> : <KeyboardArrowDownIcon/>}
                     </IconButton> : null}
@@ -112,7 +111,7 @@ Row.propTypes = {
     keys: PropTypes.arrayOf(PropTypes.string).isRequired,
     visualize: PropTypes.bool.isRequired,
     goTerm: PropTypes.string.isRequired,
-    mapper: PropTypes.objectOf(PropTypes.oneOfType([PropTypes.string, PropTypes.number])),
+    mapper: PropTypes.objectOf(PropTypes.any).isRequired,
     scale: PropTypes.func.isRequired,
     open: PropTypes.bool.isRequired,
     setOpen: PropTypes.func.isRequired
@@ -192,6 +191,7 @@ const DataTable = inject("dataStore")(observer((props) => {
         }
         content.push(<Row key={goTerm} open={props.dataStore.tableStore.termState.filter(d => d.goTerm === goTerm)[0].open}
                           setOpen={() => toggleOpen(goTerm)} scale={scale} visualize={visualize} mapper={mapper}
+                          subTerms={props.dataStore.filterHierarchy[goTerm]}
                           keys={keys} goTerm={goTerm}/>);
     });
     return (

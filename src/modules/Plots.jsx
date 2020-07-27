@@ -1,4 +1,4 @@
-import React, {useEffect} from "react";
+import React, {useCallback, useEffect} from "react";
 import Grid from "@material-ui/core/Grid";
 import AnimatedTreemap from "./AnimatedTreemap/AnimatedTreemap";
 import SimpleChart from "./SimpleCharts/SimpleChart";
@@ -29,18 +29,20 @@ const Plots = inject("dataStore", "visStore")(observer((props) => {
             },
         }),
     );
-    const main = React.createRef();
+    const changeWidth = useCallback(() => {
+        props.visStore.setScreenWidth(window.innerWidth)
+    }, [props.visStore]);
     useEffect(() => {
-        if (main.current != null) {
-            props.visStore.setScreenWidth(main.current.getBoundingClientRect().width);
-        }
-    }, [main, props.visStore]);
+        changeWidth();
+        window.addEventListener("resize", changeWidth);
+        console.log("added listener");
+    }, []);
     const classes = useStyles();
     return (
-        <Grid ref={main} className={classes.root} container spacing={1}>
+        <Grid className={classes.root} container spacing={1}>
             <Grid item xs={6}>
                 <Paper className={classes.paper}>
-                    <Tree width={props.visStore.screenWidth / 2} height={props.visStore.plotHeight/2}
+                    <Tree width={props.visStore.screenWidth / 2} height={props.visStore.plotHeight / 2}
                     />
                 </Paper>
             </Grid>
@@ -48,7 +50,7 @@ const Plots = inject("dataStore", "visStore")(observer((props) => {
                 <Paper className={classes.paper}>
                     {props.dataStore.pcaLoaded ?
                         <PCA width={props.visStore.screenWidth / 4}
-                             height={props.visStore.plotHeight/2}
+                             height={props.visStore.plotHeight / 2}
                         /> : null
                     }
                 </Paper>
@@ -57,7 +59,7 @@ const Plots = inject("dataStore", "visStore")(observer((props) => {
                 <Paper className={classes.paper}>
                     {props.dataStore.correlationLoaded ?
                         <CorrelationHeatmap width={props.visStore.screenWidth / 4}
-                                            height={props.visStore.plotHeight/2}
+                                            height={props.visStore.plotHeight / 2}
                         /> : null
                     }
                 </Paper>
@@ -65,18 +67,18 @@ const Plots = inject("dataStore", "visStore")(observer((props) => {
 
             <Grid item xs={4}>
                 <Paper className={classes.paper}>
-                    <SimpleChart width={props.visStore.screenWidth / 3} height={props.visStore.plotHeight/2}/>
+                    <SimpleChart width={props.visStore.screenWidth / 3} height={props.visStore.plotHeight / 2}/>
                 </Paper>
             </Grid>
             <Grid item xs={4}>
                 <Paper className={classes.paper}>
                     <AnimatedTreemap width={props.visStore.screenWidth / 3}
-                                     height={props.visStore.plotHeight/2}/>
+                                     height={props.visStore.plotHeight / 2}/>
                 </Paper>
             </Grid>
             <Grid item xs={4}>
                 <Paper className={classes.paper}>
-                    <SmallMultiples width={props.visStore.screenWidth / 3} height={props.visStore.plotHeight/2}/>
+                    <SmallMultiples width={props.visStore.screenWidth / 3} height={props.visStore.plotHeight / 2}/>
                 </Paper>
             </Grid>
             <Grid item xs={12}>

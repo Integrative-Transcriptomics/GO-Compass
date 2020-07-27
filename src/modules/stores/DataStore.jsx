@@ -93,9 +93,9 @@ export class DataStore {
                 }
             });
         reaction(
-            () => Object.keys(this.filterHierarchy),
-            (keys) => {
-                this.tableStore.initTermState(keys);
+            () => this.filterHierarchy,
+            (object) => {
+                this.tableStore.initTermState(Object.keys(object));
             });
         performPCA(this.filteredPvalues, response => {
             this.pca = response;

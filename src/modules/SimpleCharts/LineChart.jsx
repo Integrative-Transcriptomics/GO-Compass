@@ -72,7 +72,7 @@ const LineChart = inject("dataStore", "visStore")(observer((props) => {
 LineChart.propTypes = {
     width: PropTypes.number.isRequired,
     height: PropTypes.number.isRequired,
-    data: PropTypes.arrayOf(PropTypes.array).isRequired,
+    data: PropTypes.arrayOf(PropTypes.object).isRequired,
 };
 export default LineChart;
 

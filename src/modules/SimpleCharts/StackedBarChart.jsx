@@ -38,6 +38,7 @@ const StackedBarChart = inject("dataStore", "visStore")(observer((props) => {
         const isHighlighted = ((props.visStore.parentHighlight === null | props.visStore.parentHighlight === category.key) & props.visStore.childHighlight === null) | !props.visStore.showOverview;
         return category.map((timepoint, i) => {
             let childHighlightRect = null;
+            //console.log(timepoint);
             if (props.visStore.showOverview && props.visStore.childHighlight !== null
                 && props.mapper.get(props.visStore.childHighlight).parent === category.key) {
                 const childHeight = height - yScale(props.mapper.get(props.visStore.childHighlight).values[i]);

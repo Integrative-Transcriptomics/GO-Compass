@@ -3,13 +3,14 @@ import * as d3 from "d3";
 import {inject, observer} from "mobx-react";
 import Axis from "./SimpleCharts/Axis";
 import PropTypes from "prop-types";
+import {cropText} from "../UtilityFunctions";
 
 
 const Tree = inject("dataStore", "visStore")(observer((props) => {
     const lengths = true;
     const margins = {
         top: 20,
-        right: 20,
+        right: 30,
         bottom: 40,
         left: 20,
     };
@@ -17,8 +18,10 @@ const Tree = inject("dataStore", "visStore")(observer((props) => {
     let width = props.width - margins.left - margins.right;
 
     const root = d3.hierarchy(props.dataStore.filteredTree);
+    const textWidth=200;
+    const textHeight = 10;
     const rectSize = height / root.descendants().filter(d => !("children" in d)).length;
-    const treeWidth = width - props.dataStore.conditions.length * rectSize - 200;
+    const treeWidth = width - (props.dataStore.conditions.length +1) * rectSize - textWidth;
 
     const dispScale = d3.scaleLinear().domain([0, 1]).range([0, treeWidth]);
     d3.cluster().size([height, treeWidth]).separation(function (a, b) {
@@ -98,13 +101,15 @@ const Tree = inject("dataStore", "visStore")(observer((props) => {
                 <rect x={descendant.x - 0.5 * rectSize} y={heatmapY(condition)} height={rectSize}
                       width={rectSize}
                       fill={heatmapColor(props.dataStore.dataTable[descendant.data.name]["pvalues"][i])}/>
-                <title>{props.dataStore.dataTable[descendant.data.name].description}</title>
             </g>)
         })}
-            <text transform={"translate(" + (height - rectSize / 2) + ",0)rotate(90)"} y={height - descendant.x}
+            <text transform={"translate(" + (height-textHeight/2) + ",0)rotate(90)"} y={height - descendant.x}
                   x={props.dataStore.conditions.length * rectSize}
-                  fontSize={10}
-                  fontWeight={fontWeight}>{props.dataStore.dataTable[descendant.data.name].description}</text>
+                  fontSize={textHeight}
+                  fontWeight={fontWeight}>
+                {cropText(props.dataStore.dataTable[descendant.data.name].description,10,fontWeight,textWidth)}
+            </text>
+            <title>{props.dataStore.dataTable[descendant.data.name].description}</title>
         </g>
     });
     const xAxis = d3.axisBottom()
