@@ -18,7 +18,7 @@ import Paper from "@material-ui/core/Paper";
 import Grid from "@material-ui/core/Grid";
 import KeyboardArrowDownIcon from '@material-ui/icons/KeyboardArrowDown';
 import KeyboardArrowUpIcon from '@material-ui/icons/KeyboardArrowUp';
-import {getSupportedGenomes, multiRevigoGeneLists, multiRevigoGoLists} from "../parseData";
+import {getSupportedGenomes, multiRevigoGeneLists, multiRevigoGoLists} from "../parseDataFlask";
 import IconButton from "@material-ui/core/IconButton";
 import Autocomplete from '@material-ui/lab/Autocomplete';
 import {DataStore} from "./stores/DataStore";
@@ -28,11 +28,13 @@ import PropTypes from "prop-types";
 const SelectData = (props) => {
     const [supportedGenomes, setSupportedGenomes] = useState([]);
     const [goFile, setGoFile] = useState(null);
+    const [backgroundFile, setBackgroundFile] = useState(null);
     const [geneFiles, setGeneFiles] = useState([]);
     const [conditions, setConditions] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
     const [ontology, setOntology] = useState("BP");
     const [selectedSpecies, selectSpecies] = useState(null);
+    const [selectedMeasure, selectMeasure] = useState(null);
     const [pvalueFilter, setPvalueFilter] = useState(0.5);
     const [selectedTab, selectTab] = useState(0);
     const useStyles = makeStyles((theme: Theme) =>
@@ -51,15 +53,16 @@ const SelectData = (props) => {
     const launch = useCallback(() => {
         setIsLoading(true);
         if (goFile !== null) {
-            multiRevigoGoLists(goFile, ontology, pvalueFilter, response=>{
+            multiRevigoGoLists(goFile, backgroundFile, ontology, selectedMeasure.value, pvalueFilter, response => {
                 props.setDataStore(new DataStore(response.data, response.tree, response.conditions));
             });
-        } else if (geneFiles.length > 0 && selectedSpecies !== null) {
-            multiRevigoGeneLists(geneFiles, conditions, selectedSpecies.value, ontology, pvalueFilter, response=>{
+        } else if (geneFiles.length > 0) {
+            multiRevigoGeneLists(geneFiles, backgroundFile, conditions, ontology, selectedMeasure.value, pvalueFilter, response => {
+                console.log(response);
                 props.setDataStore(new DataStore(response.data, response.tree, response.conditions));
             });
         }
-    }, [goFile, selectedSpecies, conditions, pvalueFilter, geneFiles, ontology, props]);
+    }, [goFile, backgroundFile, selectedSpecies, selectedMeasure, conditions, pvalueFilter, geneFiles, ontology, props]);
     const getGenomes = useCallback(() => {
         if (supportedGenomes.length === 0) {
             getSupportedGenomes((genomes) => setSupportedGenomes(genomes))
@@ -68,6 +71,10 @@ const SelectData = (props) => {
     const classes = useStyles();
     const speciesOptions = supportedGenomes.map(d => {
         return ({value: d.taxon_id, label: d.long_name})
+    });
+    const similarityMeasures = ["Resnik", "Lin", "Edge based"];
+    const similarityOptions = similarityMeasures.map(d => {
+        return ({value: d, label: d})
     });
     return (
         <Grid
@@ -104,8 +111,7 @@ const SelectData = (props) => {
                                         <input
                                             type="file"
                                             style={{display: "none"}}
-                                            onChange={(event) => setGoFile(new File([event.target.files[0]]
-                                                , event.target.files[0].name + ".txt", {type: "text/plain"}))}
+                                            onChange={(event) => setGoFile(event.target.files[0])}
                                         />
                                     </Button>
                                     {goFile !== null ? goFile.name : "No file selected"}
@@ -130,7 +136,7 @@ const SelectData = (props) => {
                                             style={{display: "none"}}
                                             onChange={(event) => {
                                                 setConditions([...event.target.files].map(d => d.name.slice(0, -4)));
-                                                setGeneFiles([...event.target.files].map(file => new File([file], file.name, {type: "text/plain"})))
+                                                setGeneFiles([...event.target.files])
                                             }}
                                         />
                                     </Button>
@@ -197,7 +203,26 @@ const SelectData = (props) => {
                             </ListItem>)}
                         </Paper>
                     </div>
-                    <ListSubheader>Select Species</ListSubheader>
+                    <ListSubheader>Select Background file</ListSubheader>
+                    <ListItem>
+                        <Typography>
+                            <Button className={classes.menuButton}
+                                    variant="contained"
+                                    disabled={isLoading}
+                                    component="label"
+                            >
+                                Select File
+                                <input
+                                    type="file"
+                                    style={{display: "none"}}
+                                    onChange={(event) => setBackgroundFile(event.target.files[0])}
+                                />
+                            </Button>
+                            {backgroundFile !== null ? backgroundFile.name : "No file selected"}
+                        </Typography>
+                    </ListItem>
+                    <ListSubheader>Select Similarity Measure</ListSubheader>
+                    {/*}
                     <ListItem onClick={() => getGenomes()}>
                         <Autocomplete
                             id="combo-box-demo"
@@ -210,6 +235,22 @@ const SelectData = (props) => {
                                 selectSpecies(newValue);
                             }}
                             renderInput={(params) => <TextField {...params} label="Select Species"
+                                                                variant="outlined"/>}
+                        />
+                    </ListItem>
+                    */}
+                    <ListItem onClick={() => getGenomes()}>
+                        <Autocomplete
+                            id="combo-box-demo"
+                            options={similarityOptions}
+                            disabled={isLoading}
+                            getOptionLabel={(option) => option.label}
+                            value={selectedMeasure}
+                            style={{width: 300}}
+                            onChange={(event, newValue) => {
+                                selectMeasure(newValue);
+                            }}
+                            renderInput={(params) => <TextField {...params} label="Similarity measure"
                                                                 variant="outlined"/>}
                         />
                     </ListItem>
@@ -261,7 +302,7 @@ const SelectData = (props) => {
     );
 };
 SelectData.propTypes = {
-    setDataStore:PropTypes.func.isRequired,
+    setDataStore: PropTypes.func.isRequired,
 };
 
 export default SelectData;

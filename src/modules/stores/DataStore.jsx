@@ -1,5 +1,5 @@
 import {action, extendObservable, reaction} from "mobx"
-import {performCorrelation, performPCA} from "../../parseData";
+import {performCorrelation, performPCA} from "../../parseDataFlask";
 import * as d3 from "d3";
 import {TableStore} from "../DetailedTable/TableStore";
 import {VisStore} from "./VisStore";
@@ -117,14 +117,14 @@ export class DataStore {
 
     extractHierarchy(tree, cutoff, includeRep) {
         const toReturn = {};
-        if (this.dataTable[tree.name].dispensability < cutoff) {
+        if (this.dataTable[tree.name].dispensability <= cutoff) {
             toReturn[tree.name] = [];
             if (includeRep) {
                 toReturn[tree.name].push(tree.name)
             }
             if ("children" in tree) {
                 tree.children.forEach(child => {
-                    if (this.dataTable[child.name].dispensability >= cutoff) {
+                    if (this.dataTable[child.name].dispensability > cutoff) {
                         toReturn[tree.name].push(...this.flattenTree(child))
                     } else {
                         const hierarchy = this.extractHierarchy(child, cutoff, includeRep);
@@ -170,11 +170,11 @@ export class DataStore {
     }
 
     filterTree(tree) {
-        if (this.dataTable[tree.name].dispensability < this.filterCutoff) {
+        if (this.dataTable[tree.name].dispensability <= this.filterCutoff) {
             if ("children" in tree) {
                 const children = [];
                 tree.children.forEach(child => {
-                    if (this.dataTable[child.name].dispensability < this.filterCutoff) {
+                    if (this.dataTable[child.name].dispensability <= this.filterCutoff) {
                         children.push(this.filterTree(child));
                     }
                 });

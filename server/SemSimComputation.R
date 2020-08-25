@@ -375,7 +375,7 @@ function(data, ontology, pvalueFilter) {
   
   con <- textConnection(data)
   
-  table <- read.table(con, header = T)
+  table <- read.table(con, header = T, check.names=FALSE)
   
   multiRevigo(table, ontology, pvalueFilter)
 }

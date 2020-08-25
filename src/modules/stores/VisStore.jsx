@@ -22,7 +22,7 @@ export class VisStore {
             },
 
             setScreenWidth: action((width) => {
-                this.screenWidth = width;
+                this.screenWidth = width -100;
             }),
             setPlotHeight: action((height) => {
                 this.plotHeight = height - 16;

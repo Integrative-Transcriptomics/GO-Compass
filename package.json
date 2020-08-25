@@ -2,7 +2,7 @@
   "name": "go-comparison",
   "version": "0.1.0",
   "private": true,
-  "proxy": "http://localhost:3001/",
+  "proxy": "http://localhost:5000/",
   "dependencies": {
     "@material-ui/core": "^4.9.13",
     "@material-ui/icons": "^4.9.1",
@@ -23,6 +23,8 @@
   },
   "scripts": {
     "dev": "concurrently \"npm run server\" \"npm run start\"",
+    "devFlask": "concurrently \"npm run flaskServer\" \"npm run start\"",
+    "flaskServer": "cd server && flask run --no-debugger",
     "server": "Rscript server/runServer.R",
     "start": "react-scripts start",
     "build": "react-scripts build",

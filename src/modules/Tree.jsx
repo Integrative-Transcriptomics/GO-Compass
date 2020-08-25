@@ -23,7 +23,8 @@ const Tree = inject("dataStore", "visStore")(observer((props) => {
     const rectSize = height / root.descendants().filter(d => !("children" in d)).length;
     const treeWidth = width - (props.dataStore.conditions.length +1) * rectSize - textWidth;
 
-    const dispScale = d3.scaleLinear().domain([0, 1]).range([0, treeWidth]);
+    const dispScale = d3.scaleLinear().domain([0, d3.max(Object.values(props.dataStore.dataTable)
+        .map(d=> d.dispensability))]).range([0, treeWidth]);
     d3.cluster().size([height, treeWidth]).separation(function (a, b) {
         return 1;
     })(root);
