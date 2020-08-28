@@ -29,7 +29,6 @@ parents = get_go2parents(godag, optional_relationships)
 def MultiGO(goEnrichment, objanno, ontology, method):
     background = objanno.get_id2gos(namespace=ontology)
     goEnrichment.sort_index(inplace= True)
-    print(goEnrichment)
     mask = goEnrichment[goEnrichment < float(request.form['pvalueFilter'])].isnull().all(axis=1)
     goEnrichment = goEnrichment[mask == False]
     goTerms = goEnrichment.index.values
@@ -82,7 +81,8 @@ def iterateMatrix(matrix, goTerms, goEnrichment, background):
         indices = list(zip(indices[0], indices[1]))[0]
         termA = goTerms[indices[0]]
         termB = goTerms[indices[1]]
-        toDelete = testGoTerms(termA, termB, goEnrichment, background, frequencies, maxDiff)
+        delete = testGoTerms(termA, termB, goEnrichment, background, frequencies, maxDiff)
+        toDelete=delete["term"]
         if toDelete == termA:
             deleteIndex = indices[0]
             toKeep = termB
@@ -108,6 +108,7 @@ def iterateMatrix(matrix, goTerms, goEnrichment, background):
             "termID": toDelete,
             "description": godag[toDelete].name,
             "frequency": calculateFrequency(toDelete, frequencies),
+            "rejection": delete["rejection"],
             "uniqueness": 1- avgs[toDelete],
             "dispensability": maxValue,
             "pvalues": np.negative(np.log10(goEnrichment.loc[toDelete,:].values)).tolist()
@@ -124,52 +125,64 @@ def testGoTerms(termA, termB, goEnrichment, background, goCounts, maxDiff):
     if frequencyA > 0.05:
         if frequencyB > 0.05:
             if frequencyB > frequencyA:
-                return termB
+                return {"rejection": "frequency" + termA, "term": termB}
+                #return termB
             else:
-                return termA
+                return {"rejection": "frequency" + termB, "term": termA}
+                #return termA
         else:
-            return termA
+            return {"rejection": "frequency" + termB, "term": termA}
+            #return termA
     else:
         if frequencyB > 0.05:
-            return termB
+            return {"rejection": "frequency" + termA, "term": termB}
+            #return termB
         # p-value reject
         else:
             pvaluesA = np.array(goEnrichment.loc[termA,:].values.tolist())
             pvaluesB = np.array(goEnrichment.loc[termB,:].values.tolist())
-            filterMask = np.where(abs(pvaluesA -  pvaluesB)>maxDiff)
+            filterMask = (abs(pvaluesA -  pvaluesB)*(1- np.minimum(pvaluesA, pvaluesB)))>maxDiff
             filteredPvaluesA = pvaluesA[filterMask]
             filteredPvaluesB = pvaluesB[filterMask]
-            if len(np.where(filteredPvaluesA > filteredPvaluesB))> len(filterMask)/2:
-                return termA
+            if len(np.where(filteredPvaluesA > filteredPvaluesB))< len(np.where(filteredPvaluesA > filteredPvaluesB)):
+                return {"rejection": "pval" + termB, "term": termA}
+                #return termA
             else:
-                if len(np.where(filteredPvaluesA < filteredPvaluesB))> len(filterMask)/2:
-                    return termB
+                if len(np.where(filteredPvaluesA < filteredPvaluesB))> len(np.where(filteredPvaluesA > filteredPvaluesB)):
+                    return {"rejection": "pval" + termA, "term": termB}
+                    #return termB
                 # parent reject
                 else:
                     parentsA = parents[termA]
                     parentsB = parents[termB]
                     genesA = getAssociatedGenes(termA, background)
-                    genesB = getAssociatedGenes(termA, background)
+                    genesB = getAssociatedGenes(termB, background)
                     intersection = np.intersect1d(genesA,genesB)
                     if termB in parentsA:
                         if len(genesB) * 0.75 < len(intersection):
-                            return termB
+                            return {"rejection": "parent" + termA, "term": termB}
+                            #return termB
                         else:
-                            return termA
+                            return {"rejection": "child" + termB, "term": termA}
+                            #return termA
                     else:
                         if termA in parentsB:
                             if len(genesA) * 0.75 < len(intersection):
-                                return termA
+                                return {"rejection": "parent" + termB, "term": termA}
+                                #return termA
                             else:
-                                return termB
+                                return {"rejection": "child" + termA, "term": termB}
+                                #return termB
                         # pseudo random reject
                         else:
                             seed = int(termA[3:-1])
                             random.seed(seed)
                             if bool(random.getrandbits(1)):
-                                return termA
+                                return {"rejection": "random" + termB, "term": termA}
+                                #return termA
                             else:
-                                return termB
+                                return {"rejection": "random" + termA, "term": termB}
+                                #return termB
 
 def calculateFrequency(term, frequencies):
     descendants = getDescendants(term)
@@ -183,7 +196,11 @@ def calculateFrequency(term, frequencies):
 
 def getAssociatedGenes(term, background):
     npBackground = np.array(background)
-    return npBackground[np.where(npBackground[1] == term)][0]
+    associatedGenes = list()
+    filteredBackground = npBackground[:,npBackground[1] == term]
+    if len(filteredBackground) > 0:
+        associatedGenes = filteredBackground[0,:]
+    return associatedGenes
 
 def readBackground(backgroundFile,ontology):
     helperFileName= uuid.uuid1().hex + ".txt"

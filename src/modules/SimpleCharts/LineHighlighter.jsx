@@ -45,7 +45,7 @@ const LineHighlighter = inject("visStore")(observer((props) => {
         if (!dragging) {
             let els = d3.selectAll([...highlightRef.current.childNodes]);
             els.transition()
-                .duration(props.visStore.duration)
+                .duration(props.visStore.animationDuration)
                 .ease(d3.easeLinear)
                 .attr("x1", xScale(props.visStore.conditionIndex))
                 .attr("x2", xScale(props.visStore.conditionIndex))
@@ -53,7 +53,7 @@ const LineHighlighter = inject("visStore")(observer((props) => {
                     setX(xScale(props.visStore.conditionIndex))
                 });
         }
-    }, [highlightRef, props.visStore.duration, props.visStore.conditionIndex, dragging, xScale]);
+    }, [highlightRef, props.visStore.conditionIndex, props.visStore.animationDuration, dragging, xScale]);
     useEffect(() => {
         if (dragging) {
             const xDiff = x0 - props.xPos;

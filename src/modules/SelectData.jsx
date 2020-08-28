@@ -30,10 +30,9 @@ const SelectData = (props) => {
     const [goFile, setGoFile] = useState(null);
     const [backgroundFile, setBackgroundFile] = useState(null);
     const [geneFiles, setGeneFiles] = useState([]);
-    const [conditions, setConditions] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
     const [ontology, setOntology] = useState("BP");
-    const [selectedSpecies, selectSpecies] = useState(null);
+    const [conditions, setConditions] = useState([]);
     const [selectedMeasure, selectMeasure] = useState(null);
     const [pvalueFilter, setPvalueFilter] = useState(0.5);
     const [selectedTab, selectTab] = useState(0);
@@ -57,21 +56,20 @@ const SelectData = (props) => {
                 props.setDataStore(new DataStore(response.data, response.tree, response.conditions));
             });
         } else if (geneFiles.length > 0) {
-            multiRevigoGeneLists(geneFiles, backgroundFile, conditions, ontology, selectedMeasure.value, pvalueFilter, response => {
-                console.log(response);
+            const reorderedFiles = conditions.map(d => {
+                return geneFiles[d.index];
+            });
+            multiRevigoGeneLists(reorderedFiles, backgroundFile, conditions.map(d => d.condition), ontology, selectedMeasure.value, pvalueFilter, response => {
                 props.setDataStore(new DataStore(response.data, response.tree, response.conditions));
             });
         }
-    }, [goFile, backgroundFile, selectedSpecies, selectedMeasure, conditions, pvalueFilter, geneFiles, ontology, props]);
+    }, [goFile, backgroundFile, selectedMeasure, conditions, pvalueFilter, geneFiles, ontology, props]);
     const getGenomes = useCallback(() => {
         if (supportedGenomes.length === 0) {
             getSupportedGenomes((genomes) => setSupportedGenomes(genomes))
         }
     }, [supportedGenomes]);
     const classes = useStyles();
-    const speciesOptions = supportedGenomes.map(d => {
-        return ({value: d.taxon_id, label: d.long_name})
-    });
     const similarityMeasures = ["Resnik", "Lin", "Edge based"];
     const similarityOptions = similarityMeasures.map(d => {
         return ({value: d, label: d})
@@ -135,72 +133,59 @@ const SelectData = (props) => {
                                             multiple
                                             style={{display: "none"}}
                                             onChange={(event) => {
-                                                setConditions([...event.target.files].map(d => d.name.slice(0, -4)));
+                                                setConditions([...event.target.files].map((d, i) => {
+                                                    return ({"index": i, "condition": d.name.slice(0, -4)})
+                                                }));
                                                 setGeneFiles([...event.target.files])
                                             }}
                                         />
                                     </Button>
                                 </Typography>
                             </ListItem>
-                            {geneFiles.length > 0 ? <ListSubheader>Specify conditions</ListSubheader> : null}
-                            {geneFiles.map((d, i) => <ListItem>
-                                <IconButton onClick={() => {
-                                    const conditionsCopy = conditions.slice();
-                                    const fileCopy = geneFiles.map(file => new File([file], file.name, {type: "text/plain"}));
-                                    if (i > 0) {
-                                        const save = conditionsCopy[i - 1];
-                                        const file = fileCopy[i - 1];
-                                        conditionsCopy[i - 1] = conditionsCopy[i];
-                                        fileCopy[i - 1] = fileCopy[i];
-                                        conditionsCopy[i] = save;
-                                        fileCopy[i] = file;
-                                    } else {
-                                        const save = conditionsCopy[0];
-                                        const file = fileCopy[0];
-                                        conditionsCopy[0] = conditionsCopy[conditions.length - 1];
-                                        fileCopy[0] = fileCopy[conditions.length - 1];
-                                        conditionsCopy[conditions.length - 1] = save;
-                                        fileCopy[conditions.length - 1] = file;
-                                    }
-                                    setConditions(conditionsCopy);
-                                    setGeneFiles(fileCopy);
-                                }}>
-                                    <KeyboardArrowUpIcon fontSize="small"/>
-                                </IconButton>
-                                <IconButton onClick={() => {
-                                    const conditionsCopy = conditions.slice();
-                                    const fileCopy = geneFiles.map(file => new File([file], file.name, {type: "text/plain"}));
-                                    if (i < conditionsCopy.length - 1) {
-                                        const save = conditionsCopy[i + 1];
-                                        const file = fileCopy[i - +1];
-                                        conditionsCopy[i + 1] = conditionsCopy[i];
-                                        fileCopy[i + 1] = fileCopy[i];
-                                        conditionsCopy[i] = save;
-                                        fileCopy[i] = file;
-                                    } else {
-                                        const save = conditionsCopy[0];
-                                        const file = fileCopy[0];
-                                        conditionsCopy[0] = conditionsCopy[i];
-                                        fileCopy[0] = fileCopy[i];
-                                        conditionsCopy[i] = save;
-                                        fileCopy[i] = file;
-                                    }
-                                    setConditions(conditionsCopy);
-                                    setGeneFiles(fileCopy);
-                                }}>
-                                    <KeyboardArrowDownIcon fontSize="small"/>
-                                </IconButton>
-                                <TextField required
-                                           label={d.name}
-                                           disabled={isLoading}
-                                           onChange={(e) => {
-                                               let conditionsCopy = conditions.slice();
-                                               conditionsCopy[i] = e.target.value;
-                                               setConditions(conditionsCopy);
-                                           }}
-                                           value={conditions[i]}
-                                           defaultValue={d.name}/>
-                            </ListItem>)}
+                            {conditions.length > 0 ? <ListSubheader>Specify conditions</ListSubheader> : null}
+                            {conditions.map((d, i) =>
+                                <ListItem key={d.index}>
+                                    <IconButton onClick={() => {
+                                        const conditionsCopy = conditions.slice();
+                                        if (i > 0) {
+                                            const save = conditionsCopy[i - 1];
+                                            conditionsCopy[i - 1] = conditionsCopy[i];
+                                            conditionsCopy[i] = save;
+                                        } else {
+                                            const save = conditionsCopy[0];
+                                            conditionsCopy[0] = conditionsCopy[conditions.length - 1];
+                                            conditionsCopy[conditions.length - 1] = save;
+                                        }
+                                        setConditions(conditionsCopy);
+                                    }}>
+                                        <KeyboardArrowUpIcon fontSize="small"/>
+                                    </IconButton>
+                                    <IconButton onClick={() => {
+                                        const conditionsCopy = conditions.slice();
+                                        if (i < conditionsCopy.length - 1) {
+                                            const save = conditionsCopy[i + 1];
+                                            conditionsCopy[i + 1] = conditionsCopy[i];
+                                            conditionsCopy[i] = save;
+                                        } else {
+                                            const save = conditionsCopy[0];
+                                            conditionsCopy[0] = conditionsCopy[i];
+                                            conditionsCopy[i] = save;
+                                        }
+                                        setConditions(conditionsCopy);
+                                    }}>
+                                        <KeyboardArrowDownIcon fontSize="small"/>
+                                    </IconButton>
+                                    <TextField required
+                                               label={d.condition}
+                                               disabled={isLoading}
+                                               onChange={(e) => {
+                                                   let conditionsCopy = conditions.slice();
+                                                   conditionsCopy[i].condition = e.target.value;
+                                                   setConditions(conditionsCopy);
+                                               }}
+                                               value={d.condition}/>
+                                </ListItem>
+                            )}
                         </Paper>
                     </div>
                     <ListSubheader>Select Background file</ListSubheader>
@@ -223,22 +208,22 @@ const SelectData = (props) => {
                     </ListItem>
                     <ListSubheader>Select Similarity Measure</ListSubheader>
                     {/*}
-                    <ListItem onClick={() => getGenomes()}>
-                        <Autocomplete
-                            id="combo-box-demo"
-                            options={speciesOptions}
-                            disabled={isLoading}
-                            getOptionLabel={(option) => option.label}
-                            value={selectedSpecies}
-                            style={{width: 300}}
-                            onChange={(event, newValue) => {
-                                selectSpecies(newValue);
-                            }}
-                            renderInput={(params) => <TextField {...params} label="Select Species"
-                                                                variant="outlined"/>}
-                        />
-                    </ListItem>
-                    */}
+                                                <ListItem onClick={() => getGenomes()}>
+                                                <Autocomplete
+                                                id="combo-box-demo"
+                                                options={speciesOptions}
+                                                disabled={isLoading}
+                                                getOptionLabel={(option) => option.label}
+                                                value={selectedSpecies}
+                                                style={{width: 300}}
+                                                onChange={(event, newValue) => {
+                                                selectSpecies(newValue);
+                                                }}
+                                                renderInput={(params) => <TextField {...params} label="Select Species"
+                                                variant="outlined"/>}
+                                                />
+                                                </ListItem>
+                                                */}
                     <ListItem onClick={() => getGenomes()}>
                         <Autocomplete
                             id="combo-box-demo"

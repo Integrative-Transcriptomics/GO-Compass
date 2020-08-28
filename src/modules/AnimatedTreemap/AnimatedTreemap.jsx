@@ -80,7 +80,7 @@ const AnimatedTreemap = inject("dataStore", "visStore")(observer((props) => {
         if(props.visStore.conditionIndex !== index) {
             startAnimation(props.visStore.conditionIndex);
         }
-    }, [props.visStore.conditionIndex, startAnimation]);
+    }, [props.visStore.conditionIndex, index, startAnimation]);
     const rects = [];
     const stars = [];
     layout(index).children.forEach((parent, j) =>

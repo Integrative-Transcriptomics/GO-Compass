@@ -35,8 +35,7 @@ const Plots = inject("dataStore", "visStore")(observer((props) => {
     useEffect(() => {
         changeWidth();
         window.addEventListener("resize", changeWidth);
-        console.log("added listener");
-    }, []);
+    }, [changeWidth]);
     const classes = useStyles();
     return (
         <Grid className={classes.root} container spacing={1}>

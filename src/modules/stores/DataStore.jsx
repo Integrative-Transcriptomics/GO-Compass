@@ -154,7 +154,7 @@ export class DataStore {
                 toReturn.push(tree[key]);
             }
         });
-        return toReturn;
+        return [...new Set(toReturn)];
     }
 
     traverse(tree) {

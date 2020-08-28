@@ -2,7 +2,6 @@ import axios from 'axios';
 
 function performCorrelation(data, callback) {
     axios.post("/correlation", {data: data}).then((response) => {
-        console.log(response.data)
         callback(response.data);
     })
 }
@@ -19,7 +18,6 @@ function getSupportedGenomes(callback) {
 }
 
 function multiRevigoGeneLists(dataFiles, backgroundFile, conditions, ontology, method, pvalueFilter, callback) {
-    console.log(dataFiles);
     const formData = new FormData();
     formData.append("background", backgroundFile);
     dataFiles.forEach(file => formData.append("geneLists[]", file));
@@ -47,7 +45,6 @@ function multiRevigoGoLists(dataFile, backgroundFile, ontology, method, pvalueFi
         formData.append("method", method);
         axios.post("/GoListsMultiREVIGO", formData)
             .then(response => {
-                console.log(response.data);
                 callback(response.data);
             })
             .catch(function (error) {
