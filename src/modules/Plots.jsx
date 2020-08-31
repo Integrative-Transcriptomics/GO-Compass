@@ -9,8 +9,8 @@ import Paper from "@material-ui/core/Paper";
 import DataTable from "./DetailedTable/DataTable";
 import CorrelationHeatmap from "./CorrelationHeatmap";
 import PCA from "./PCA";
-import Tree from "./Tree";
 import {inject, observer} from "mobx-react";
+import ClusteredHeatmap from "./ClusteredHeatmap/ClusteredHeatmap";
 
 /**
  * @return {null}
@@ -41,7 +41,7 @@ const Plots = inject("dataStore", "visStore")(observer((props) => {
         <Grid className={classes.root} container spacing={1}>
             <Grid item xs={6}>
                 <Paper className={classes.paper}>
-                    <Tree width={props.visStore.screenWidth / 2} height={props.visStore.plotHeight / 2}
+                    <ClusteredHeatmap width={props.visStore.screenWidth / 2} height={props.visStore.plotHeight / 2}
                     />
                 </Paper>
             </Grid>

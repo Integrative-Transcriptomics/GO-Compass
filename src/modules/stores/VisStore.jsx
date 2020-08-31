@@ -18,7 +18,7 @@ export class VisStore {
             sigThreshold: 0.05,
 
             get termColorScale() {
-                return d3.scaleOrdinal(this.dataStore.nestedData.map(d => d.id), d3.schemeCategory10.map(d => d3.interpolateRgb(d, "white")(0.5)));
+                return d3.scaleOrdinal(d3.schemeSet3);
             },
 
             setScreenWidth: action((width) => {

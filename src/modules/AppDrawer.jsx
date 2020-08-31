@@ -9,7 +9,6 @@ import Drawer from "@material-ui/core/Drawer";
 import React from "react";
 import {inject, observer} from "mobx-react";
 import PropTypes from "prop-types";
-import * as d3 from "d3";
 
 const AppDrawer = inject("dataStore", "visStore")(observer((props) => {
     return (<Drawer anchor={"left"} open={props.open} onClose={props.toggleDrawer}>
@@ -35,20 +34,6 @@ const AppDrawer = inject("dataStore", "visStore")(observer((props) => {
                                      name="checkedA"/>}
                     label="Time Series Data"
                 />
-            </ListItem>
-            <ListSubheader>
-                Select cutoffs
-            </ListSubheader>
-            <ListItem>
-                <Slider value={[props.dataStore.clusterCutoff, props.dataStore.filterCutoff]} min={0}
-                        step={0.01}
-                        max={d3.max(Object.values(props.dataStore.dataTable)
-                            .map(d=> d.dispensability))}
-                        valueLabelDisplay="auto"
-                        onChange={(event, value) => {
-                            props.dataStore.setClusterCutoff(value[0]);
-                            props.dataStore.setFilterCutoff(value[1]);
-                        }}/>
             </ListItem>
         </List>
     </Drawer>)
