@@ -29,10 +29,17 @@ const DraggableLine = inject("visStore")(observer((props) => {
     useEffect(() => {
         if (dragging) {
             const xDiff = x0 - props.xPos;
-            setX(x - xDiff);
+            let currX = x - xDiff;
+            if (currX < props.min) {
+                currX = props.min;
+            }
+            if (currX > props.max) {
+                currX = props.max
+            }
+            setX(currX);
             setX0(props.xPos);
-            props.mouseUp(inverseX(x))
-        } else{
+            props.mouseUp(inverseX(currX));
+        } else {
             let els = d3.selectAll([...ref.current.childNodes]);
             els.transition()
                 .duration(props.duration)
@@ -43,7 +50,12 @@ const DraggableLine = inject("visStore")(observer((props) => {
                     setX(props.x)
                 });
         }
-    }, [x0, x, props.x, dragging, props.xPos]);
+    }, [x0, x, props.x, dragging, props.xPos, props.mouseIn]);
+    useEffect(()=>{
+        if(!props.mouseDown){
+            setDragging(false);
+        }
+    },[props.mouseDown]);
     const mouseUp = useCallback(() => {
         setDragging(false);
     }, [x, inverseX, props.visStore]);

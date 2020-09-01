@@ -8,6 +8,8 @@ import Heatmap from "./Heatmap";
 
 const ClusteredHeatmap = inject("dataStore", "visStore")(observer((props) => {
     const [xPos, setXPos] = useState(0);
+    const [mouseDown, setMouseDown] = useState(false);
+
     const margins = {
         top: 40,
         right: 30,
@@ -20,19 +22,22 @@ const ClusteredHeatmap = inject("dataStore", "visStore")(observer((props) => {
     const root = d3.hierarchy(props.dataStore.filteredTree);
     const textWidth = 100;
     const rectWidth = 10;
-    const heatmapWidth = textWidth + (props.dataStore.conditions.length+1)*rectWidth;
-    const treeWidth = width- heatmapWidth;
+    const heatmapWidth = textWidth + (props.dataStore.conditions.length + 1) * rectWidth;
+    const treeWidth = width - heatmapWidth - rectWidth;
 
     d3.cluster().size([height, treeWidth]).separation(function (a, b) {
         return 1;
     })(root);
     const descendants = root.descendants().filter(d => !("children" in d));
     return (
-        <svg width={props.width} height={props.height} onMouseMove={(e) => setXPos(e.pageX)}>
+        <svg width={props.width} height={props.height} onMouseMove={(e) => setXPos(e.pageX)}
+             onMouseDown={() => setMouseDown(true)} onMouseUp={() => setMouseDown(false)}>
             <g transform={"translate(" + margins.left + "," + margins.top + ")"}>
-                <Tree width={treeWidth} height={height} descendants={descendants} links={root.links()} xPos={xPos}/>
-                <g transform={"translate(" + (treeWidth) + ",0)"}>
-                    <Heatmap width={heatmapWidth} textWidth={textWidth} rectWidth={rectWidth} height={height} descendants={descendants} />
+                <Tree width={treeWidth} height={height} descendants={descendants} links={root.links()} xPos={xPos}
+                      mouseDown={mouseDown}/>
+                <g transform={"translate(" + (treeWidth + rectWidth) + ",0)"}>
+                    <Heatmap width={heatmapWidth} textWidth={textWidth} rectWidth={rectWidth} height={height}
+                             descendants={descendants}/>
                 </g>
             </g>
         </svg>

@@ -18,7 +18,7 @@ export class VisStore {
             sigThreshold: 0.05,
 
             get termColorScale() {
-                return d3.scaleOrdinal(d3.schemeSet3);
+                return d3.scaleOrdinal(d3.schemeSet2);
             },
 
             setScreenWidth: action((width) => {

@@ -49,8 +49,11 @@ const Heatmap = inject("dataStore", "visStore")(observer((props) => {
             </g>
         </g>
     });
-    const conditionLabels = props.dataStore.conditions.map(condition => <text fontSize={textHeight}
-                                                                              transform={"translate(" + (heatmapX(condition) + props.rectWidth) + ",0)rotate(300)"}>{condition}</text>);
+    const conditionLabels = props.dataStore.conditions.map(condition =>
+        <text key={condition} fontSize={textHeight}
+              transform={"translate(" + (heatmapX(condition) + props.rectWidth) + ",0)rotate(300)"}>
+            {condition}
+        </text>);
     return (
         <g>
             <g>

@@ -144,11 +144,11 @@ def testGoTerms(termA, termB, goEnrichment, background, goCounts, maxDiff):
             filterMask = (abs(pvaluesA -  pvaluesB)*(1- np.minimum(pvaluesA, pvaluesB)))>maxDiff
             filteredPvaluesA = pvaluesA[filterMask]
             filteredPvaluesB = pvaluesB[filterMask]
-            if len(np.where(filteredPvaluesA > filteredPvaluesB))< len(np.where(filteredPvaluesA > filteredPvaluesB)):
+            if len(np.where(filteredPvaluesA < filteredPvaluesB)[0])< len(np.where(filteredPvaluesA > filteredPvaluesB)[0]):
                 return {"rejection": "pval" + termB, "term": termA}
                 #return termA
             else:
-                if len(np.where(filteredPvaluesA < filteredPvaluesB))> len(np.where(filteredPvaluesA > filteredPvaluesB)):
+                if len(np.where(filteredPvaluesA < filteredPvaluesB)[0])> len(np.where(filteredPvaluesA > filteredPvaluesB)[0]):
                     return {"rejection": "pval" + termA, "term": termB}
                     #return termB
                 # parent reject

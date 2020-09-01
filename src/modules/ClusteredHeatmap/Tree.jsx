@@ -50,10 +50,16 @@ const Tree = inject("dataStore", "visStore")(observer((props) => {
     });
     const cutoffLine = <DraggableLine width={props.width} height={props.height} xPos={props.xPos}
                                       xScale={dispScale} mouseUp={props.dataStore.setClusterCutoff} duration={0}
-                                      x={dispScale(props.dataStore.clusterCutoff)}/>;
+                                      min={0}
+                                      max={dispScale(props.dataStore.filterCutoff)}
+                                      x={dispScale(props.dataStore.clusterCutoff)}
+                                      mouseDown={props.mouseDown}/>;
     const clusterLine = <DraggableLine width={props.width} height={props.height} xPos={props.xPos}
                                        xScale={dispScale} mouseUp={props.dataStore.setFilterCutoff} duration={0}
-                                       x={dispScale(props.dataStore.filterCutoff)}/>;
+                                       min={dispScale(props.dataStore.clusterCutoff)}
+                                       max={props.width}
+                                       x={dispScale(props.dataStore.filterCutoff)}
+                                       mouseDown={props.mouseDown}/>;
 
     const xAxis = d3.axisBottom()
         .scale(dispScale);
