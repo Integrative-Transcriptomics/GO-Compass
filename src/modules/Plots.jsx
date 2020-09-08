@@ -12,7 +12,9 @@ import PCA from "./PCA";
 import {inject, observer} from "mobx-react";
 import ClusteredHeatmap from "./ClusteredHeatmap/ClusteredHeatmap";
 import Typography from "@material-ui/core/Typography";
-import Legend from "./HorizontalLegend";
+import Button from "@material-ui/core/Button";
+import {KeyboardArrowRight} from "@material-ui/icons";
+import MobileStepper from "@material-ui/core/MobileStepper";
 
 /**
  * @return {null}
@@ -87,16 +89,38 @@ const Plots = inject("dataStore", "visStore")(observer((props) => {
             </Grid>
             <Grid item xs={4}>
                 <Paper className={classes.paper}>
-                    <Typography>
-                        Selected List
-                    </Typography>
+                    {/* eslint-disable-next-line react/jsx-no-undef */}
+                    <MobileStepper
+                        steps={props.dataStore.conditions.length}
+                        position="static"
+                        variant="text"
+                        activeStep={props.visStore.conditionIndex}
+                        nextButton={
+                            <Button size="small"
+                                    onClick={() => props.visStore.setConditionIndex(props.visStore.conditionIndex + 1)}
+                                    disabled={props.visStore.conditionIndex === props.dataStore.conditions.length - 1}>
+                                Next
+                                <KeyboardArrowRight/>
+                            </Button>
+                        }
+                        backButton={
+                            <Button size="small"
+                                    onClick={() => props.visStore.setConditionIndex(props.visStore.conditionIndex - 1)}
+                                    disabled={props.visStore.conditionIndex === 0}>
+                                <KeyboardArrowRight/>
+                                Back
+                            </Button>
+                        }
+                    />
                     <AnimatedTreemap width={props.visStore.screenWidth / 3}
                                      height={props.visStore.plotHeight / 2}/>
                 </Paper>
             </Grid>
             <Grid item xs={4}>
                 <Paper className={classes.paper}>
-
+                    <Typography>
+                        Treemaps
+                    </Typography>
                     <SmallMultiples width={props.visStore.screenWidth / 3} height={props.visStore.plotHeight / 2}/>
                 </Paper>
             </Grid>

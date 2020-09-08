@@ -22,13 +22,11 @@ const Heatmap = inject("dataStore", "visStore")(observer((props) => {
     let text = [];
     descendants.forEach(descendant => {
         let fontWeight = "normal";
-        let clusterRectWidth = props.rectWidth / 2;
         if (props.visStore.childHighlight === descendant.data.name) {
             fontWeight = "bold";
         }
         if (props.dataStore.getFilterParent(descendant.data.name) === descendant.data.name) {
             fontWeight = "bold";
-            clusterRectWidth = props.rectWidth;
         }
         heatmapCells.push(
             <g key={descendant.data.name}
@@ -66,9 +64,8 @@ const Heatmap = inject("dataStore", "visStore")(observer((props) => {
             const x3 = x1 + 0.5 * props.rectWidth;
             const y1 = descendant.y - 0.5 * rectHeight;
             const y2 = y1 + 0.5 * rectHeight;
-            const y3 = y1;
             clusterCells.push(
-                <polygon points={x1 + "," + y1 + " " + x2 + "," + y2 + " " + x3 + "," + y3}
+                <polygon points={x1 + "," + y1 + " " + x2 + "," + y2 + " " + x3 + "," + y1}
                          fill={props.visStore.termColorScale(props.dataStore.getFilterParent(descendant.data.name))}/>
             );
         }
@@ -76,7 +73,7 @@ const Heatmap = inject("dataStore", "visStore")(observer((props) => {
     });
     const conditionLabels = props.dataStore.conditions.map(condition =>
         <text key={condition} fontSize={textHeight}
-              transform={"translate(" + (heatmapX(condition) + props.rectWidth) + ",0)rotate(300)"}>
+              transform={"translate(" + (heatmapX(condition) + props.rectWidth) + ","+ -0.5*rectHeight +")rotate(300)"}>
             {condition}
         </text>);
     return (
