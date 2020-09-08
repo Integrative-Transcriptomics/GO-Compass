@@ -17,37 +17,62 @@ const Heatmap = inject("dataStore", "visStore")(observer((props) => {
     const descendants = props.descendants.filter(d => !("children" in d));
     const heatmapX = d3.scaleBand().domain(props.dataStore.conditions).range([0, props.dataStore.conditions.length * props.rectWidth]);
     const heatmapColor = d3.scaleLinear().domain(domain).range(range);
-    const clusterCells = descendants.map(descendant => {
-        return <rect key={descendant.data.name} y={props.height - descendant.x - 0.5 * rectHeight} x={0}
-                     width={props.rectWidth / 2}
-                     height={rectHeight}
-                     fill={props.visStore.termColorScale(props.dataStore.getFilterParent(descendant.data.name))}/>
-    });
-    const heatmapCells = descendants.map(descendant => {
+    let heatmapCells = [];
+    let clusterCells = [];
+    let text = [];
+    descendants.forEach(descendant => {
         let fontWeight = "normal";
+        let clusterRectWidth = props.rectWidth / 2;
         if (props.visStore.childHighlight === descendant.data.name) {
             fontWeight = "bold";
         }
-        return <g key={descendant.data.name} onMouseEnter={() => props.visStore.setChildHighlight(descendant.data.name)}
-                  onMouseLeave={() => props.visStore.setChildHighlight(null)}>{props.dataStore.conditions.map((condition, i) => {
-            return (<g key={condition}
-            >
-                <rect y={props.height - descendant.x - 0.5 * rectHeight} x={heatmapX(condition)} width={props.rectWidth}
-                      height={rectHeight}
-                      fill={heatmapColor(props.dataStore.dataTable[descendant.data.name]["pvalues"][i])}/>
-                <title>{props.dataStore.dataTable[descendant.data.name]["pvalues"][i]}</title>
-            </g>)
-        })}
+        if (props.dataStore.getFilterParent(descendant.data.name) === descendant.data.name) {
+            fontWeight = "bold";
+            clusterRectWidth = props.rectWidth;
+        }
+        heatmapCells.push(
+            <g key={descendant.data.name}
+               onMouseEnter={() => props.visStore.setChildHighlight(descendant.data.name)}
+               onMouseLeave={() => props.visStore.setChildHighlight(null)}>{props.dataStore.conditions.map((condition, i) => {
+                return (
+                    <g key={condition}>
+                        <rect y={descendant.y - 0.5 * rectHeight} x={heatmapX(condition)}
+                              width={props.rectWidth}
+                              height={rectHeight}
+                              fill={heatmapColor(props.dataStore.dataTable[descendant.data.name]["pvalues"][i])}/>
+                        <title>{props.dataStore.dataTable[descendant.data.name]["pvalues"][i]}</title>
+                    </g>)
+            })}
+            </g>);
+        text.push(
             <g>
-                <text y={props.height - descendant.x + 0.5 * rectHeight}
-                      x={props.dataStore.conditions.length * props.rectWidth}
+                <text y={descendant.y}
+                      alignmentBaseline="central"
                       fontSize={textHeight}
                       fontWeight={fontWeight}>
                     {cropText(props.dataStore.dataTable[descendant.data.name].description, 10, fontWeight, props.textWidth)}
                 </text>
                 <title>{props.dataStore.dataTable[descendant.data.name].description}</title>
-            </g>
-        </g>
+            </g>);
+        clusterCells.push(
+            <rect key={descendant.data.name} y={descendant.y - 0.5 * rectHeight}
+                  x={0.5 * props.rectWidth}
+                  width={0.5*props.rectWidth}
+                  height={rectHeight}
+                  fill={props.visStore.termColorScale(props.dataStore.getFilterParent(descendant.data.name))}/>);
+        if (descendant.data.value <= props.dataStore.clusterCutoff) {
+            const x1 = props.rectWidth;
+            const x2 = x1;
+            const x3 = x1 + 0.5 * props.rectWidth;
+            const y1 = descendant.y - 0.5 * rectHeight;
+            const y2 = y1 + 0.5 * rectHeight;
+            const y3 = y1;
+            clusterCells.push(
+                <polygon points={x1 + "," + y1 + " " + x2 + "," + y2 + " " + x3 + "," + y3}
+                         fill={props.visStore.termColorScale(props.dataStore.getFilterParent(descendant.data.name))}/>
+            );
+        }
+
     });
     const conditionLabels = props.dataStore.conditions.map(condition =>
         <text key={condition} fontSize={textHeight}
@@ -57,13 +82,16 @@ const Heatmap = inject("dataStore", "visStore")(observer((props) => {
     return (
         <g>
             <g>
-                {clusterCells}
-            </g>
-            <g transform={"translate(" + props.rectWidth + ",0)"}>
                 {heatmapCells}
                 {conditionLabels}
             </g>
-            <g transform={"translate(" + ((props.dataStore.conditions.length + 1) * props.rectWidth) + "," + (props.height + 5) + ")"}>
+            <g transform={"translate(" + props.dataStore.conditions.length * props.rectWidth + ",0)"}>
+                {clusterCells}
+            </g>
+            <g transform={"translate(" + ((props.dataStore.conditions.length + 1.5) * props.rectWidth + 5) + "," + 0 + ")"}>
+                {text}
+            </g>
+            <g transform={"translate(" + ((props.dataStore.conditions.length + 1.5) * props.rectWidth) + "," + (props.height + 5) + ")"}>
                 <Legend range={range} domain={domain}/>
             </g>
         </g>

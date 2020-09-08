@@ -4,6 +4,7 @@ import {inject, observer} from "mobx-react";
 import PropTypes from "prop-types";
 import Tree from "./Tree";
 import Heatmap from "./Heatmap";
+import calculateTreeLayout from "./RFLayout";
 
 
 const ClusteredHeatmap = inject("dataStore", "visStore")(observer((props) => {
@@ -19,21 +20,18 @@ const ClusteredHeatmap = inject("dataStore", "visStore")(observer((props) => {
     const height = props.height - margins.top - margins.bottom;
     let width = props.width - margins.left - margins.right;
 
-    const root = d3.hierarchy(props.dataStore.filteredTree);
     const textWidth = 100;
     const rectWidth = 10;
     const heatmapWidth = textWidth + (props.dataStore.conditions.length + 1) * rectWidth;
     const treeWidth = width - heatmapWidth - rectWidth;
+    const descendants = calculateTreeLayout(props.dataStore.filteredTree,height);
 
-    d3.cluster().size([height, treeWidth]).separation(function (a, b) {
-        return 1;
-    })(root);
-    const descendants = root.descendants().filter(d => !("children" in d));
+
     return (
         <svg width={props.width} height={props.height} onMouseMove={(e) => setXPos(e.pageX)}
              onMouseDown={() => setMouseDown(true)} onMouseUp={() => setMouseDown(false)}>
             <g transform={"translate(" + margins.left + "," + margins.top + ")"}>
-                <Tree width={treeWidth} height={height} descendants={descendants} links={root.links()} xPos={xPos}
+                <Tree width={treeWidth} height={height} descendants={descendants} xPos={xPos}
                       mouseDown={mouseDown}/>
                 <g transform={"translate(" + (treeWidth + rectWidth) + ",0)"}>
                     <Heatmap width={heatmapWidth} textWidth={textWidth} rectWidth={rectWidth} height={height}

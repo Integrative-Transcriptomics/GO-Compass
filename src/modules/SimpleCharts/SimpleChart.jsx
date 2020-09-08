@@ -8,7 +8,6 @@ import Box from "@material-ui/core/Box";
 import FormControlLabel from "@material-ui/core/FormControlLabel";
 import Switch from "@material-ui/core/Switch";
 import {inject, observer} from "mobx-react";
-import Legend from "../Legend";
 import PlayButton from "../PlayButton";
 import Button from "@material-ui/core/Button";
 import Menu from "@material-ui/core/Menu";
@@ -110,7 +109,6 @@ const SimpleChart = inject("dataStore", "visStore")(observer((props) => {
     return (
         <Box>
             <div ref={rest}>
-                <Legend width={props.width}/>
                 {props.visStore.isTimeSeries ?
                     <div>
                         <PlayButton/>

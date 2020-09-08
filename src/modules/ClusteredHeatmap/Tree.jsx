@@ -9,43 +9,39 @@ import DraggableLine from "./DraggableLine";
 const Tree = inject("dataStore", "visStore")(observer((props) => {
     const dispScale = d3.scaleLinear().domain([0, d3.max(Object.values(props.dataStore.dataTable)
         .map(d => d.dispensability))]).range([0, props.width]);
+    const links2 = [];
     const nodes = props.descendants.map(node => {
         const dispensability = props.dataStore.dataTable[node.data.name].dispensability;
         let fill;
         let r = 2;
-        if (props.dataStore.dataTable[node.data.name].dispensability < props.dataStore.clusterCutoff) {
+        let strokeColor = "lightgray";
+        if (dispensability < props.dataStore.clusterCutoff) {
             fill = props.visStore.termColorScale(node.data.name);
+            strokeColor = fill;
             r = 4;
         } else {
             fill = props.visStore.termColorScale(props.dataStore.getFilterParent(node.data.name))
         }
-        let strokeColor = "lightgray";
         if (props.visStore.childHighlight === node.data.name) {
             strokeColor = "black";
         }
-        let y1 = dispScale(dispensability);
+
+
+        if (node.parent != null) {
+            links2.push(<line x1={dispScale(node.x)} y1={node.y}
+                              x2={dispScale(node.parent.x)} y2={node.parent.y}
+                              strokeWidth={1} stroke={"black"}/>);
+        }
+
         return (<g key={node.data.name} onMouseEnter={() => props.visStore.setChildHighlight(node.data.name)}
                    onMouseLeave={() => props.visStore.setChildHighlight(null)}>
             <title>{props.dataStore.dataTable[node.data.name].description}</title>
-            <line x1={node.x} x2={node.x} y1={y1} y2={props.width} strokeWidth={1} strokeDasharray="4 1"
+            <line x1={dispScale(node.x)} x2={props.width} y1={node.y} y2={node.y} strokeWidth={1} strokeDasharray="4 1"
                   stroke={strokeColor}/>
-            <line x1={node.x} x2={node.x} y1={y1} y2={props.width} strokeWidth={4} strokeDasharray="4 1"
+            <line x1={dispScale(node.x)} x2={props.width} y1={node.y} y2={node.y} strokeWidth={4} strokeDasharray="4 1"
                   stroke="none"/>
-            <circle cx={node.x} cy={y1} r={r} fill={fill} stroke="black"/>
-            <circle cx={node.x} cy={y1} r={r + 3} fill="none"/>
-        </g>)
-    });
-    const links = props.links.map((link, i) => {
-        let y1 = dispScale(props.dataStore.dataTable[link.source.data.name].dispensability);
-        let y2 = dispScale(props.dataStore.dataTable[link.target.data.name].dispensability);
-        let stroke = "black";
-        if (props.dataStore.dataTable[link.target.data.name].dispensability > props.dataStore.clusterCutoff) {
-            stroke = props.visStore.termColorScale(props.dataStore.getFilterParent(link.target.data.name))
-        }
-        return (<g key={i}>
-            <line x1={link.source.x} y1={y1}
-                  x2={link.target.x} y2={y2}
-                  strokeWidth={1} stroke={stroke}/>
+            <circle cx={dispScale(node.x)} cy={node.y} r={r} fill={fill} stroke="black"/>
+            <circle cx={dispScale(node.x)} cy={node.y} r={r + 3} fill="none"/>
         </g>)
     });
     const cutoffLine = <DraggableLine width={props.width} height={props.height} xPos={props.xPos}
@@ -65,9 +61,9 @@ const Tree = inject("dataStore", "visStore")(observer((props) => {
         .scale(dispScale);
     return (
         <g>
-            <g transform={"translate(" + 0 + "," + (props.height) + ")rotate(270)"}>
+            <g >
                 <g>
-                    {links}
+                    {links2}
                     {nodes}
                 </g>
             </g>

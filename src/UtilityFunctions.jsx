@@ -25,3 +25,15 @@ export function cropText(text, fontSize, fontweight, maxWidth) {
     }
     return returnText;
 }
+/**
+ * crops the text to a certain width and adds "..." in the end
+ * @param {string} text
+ * @param {number} fontSize
+ * @param {*} fontweight
+ * @returns {string}
+ */
+export function getTextWidth(text, fontSize, fontweight) {
+    const context = document.createElement('canvas').getContext('2d');
+    context.font = `${fontweight} ${fontSize}px sans-serif`;
+    return context.measureText(text).width;
+}

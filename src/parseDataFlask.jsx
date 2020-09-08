@@ -45,6 +45,7 @@ function multiRevigoGoLists(dataFile, backgroundFile, ontology, method, pvalueFi
         formData.append("method", method);
         axios.post("/GoListsMultiREVIGO", formData)
             .then(response => {
+                console.log(response.data);
                 callback(response.data);
             })
             .catch(function (error) {

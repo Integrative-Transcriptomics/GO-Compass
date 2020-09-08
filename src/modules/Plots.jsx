@@ -11,6 +11,8 @@ import CorrelationHeatmap from "./CorrelationHeatmap";
 import PCA from "./PCA";
 import {inject, observer} from "mobx-react";
 import ClusteredHeatmap from "./ClusteredHeatmap/ClusteredHeatmap";
+import Typography from "@material-ui/core/Typography";
+import Legend from "./HorizontalLegend";
 
 /**
  * @return {null}
@@ -23,9 +25,10 @@ const Plots = inject("dataStore", "visStore")(observer((props) => {
                 backgroundColor: 'lightgray'
             },
             paper: {
-                padding: theme.spacing(0),
+                padding: theme.spacing(2),
                 textAlign: 'left',
                 color: theme.palette.text.secondary,
+                elevation: 3
             },
         }),
     );
@@ -41,12 +44,18 @@ const Plots = inject("dataStore", "visStore")(observer((props) => {
         <Grid className={classes.root} container spacing={1}>
             <Grid item xs={6}>
                 <Paper className={classes.paper}>
+                    <Typography>
+                        Select Cutoffs
+                    </Typography>
                     <ClusteredHeatmap width={props.visStore.screenWidth / 2} height={props.visStore.plotHeight / 2}
                     />
                 </Paper>
             </Grid>
             <Grid item xs={3}>
                 <Paper className={classes.paper}>
+                    <Typography>
+                        Principal Component Analysis of Lists
+                    </Typography>
                     {props.dataStore.pcaLoaded ?
                         <PCA width={props.visStore.screenWidth / 4}
                              height={props.visStore.plotHeight / 2}
@@ -56,6 +65,9 @@ const Plots = inject("dataStore", "visStore")(observer((props) => {
             </Grid>
             <Grid item xs={3}>
                 <Paper className={classes.paper}>
+                    <Typography>
+                        List Correlation
+                    </Typography>
                     {props.dataStore.correlationLoaded ?
                         <CorrelationHeatmap width={props.visStore.screenWidth / 4}
                                             height={props.visStore.plotHeight / 2}
@@ -66,17 +78,25 @@ const Plots = inject("dataStore", "visStore")(observer((props) => {
 
             <Grid item xs={4}>
                 <Paper className={classes.paper}>
+                    <Typography>
+                        {props.visStore.childHighlight == null ? "Category Overview"
+                            : props.dataStore.dataTable[props.visStore.childHighlight].description}
+                    </Typography>
                     <SimpleChart width={props.visStore.screenWidth / 3} height={props.visStore.plotHeight / 2}/>
                 </Paper>
             </Grid>
             <Grid item xs={4}>
                 <Paper className={classes.paper}>
+                    <Typography>
+                        Selected List
+                    </Typography>
                     <AnimatedTreemap width={props.visStore.screenWidth / 3}
                                      height={props.visStore.plotHeight / 2}/>
                 </Paper>
             </Grid>
             <Grid item xs={4}>
                 <Paper className={classes.paper}>
+
                     <SmallMultiples width={props.visStore.screenWidth / 3} height={props.visStore.plotHeight / 2}/>
                 </Paper>
             </Grid>

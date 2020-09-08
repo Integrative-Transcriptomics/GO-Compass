@@ -74,6 +74,7 @@ def iterateMatrix(matrix, goTerms, goEnrichment, background):
         row = row[row != -1]
         avgs[term] = (col.sum() + row.sum())/(len(goTerms)-1)
     tree = dict()
+    tree2 = dict()
     goList = dict()
     while(len(goTerms)) > 0:
         maxValue = np.amax(np.ravel(matrix))
@@ -89,6 +90,19 @@ def iterateMatrix(matrix, goTerms, goEnrichment, background):
         else:
             deleteIndex = indices[1]
             toKeep = termA
+
+        if toKeep != toDelete:
+            if toDelete in tree2:
+                if toKeep in tree2:
+                    tree2[toKeep][toDelete] = tree2[toDelete]
+                else:
+                    tree2[toKeep] = tree2[toDelete]
+            else:
+                if toKeep in tree2:
+                    tree2[toKeep][toDelete] = toDelete
+                else:
+                    tree2[toKeep] = {toDelete: toDelete}
+            tree2.pop(toDelete, None)
 
         if toKeep != toDelete:
             if toDelete in tree:
@@ -116,7 +130,7 @@ def iterateMatrix(matrix, goTerms, goEnrichment, background):
         goTerms = np.delete(goTerms, deleteIndex)
         matrix = np.delete(matrix, deleteIndex, 0)
         matrix = np.delete(matrix, deleteIndex, 1)
-    return {"tree": tree, "data": goList, "conditions": list(goEnrichment.columns)}
+    return {"tree": tree, "data": goList, "conditions": list(goEnrichment.columns), "tree2": tree2}
 
 def testGoTerms(termA, termB, goEnrichment, background, goCounts, maxDiff):
     #frequency check

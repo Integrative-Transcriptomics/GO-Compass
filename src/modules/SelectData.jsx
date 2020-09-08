@@ -33,7 +33,7 @@ const SelectData = (props) => {
     const [isLoading, setIsLoading] = useState(false);
     const [ontology, setOntology] = useState("BP");
     const [conditions, setConditions] = useState([]);
-    const [selectedMeasure, selectMeasure] = useState(null);
+    const [selectedMeasure, selectMeasure] = useState("Edge based");
     const [pvalueFilter, setPvalueFilter] = useState(0.5);
     const [selectedTab, selectTab] = useState(0);
     const useStyles = makeStyles((theme: Theme) =>
@@ -52,15 +52,15 @@ const SelectData = (props) => {
     const launch = useCallback(() => {
         setIsLoading(true);
         if (goFile !== null) {
-            multiRevigoGoLists(goFile, backgroundFile, ontology, selectedMeasure.value, pvalueFilter, response => {
-                props.setDataStore(new DataStore(response.data, response.tree, response.conditions));
+            multiRevigoGoLists(goFile, backgroundFile, ontology, selectedMeasure, pvalueFilter, response => {
+                props.setDataStore(new DataStore(response.data, response.tree2, response.conditions));
             });
         } else if (geneFiles.length > 0) {
             const reorderedFiles = conditions.map(d => {
                 return geneFiles[d.index];
             });
-            multiRevigoGeneLists(reorderedFiles, backgroundFile, conditions.map(d => d.condition), ontology, selectedMeasure.value, pvalueFilter, response => {
-                props.setDataStore(new DataStore(response.data, response.tree, response.conditions));
+            multiRevigoGeneLists(reorderedFiles, backgroundFile, conditions.map(d => d.condition), ontology, selectedMeasure, pvalueFilter, response => {
+                props.setDataStore(new DataStore(response.data, response.tree2, response.conditions));
             });
         }
     }, [goFile, backgroundFile, selectedMeasure, conditions, pvalueFilter, geneFiles, ontology, props]);
@@ -70,10 +70,6 @@ const SelectData = (props) => {
         }
     }, [supportedGenomes]);
     const classes = useStyles();
-    const similarityMeasures = ["Resnik", "Lin", "Edge based"];
-    const similarityOptions = similarityMeasures.map(d => {
-        return ({value: d, label: d})
-    });
     return (
         <Grid
             container
@@ -206,7 +202,6 @@ const SelectData = (props) => {
                             {backgroundFile !== null ? backgroundFile.name : "No file selected"}
                         </Typography>
                     </ListItem>
-                    <ListSubheader>Select Similarity Measure</ListSubheader>
                     {/*}
                                                 <ListItem onClick={() => getGenomes()}>
                                                 <Autocomplete
@@ -224,20 +219,19 @@ const SelectData = (props) => {
                                                 />
                                                 </ListItem>
                                                 */}
-                    <ListItem onClick={() => getGenomes()}>
-                        <Autocomplete
-                            id="combo-box-demo"
-                            options={similarityOptions}
-                            disabled={isLoading}
-                            getOptionLabel={(option) => option.label}
-                            value={selectedMeasure}
-                            style={{width: 300}}
-                            onChange={(event, newValue) => {
-                                selectMeasure(newValue);
-                            }}
-                            renderInput={(params) => <TextField {...params} label="Similarity measure"
-                                                                variant="outlined"/>}
-                        />
+                    <ListItem>
+                        <FormControl className={classes.formControl}>
+                            <InputLabel>Similarity measure</InputLabel>
+                            <Select
+                                value={selectedMeasure}
+                                disabled={isLoading}
+                                onChange={(e) => selectMeasure(e.target.value)}
+                            >
+                                <MenuItem value="Edge based">Edge based</MenuItem>
+                                <MenuItem value="Resnik">Resnik</MenuItem>
+                                <MenuItem value="Lin">Lin</MenuItem>
+                            </Select>
+                        </FormControl>
                     </ListItem>
                     <ListItem>
                         <FormControl className={classes.formControl}>

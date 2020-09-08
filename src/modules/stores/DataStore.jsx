@@ -13,12 +13,13 @@ export class DataStore {
         extendObservable(this, {
             filterCutoff: 0.7,
             clusterCutoff: 0.1,
-            tree: this.traverse(tree)[0],
             dataTable: dataTable,
+            tree: this.traverse(tree, dataTable)[0],
             conditions: conditions,
             dataLoaded: false,
             pcaLoaded: false,
             correlationLoaded: false,
+
 
 
             get filteredTree() {
@@ -142,27 +143,23 @@ export class DataStore {
     }
 
 
-    flattenTree(tree) {
+    flattenTree(node) {
         const toReturn = [];
-        Object.keys(tree).forEach(key => {
-            if ((typeof tree[key]) == 'object' && tree[key] !== null) {
-                const flatObject = this.flattenTree(tree[key]);
-                Object.keys(flatObject).forEach(key2 => {
-                    toReturn.push(flatObject[key2]);
-                })
-            } else {
-                toReturn.push(tree[key]);
-            }
-        });
-        return [...new Set(toReturn)];
+        if ("children" in node) {
+            node.children.forEach(child => {
+                toReturn.push(...this.flattenTree(child));
+            });
+        }
+        toReturn.push(node.name);
+        return toReturn
     }
 
-    traverse(tree) {
+    traverse(tree, dataTable) {
         if (tree !== null && typeof tree == "object") {
             return (Object.entries(tree).map(([key, child]) => {
                 if (typeof child == "object") {
-                    return ({name: key, children: this.traverse(child)})
-                } else return ({name: child});
+                    return ({name: key, children: this.traverse(child, dataTable), value: dataTable[key].dispensability})
+                } else return ({name: child, value: dataTable[child].dispensability});
             }));
         } else {
             return null;
@@ -178,12 +175,11 @@ export class DataStore {
                         children.push(this.filterTree(child));
                     }
                 });
-                return ({"name": tree.name, "children": children})
+                return ({"name": tree.name, "children": children, value: tree.value})
             }
-            return {"name": tree.name};
+            return {"name": tree.name, value: tree.value};
         }
     }
-
     nest(data, ...keys) {
         const nest = d3.nest();
         for (const key of keys) nest.key(key);
