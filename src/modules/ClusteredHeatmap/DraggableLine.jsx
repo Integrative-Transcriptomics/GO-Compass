@@ -19,12 +19,21 @@ const DraggableLine = inject("visStore")(observer((props) => {
 
     const inverseX = d3.scaleLinear().domain([0, props.width]).range(xScale.domain());
 
-    const highlighter = <g ref={ref}>
+    const sliderX0 = x - 5;
+    const sliderY0 = -10;
+    const sliderX1 = x + 5;
+    const sliderY1 = -10;
+    const sliderX2 = x;
+    const sliderY2 = 0;
+    const highlighter = <g onMouseDown={(e) => mouseDown(e)} ref={ref} cursor={dragging ? "grabbing" : "grab"}>
         <line x1={x} x2={x} y1={0} y2={props.height}
               fill='none'
               stroke='black' strokeWidth={1}/>
-        <line onMouseDown={(e) => mouseDown(e)} x1={x} x2={x} y1={0} y2={props.height}
+        <line x1={x} x2={x} y1={0} y2={props.height}
               fill='none' stroke='black' opacity={0} strokeWidth={5}/>
+        <polygon points={sliderX0 + "," + sliderY0 + " " +
+        sliderX1 + "," + sliderY1 + " " +
+        sliderX2 + "," + sliderY2}/>
     </g>;
     useEffect(() => {
         if (dragging) {
@@ -50,15 +59,15 @@ const DraggableLine = inject("visStore")(observer((props) => {
                     setX(props.x)
                 });
         }
-    }, [x0, x, props.x, dragging, props.xPos, props.mouseIn]);
-    useEffect(()=>{
-        if(!props.mouseDown){
+    }, [x0, x, dragging, props, inverseX,  ref]);
+    useEffect(() => {
+        if (!props.mouseDown) {
             setDragging(false);
         }
-    },[props.mouseDown]);
+    }, [props.mouseDown]);
     const mouseUp = useCallback(() => {
         setDragging(false);
-    }, [x, inverseX, props.visStore]);
+    }, []);
     return (
         <g onMouseUp={() => mouseUp()}>
             {highlighter}
