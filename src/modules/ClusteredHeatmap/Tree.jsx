@@ -79,7 +79,6 @@ Tree.propTypes = {
     width: PropTypes.number.isRequired,
     height: PropTypes.number.isRequired,
     descendants: PropTypes.arrayOf(PropTypes.object).isRequired,
-    links: PropTypes.arrayOf(PropTypes.object).isRequired,
 };
 
 export default Tree;

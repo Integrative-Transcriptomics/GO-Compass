@@ -1,5 +1,4 @@
 import React, {useState} from 'react';
-import * as d3 from "d3";
 import {inject, observer} from "mobx-react";
 import PropTypes from "prop-types";
 import Tree from "./Tree";
