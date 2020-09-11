@@ -31,6 +31,8 @@ def MultiGO(goEnrichment, objanno, ontology, method):
     goEnrichment.sort_index(inplace= True)
     mask = goEnrichment[goEnrichment < float(request.form['pvalueFilter'])].isnull().all(axis=1)
     goEnrichment = goEnrichment[mask == False]
+    goEnrichment = goEnrichment[goEnrichment.index.isin(godag.keys())]
+    print(goEnrichment)
     goTerms = goEnrichment.index.values
     matrix = np.array(createMatrix(goTerms, background, method))
     matrix[matrix == None] = 0
