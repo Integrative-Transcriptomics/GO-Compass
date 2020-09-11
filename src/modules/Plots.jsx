@@ -13,21 +13,23 @@ import {inject, observer} from "mobx-react";
 import ClusteredHeatmap from "./ClusteredHeatmap/ClusteredHeatmap";
 import Typography from "@material-ui/core/Typography";
 import Button from "@material-ui/core/Button";
-import {KeyboardArrowRight} from "@material-ui/icons";
+import {KeyboardArrowLeft, KeyboardArrowRight} from "@material-ui/icons";
 import MobileStepper from "@material-ui/core/MobileStepper";
 
 /**
  * @return {null}
  */
 const Plots = inject("dataStore", "visStore")(observer((props) => {
-    const useStyles = makeStyles((theme: Theme) =>
+    const useStyles = makeStyles((theme) =>
         createStyles({
             root: {
+                padding: 10,
                 flexGrow: 1,
                 backgroundColor: 'lightgray'
             },
             paper: {
-                padding: theme.spacing(2),
+                height: "100%",
+                padding: 1,
                 textAlign: 'left',
                 color: theme.palette.text.secondary,
                 elevation: 3
@@ -44,7 +46,7 @@ const Plots = inject("dataStore", "visStore")(observer((props) => {
     const classes = useStyles();
     return (
         <Grid className={classes.root} container spacing={1}>
-            <Grid item xs={6}>
+            <Grid item xs={6} >
                 <Paper className={classes.paper}>
                     <Typography>
                         Select Cutoffs
@@ -107,7 +109,7 @@ const Plots = inject("dataStore", "visStore")(observer((props) => {
                             <Button size="small"
                                     onClick={() => props.visStore.setConditionIndex(props.visStore.conditionIndex - 1)}
                                     disabled={props.visStore.conditionIndex === 0}>
-                                <KeyboardArrowRight/>
+                                <KeyboardArrowLeft/>
                                 Back
                             </Button>
                         }

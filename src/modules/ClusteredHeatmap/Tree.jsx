@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React from 'react';
 import * as d3 from "d3";
 import {inject, observer} from "mobx-react";
 import Axis from "./../SimpleCharts/Axis";
@@ -9,10 +9,11 @@ import DraggableLine from "./DraggableLine";
 const Tree = inject("dataStore", "visStore")(observer((props) => {
     const dispScale = d3.scaleLinear().domain([0, d3.max(Object.values(props.dataStore.dataTable)
         .map(d => d.dispensability))]).range([0, props.width]);
-    const links2 = [];
+    const links = [];
     const nodes = props.descendants.map(node => {
         const dispensability = props.dataStore.dataTable[node.data.name].dispensability;
         let fill;
+        let linkColor = "black";
         let r = 2;
         let strokeColor = "lightgray";
         if (dispensability < props.dataStore.clusterCutoff) {
@@ -20,7 +21,8 @@ const Tree = inject("dataStore", "visStore")(observer((props) => {
             strokeColor = fill;
             r = 4;
         } else {
-            fill = props.visStore.termColorScale(props.dataStore.getFilterParent(node.data.name))
+            fill = props.visStore.termColorScale(props.dataStore.getFilterParent(node.data.name));
+            linkColor = fill;
         }
         if (props.visStore.childHighlight === node.data.name) {
             strokeColor = "black";
@@ -28,9 +30,9 @@ const Tree = inject("dataStore", "visStore")(observer((props) => {
 
 
         if (node.parent != null) {
-            links2.push(<line x1={dispScale(node.x)} y1={node.y}
+            links.push(<line x1={dispScale(node.x)} y1={node.y}
                               x2={dispScale(node.parent.x)} y2={node.parent.y}
-                              strokeWidth={1} stroke={"black"}/>);
+                              strokeWidth={1} stroke={linkColor}/>);
         }
 
         return (<g key={node.data.name} onMouseEnter={() => props.visStore.setChildHighlight(node.data.name)}
@@ -63,7 +65,7 @@ const Tree = inject("dataStore", "visStore")(observer((props) => {
         <g>
             <g >
                 <g>
-                    {links2}
+                    {links}
                     {nodes}
                 </g>
             </g>

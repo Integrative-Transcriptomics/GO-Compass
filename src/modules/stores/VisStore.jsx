@@ -8,7 +8,7 @@ export class VisStore {
         this.animationDuration = 1500;
         extendObservable(this, {
             screenWidth: 1000,
-            plotHeight: 1000,
+            plotHeight: 700,
             tsPlotType: "lineChart",
             isTimeSeries: false,
             showOverview: false,
@@ -25,7 +25,7 @@ export class VisStore {
                 this.screenWidth = width -100;
             }),
             setPlotHeight: action((height) => {
-                this.plotHeight = height - 16;
+                this.plotHeight = height - 200;
             }),
             setTsPlotType: action((type) => {
                 this.tsPlotType = type;

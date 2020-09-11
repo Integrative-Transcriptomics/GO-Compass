@@ -42,16 +42,18 @@ const Heatmap = inject("dataStore", "visStore")(observer((props) => {
                     </g>)
             })}
             </g>);
-        text.push(
-            <g>
-                <text y={descendant.y}
-                      alignmentBaseline="central"
-                      fontSize={textHeight}
-                      fontWeight={fontWeight}>
-                    {cropText(props.dataStore.dataTable[descendant.data.name].description, 10, fontWeight, props.textWidth)}
-                </text>
-                <title>{props.dataStore.dataTable[descendant.data.name].description}</title>
-            </g>);
+        if(textHeight < rectHeight || props.dataStore.getFilterParent(descendant.data.name) === descendant.data.name) {
+            text.push(
+                <g>
+                    <text y={descendant.y}
+                          alignmentBaseline="central"
+                          fontSize={textHeight}
+                          fontWeight={fontWeight}>
+                        {cropText(props.dataStore.dataTable[descendant.data.name].description, textHeight, fontWeight, props.textWidth)}
+                    </text>
+                    <title>{props.dataStore.dataTable[descendant.data.name].description}</title>
+                </g>);
+        }
         clusterCells.push(
             <rect key={descendant.data.name} y={descendant.y - 0.5 * rectHeight}
                   x={0.5 * props.rectWidth}

@@ -18,15 +18,13 @@ import Paper from "@material-ui/core/Paper";
 import Grid from "@material-ui/core/Grid";
 import KeyboardArrowDownIcon from '@material-ui/icons/KeyboardArrowDown';
 import KeyboardArrowUpIcon from '@material-ui/icons/KeyboardArrowUp';
-import {getSupportedGenomes, multiRevigoGeneLists, multiRevigoGoLists} from "../parseDataFlask";
+import {multiRevigoGeneLists, multiRevigoGoLists} from "../parseDataFlask";
 import IconButton from "@material-ui/core/IconButton";
-import Autocomplete from '@material-ui/lab/Autocomplete';
 import {DataStore} from "./stores/DataStore";
 import PropTypes from "prop-types";
 
 
 const SelectData = (props) => {
-    const [supportedGenomes, setSupportedGenomes] = useState([]);
     const [goFile, setGoFile] = useState(null);
     const [backgroundFile, setBackgroundFile] = useState(null);
     const [geneFiles, setGeneFiles] = useState([]);
@@ -64,11 +62,6 @@ const SelectData = (props) => {
             });
         }
     }, [goFile, backgroundFile, selectedMeasure, conditions, pvalueFilter, geneFiles, ontology, props]);
-    const getGenomes = useCallback(() => {
-        if (supportedGenomes.length === 0) {
-            getSupportedGenomes((genomes) => setSupportedGenomes(genomes))
-        }
-    }, [supportedGenomes]);
     const classes = useStyles();
     return (
         <Grid
@@ -172,7 +165,7 @@ const SelectData = (props) => {
                                         <KeyboardArrowDownIcon fontSize="small"/>
                                     </IconButton>
                                     <TextField required
-                                               label={d.condition}
+                                               label={geneFiles[d.index].name}
                                                disabled={isLoading}
                                                onChange={(e) => {
                                                    let conditionsCopy = conditions.slice();

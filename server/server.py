@@ -39,7 +39,7 @@ def MultiGO(goEnrichment, objanno, ontology, method):
 def createMatrix(goTerms, background, method):
     termcounts = TermCounts(godag, background)
     matrix=list()
-    # only create half of matrix, fill rest with -inf
+    # only create half of matrix, fill rest with -1
     i = 0
     for termA in goTerms:
         j = 0
