@@ -15,24 +15,26 @@ export class DataStore {
             clusterCutoff: 0.1,
             dataTable: dataTable,
             tree: this.traverse(tree, dataTable)[0],
+            filteredTree: {},
+            filterHierarchy: {},
             conditions: conditions,
-            dataLoaded: false,
+            correlation: [],
+            pca:[],
             pcaLoaded: false,
             correlationLoaded: false,
 
 
 
-            get filteredTree() {
-                return this.filterTree(this.tree);
-            },
-
             get clusterHierarchy() {
                 return this.extractHierarchy(this.filteredTree, this.clusterCutoff, true);
             },
-            get filterHierarchy() {
-                return this.extractHierarchy(this.tree, this.filterCutoff, false);
+            get maxDisp() {
+                return (d3.max(Object.keys(this.filterHierarchy).map(key => this.dataTable[key].dispensability)));
             },
+            get minFilteredDisp() {
+                return (d3.min(Object.values(this.filterHierarchy).flat().map(key => this.dataTable[key].dispensability)));
 
+            },
             get filteredPvalues() {
                 const pvalues = {"goTerm": []};
                 Object.entries(this.dataTable).forEach(([key, value]) => {
@@ -68,7 +70,7 @@ export class DataStore {
                 });
                 return this.nest(pvalues, d => goMap.get(d.id))
             },
-            get clusterRepresentatives(){
+            get clusterRepresentatives() {
                 return Object.keys(this.clusterHierarchy)
             },
             setFilterCutoff: action((cutoff) => {
@@ -80,24 +82,29 @@ export class DataStore {
             }),
         });
         reaction(
-            () => this.filterCutoff,
+            () => this.filteredPvalues,
             () => {
-                if (this.dataLoaded) {
                     performPCA(this.filteredPvalues, response => {
                         this.pca = response;
-                        this.pcaLoaded = true;
                     });
                     performCorrelation(this.filteredPvalues, response => {
+                        console.log(response);
                         this.correlation = response;
-                        this.correlationLoaded = true;
                     })
-                }
             });
         reaction(
             () => this.filterHierarchy,
             (object) => {
                 this.tableStore.initTermState(Object.keys(object));
             });
+        reaction(() => this.filterCutoff, (cutoff => {
+            if (cutoff < this.maxDisp || cutoff >= this.minFilteredDisp) {
+                this.filteredTree = this.filterTree(this.tree);
+                this.filterHierarchy = this.extractHierarchy(this.tree, cutoff, false);
+            }
+        }));
+        this.filteredTree = this.filterTree(this.tree);
+        this.filterHierarchy = this.extractHierarchy(this.tree, this.filterCutoff, false);
         performPCA(this.filteredPvalues, response => {
             this.pca = response;
             this.pcaLoaded = true;
@@ -158,7 +165,11 @@ export class DataStore {
         if (tree !== null && typeof tree == "object") {
             return (Object.entries(tree).map(([key, child]) => {
                 if (typeof child == "object") {
-                    return ({name: key, children: this.traverse(child, dataTable), value: dataTable[key].dispensability})
+                    return ({
+                        name: key,
+                        children: this.traverse(child, dataTable),
+                        value: dataTable[key].dispensability
+                    })
                 } else return ({name: child, value: dataTable[child].dispensability});
             }));
         } else {
@@ -180,6 +191,7 @@ export class DataStore {
             return {"name": tree.name, value: tree.value};
         }
     }
+
     nest(data, ...keys) {
         const nest = d3.nest();
         for (const key of keys) nest.key(key);

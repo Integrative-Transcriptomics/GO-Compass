@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {inject, observer} from "mobx-react";
 import PropTypes from "prop-types";
 import Tree from "./Tree";
@@ -9,6 +9,7 @@ import calculateTreeLayout from "./RFLayout";
 const ClusteredHeatmap = inject("dataStore", "visStore")(observer((props) => {
     const [xPos, setXPos] = useState(0);
     const [mouseDown, setMouseDown] = useState(false);
+    const [descendants, setDescendants] = useState([]);
 
     const margins = {
         top: 40,
@@ -23,8 +24,9 @@ const ClusteredHeatmap = inject("dataStore", "visStore")(observer((props) => {
     const rectWidth = 10;
     const heatmapWidth = textWidth + (props.dataStore.conditions.length + 1) * rectWidth;
     const treeWidth = width - heatmapWidth - rectWidth;
-    const descendants = calculateTreeLayout(props.dataStore.filteredTree,height);
-
+    useEffect(()=>{
+        setDescendants(calculateTreeLayout(props.dataStore.filteredTree,height));
+    }, [props.dataStore.filteredTree, height]);
 
     return (
         <svg width={props.width} height={props.height} onMouseMove={(e) => setXPos(e.pageX)}

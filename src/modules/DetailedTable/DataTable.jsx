@@ -180,7 +180,7 @@ const DataTable = inject("dataStore")(observer((props) => {
     props.dataStore.tableStore.termState.map(d=>d.goTerm).forEach(goTerm => {
         if (header.length === 0) {
             keys = Object.keys(props.dataStore.dataTable[goTerm]).filter(d => d !== 'pvalues').concat(props.dataStore.conditions);
-            header = keys.map(d => <TableCell key={d} onClick={() => sort(d)} align="right">
+            header = keys.map(d => <TableCell key={d} onClick={() => sort(d.slice())} align="right">
                 <TableSortLabel
                     active={sortKey === d}
                     direction={sortKey === d ? sortDir : 'asc'}
