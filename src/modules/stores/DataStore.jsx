@@ -88,7 +88,6 @@ export class DataStore {
                         this.pca = response;
                     });
                     performCorrelation(this.filteredPvalues, response => {
-                        console.log(response);
                         this.correlation = response;
                     })
             });

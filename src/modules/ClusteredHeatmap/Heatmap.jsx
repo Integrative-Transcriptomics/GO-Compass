@@ -44,7 +44,7 @@ const Heatmap = inject("dataStore", "visStore")(observer((props) => {
             </g>);
         if(textHeight < rectHeight || props.dataStore.getFilterParent(descendant.data.name) === descendant.data.name) {
             text.push(
-                <g>
+                <g key={descendant.data.name}>
                     <text y={descendant.y}
                           alignmentBaseline="central"
                           fontSize={textHeight}
@@ -67,7 +67,7 @@ const Heatmap = inject("dataStore", "visStore")(observer((props) => {
             const y1 = descendant.y - 0.5 * rectHeight;
             const y2 = y1 + 0.5 * rectHeight;
             clusterCells.push(
-                <polygon points={x1 + "," + y1 + " " + x2 + "," + y2 + " " + x3 + "," + y1}
+                <polygon key={descendant.data.name +"polygon"} points={x1 + "," + y1 + " " + x2 + "," + y2 + " " + x3 + "," + y1}
                          fill={props.visStore.termColorScale(props.dataStore.getFilterParent(descendant.data.name))}/>
             );
         }

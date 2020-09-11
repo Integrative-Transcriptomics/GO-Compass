@@ -24,23 +24,24 @@ const ClusteredHeatmap = inject("dataStore", "visStore")(observer((props) => {
     const rectWidth = 10;
     const heatmapWidth = textWidth + (props.dataStore.conditions.length + 1) * rectWidth;
     const treeWidth = width - heatmapWidth - rectWidth;
-    useEffect(()=>{
-        setDescendants(calculateTreeLayout(props.dataStore.filteredTree,height));
+    useEffect(() => {
+        setDescendants(calculateTreeLayout(props.dataStore.filteredTree, height));
     }, [props.dataStore.filteredTree, height]);
-
-    return (
-        <svg width={props.width} height={props.height} onMouseMove={(e) => setXPos(e.pageX)}
-             onMouseDown={() => setMouseDown(true)} onMouseUp={() => setMouseDown(false)}>
-            <g transform={"translate(" + margins.left + "," + margins.top + ")"}>
-                <Tree width={treeWidth} height={height} descendants={descendants} xPos={xPos}
-                      mouseDown={mouseDown}/>
-                <g transform={"translate(" + (treeWidth + rectWidth) + ",0)"}>
-                    <Heatmap width={heatmapWidth} textWidth={textWidth} rectWidth={rectWidth} height={height}
-                             descendants={descendants}/>
+    if (descendants.length > 0) {
+        return (
+            <svg width={props.width} height={props.height} onMouseMove={(e) => setXPos(e.pageX)}
+                 onMouseDown={() => setMouseDown(true)} onMouseUp={() => setMouseDown(false)}>
+                <g transform={"translate(" + margins.left + "," + margins.top + ")"}>
+                    <Tree width={treeWidth} height={height} descendants={descendants} xPos={xPos}
+                          mouseDown={mouseDown}/>
+                    <g transform={"translate(" + (treeWidth + rectWidth) + ",0)"}>
+                        <Heatmap width={heatmapWidth} textWidth={textWidth} rectWidth={rectWidth} height={height}
+                                 descendants={descendants}/>
+                    </g>
                 </g>
-            </g>
-        </svg>
-    );
+            </svg>
+        );
+    } else return null;
 }));
 ClusteredHeatmap.propTypes = {
     width: PropTypes.number.isRequired,

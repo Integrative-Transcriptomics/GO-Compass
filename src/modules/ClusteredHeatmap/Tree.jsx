@@ -30,7 +30,7 @@ const Tree = inject("dataStore", "visStore")(observer((props) => {
 
 
         if (node.parent != null) {
-            links.push(<line x1={dispScale(node.x)} y1={node.y}
+            links.push(<line key={node.data.name} x1={dispScale(node.x)} y1={node.y}
                               x2={dispScale(node.parent.x)} y2={node.parent.y}
                               strokeWidth={1} stroke={linkColor}/>);
         }
