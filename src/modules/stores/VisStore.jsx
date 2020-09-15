@@ -26,7 +26,7 @@ export class VisStore {
                 const treemap = d3.treemap()
                     .tile(d3.treemapResquarify)
                     .size([width, height])
-                    .padding(d => d.height === 1 ? 2 : 0)
+                    .padding(d => d.height === 1 ? 1 : 0)
                     .round(true);
 
                 const root = treemap(d3.hierarchy({children: dataStore.nestedData, keys: dataStore.conditions})

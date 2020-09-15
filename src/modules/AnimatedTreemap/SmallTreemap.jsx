@@ -2,7 +2,7 @@ import React, {createRef, useCallback, useState} from "react";
 import PropTypes from 'prop-types';
 import * as d3 from "d3";
 import {inject, observer} from "mobx-react";
-import { v4 as uuidv4 } from 'uuid';
+import {v4 as uuidv4} from 'uuid';
 
 
 /**
@@ -19,15 +19,15 @@ const SmallTreemap = inject("dataStore", "visStore")(observer((props) => {
     const width = props.width - margins.left - margins.right;
     const fontSize = 10;
     const highlightRect = createRef();
-    const scale=width/props.parentWidth;
+    const scale = width / props.parentWidth;
 
     const currentLayout = props.visStore.treemapLayout(props.index);
     const stars = [];
     const children = [];
-    const mapId=uuidv4();
+    const mapId = uuidv4();
     currentLayout.children.forEach((parent, j) =>
         parent.children.forEach((child, i) => {
-            const id = mapId +'-'+ j + '-' + i;
+            const id = mapId + '-' + j + '-' + i;
             const isHighlighted = (props.visStore.parentHighlight === null | props.visStore.parentHighlight === parent.data.id)
                 & (props.visStore.childHighlight === null | props.visStore.childHighlight === child.data.id);
             const fill = props.visStore.termColorScale(parent.data.id);
@@ -39,6 +39,8 @@ const SmallTreemap = inject("dataStore", "visStore")(observer((props) => {
                           id={"rectSmall" + id}
                           width={child.x1 - child.x0} height={child.y1 - child.y0}
                           fill={fill}
+                          stroke={"white"}
+                          strokeWidth={1}
                           opacity={isHighlighted ? 1 : 0.5}/>
                     <title>
                         {child.data.name}
@@ -53,8 +55,8 @@ const SmallTreemap = inject("dataStore", "visStore")(observer((props) => {
                 </defs>
                 <text clipPath={'url(#clipSmall' + id + ')'}
                       opacity={-Math.log10(props.visStore.sigThreshold) < child.value ? 1 : 0}
-                      fontSize={fontSize/scale} y={child.y1 - child.y0}
-                      x={child.x1 - child.x0 - fontSize/scale}>*
+                      fontSize={fontSize / scale} y={child.y1 - child.y0}
+                      x={child.x1 - child.x0 - fontSize / scale}>*
                 </text>
             </g>);
         })
@@ -74,24 +76,20 @@ const SmallTreemap = inject("dataStore", "visStore")(observer((props) => {
             <text>{props.dataStore.conditions[props.index]}</text>
 
             <g transform={"scale(" + scale + ")"}>
-                <rect ref={highlightRect} x={currentLayout.x0} y={currentLayout.y0}
-                      width={currentLayout.x1 - currentLayout.x0}
-                      height={currentLayout.y1 - currentLayout.y0} stroke="black" strokeWidth={2} fill="none"
-                      opacity={highlighted ? 1 : 0}/>
                 {children}
                 {stars}
+                <rect ref={highlightRect} x={currentLayout.x0} y={currentLayout.y0}
+                      width={currentLayout.x1 - currentLayout.x0}
+                      height={currentLayout.y1 - currentLayout.y0} stroke="black" strokeWidth={2 / scale} fill="none"
+                      opacity={highlighted ? 1 : 0}/>
             </g>
         </g>
     );
 }));
 
 SmallTreemap.propTypes = {
-    width: PropTypes.number,
-    height: PropTypes.number,
-    data: PropTypes.object
-};
-SmallTreemap.defaultProps = {
-    width: 900,
-    height: 600,
+    width: PropTypes.number.isRequired,
+    parentWidth: PropTypes.number.isRequired,
+    index: PropTypes.number.isRequired,
 };
 export default SmallTreemap;
