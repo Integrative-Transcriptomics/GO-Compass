@@ -16,7 +16,6 @@ const AnimatedTreemap = inject("dataStore", "visStore")(observer((props) => {
         left: 20,
     };
     const width = props.width - margins.left - margins.right;
-    const height = props.height - margins.top - margins.bottom;
     const fontSize = 12;
 
 
@@ -24,31 +23,7 @@ const AnimatedTreemap = inject("dataStore", "visStore")(observer((props) => {
     const starRef = React.createRef();
 
 
-    const treemap = d3.treemap()
-        .tile(d3.treemapResquarify)
-        .size([width, height])
-        .padding(d => d.height === 1 ? 1 : 0)
-        .round(true);
-    // Compute the structure using the average value.
-    const root = treemap(d3.hierarchy({children: props.dataStore.nestedData, keys: props.dataStore.conditions})
-        .sum(d => d.values ? d3.sum(d.values) : 0)
-        .sort((a, b) => b.value - a.value));
-
-    const max = d3.max(props.dataStore.conditions
-        .map((d, i) => d3.hierarchy({children: props.dataStore.nestedData, keys: props.dataStore.conditions})
-            .sum(d => d.values ? d.values[i] : 0).value));
-    const layout = useCallback((index) => {
-        const k = Math.sqrt(root.sum(d => d.values ? d.values[index] : 0).value / max);
-        const x = (1 - k) / 2 * width;
-        const y = (1 - k) / 2 * height;
-        return treemap.size([width * k, height * k])(root)
-            .each(d => {
-                d.x0 += x;
-                d.x1 += x;
-                d.y0 += y;
-                d.y1 += y
-            })
-    }, [root, max, treemap, width, height]);
+    const layout = props.visStore.treemapLayout;
 
     const startAnimation = useCallback((index) => {
         let leaf = d3.selectAll([...leafRef.current.childNodes]);
@@ -122,7 +97,7 @@ const AnimatedTreemap = inject("dataStore", "visStore")(observer((props) => {
     );
     return (
         <svg width={props.width} height={props.height}>
-            <g transform={"translate(" + margins.left + "," + margins.top + ")"}>
+            <g transform={"translate(" + margins.left + "," + margins.top + ")scale("+ width/props.width+ ")"}>
                 <g ref={leafRef}>{rects}</g>
                 <g ref={starRef}>{stars}</g>
             </g>
