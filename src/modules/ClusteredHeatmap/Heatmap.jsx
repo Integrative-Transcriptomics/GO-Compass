@@ -7,7 +7,7 @@ import Legend from "./Legend";
 
 
 const Heatmap = inject("dataStore", "visStore")(observer((props) => {
-    const textHeight = 10;
+    const textHeight = 9;
     const rectHeight = props.height / props.descendants.filter(d => !("children" in d)).length;
 
     const range = ["white", "red"];
@@ -42,7 +42,6 @@ const Heatmap = inject("dataStore", "visStore")(observer((props) => {
                     </g>)
             })}
             </g>);
-        if(textHeight < rectHeight || props.dataStore.getFilterParent(descendant.data.name) === descendant.data.name) {
             text.push(
                 <g key={descendant.data.name}>
                     <text y={descendant.y}
@@ -53,7 +52,6 @@ const Heatmap = inject("dataStore", "visStore")(observer((props) => {
                     </text>
                     <title>{props.dataStore.dataTable[descendant.data.name].description}</title>
                 </g>);
-        }
         clusterCells.push(
             <rect key={descendant.data.name} y={descendant.y - 0.5 * rectHeight}
                   x={0.5 * props.rectWidth}

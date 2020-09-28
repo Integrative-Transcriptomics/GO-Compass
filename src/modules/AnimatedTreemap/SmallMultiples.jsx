@@ -1,6 +1,6 @@
 import React from "react";
 import PropTypes from 'prop-types';
-import Treemap from "./Treemap";
+import SmallTreemap from "./SmallTreemap";
 import {inject, observer} from "mobx-react";
 
 
@@ -22,8 +22,8 @@ const SmallMultiples = inject("dataStore", "visStore")(observer((props) => {
     const treemaps = [];
     props.dataStore.conditions.forEach((key, i) => {
         treemaps.push(<g key={key} transform={"translate(" + x + "," + y + ")"}>
-            <Treemap sigThreshold={props.sigThreshold}
-                     index={i} width={width} height={height}/>
+            <SmallTreemap sigThreshold={props.sigThreshold}
+                          index={i} parentWidth={props.width} width={width} height={height}/>
         </g>);
         if (Math.round(x + width) >= Math.round(props.width)) {
             y += height;
