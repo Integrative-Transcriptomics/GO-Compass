@@ -45,10 +45,10 @@ const App = () => {
     return (
         <div className={classes.root}>
             <React.Fragment>
-                <AppBar ref={appBar} position="sticky">
+                <AppBar ref={appBar} position="sticky" style={{backgroundColor: "#A51E37"}}>
                     <Toolbar>
                         <IconButton onClick={toggleDrawer} disabled={dataStore === null}>
-                            <MenuIcon/>
+                            <MenuIcon style={{ color: "white" }}/>
                         </IconButton>
                         <Typography className={classes.title} variant="h6">
                             GO Comparison Dashboard
