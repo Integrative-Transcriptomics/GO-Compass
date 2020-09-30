@@ -179,7 +179,7 @@ const DataTable = inject("dataStore")(observer((props) => {
     const scale = (d3.scaleLinear().domain([0, max]).range([0, 60]));
     props.dataStore.tableStore.termState.map(d=>d.goTerm).forEach(goTerm => {
         if (header.length === 0) {
-            keys = Object.keys(props.dataStore.dataTable[goTerm]).filter(d => d !== 'pvalues').concat(props.dataStore.conditions);
+            keys = props.dataStore.tableColumns;
             header = keys.map(d => <TableCell key={d} onClick={() => sort(d.slice())} align="right">
                 <TableSortLabel
                     active={sortKey === d}

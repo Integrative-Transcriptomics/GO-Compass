@@ -26,13 +26,11 @@ godag = GODag("go-basic.obo")
 optional_relationships = set()
 parents = get_go2parents(godag, optional_relationships)
 
-def MultiGO(goEnrichment, objanno, ontology, method):
-    background = objanno.get_id2gos(namespace=ontology)
+def MultiGO(goEnrichment, background, method):
     goEnrichment.sort_index(inplace= True)
     mask = goEnrichment[goEnrichment < float(request.form['pvalueFilter'])].isnull().all(axis=1)
     goEnrichment = goEnrichment[mask == False]
     goEnrichment = goEnrichment[goEnrichment.index.isin(godag.keys())]
-    print(goEnrichment)
     goTerms = goEnrichment.index.values
     matrix = np.array(createMatrix(goTerms, background, method))
     matrix[matrix == None] = 0
@@ -76,9 +74,8 @@ def iterateMatrix(matrix, goTerms, goEnrichment, background):
         row = row[row != -1]
         avgs[term] = (col.sum() + row.sum())/(len(goTerms)-1)
     tree = dict()
-    tree2 = dict()
     goList = dict()
-    while(len(goTerms)) > 0:
+    while len(goTerms) > 0:
         maxValue = np.amax(np.ravel(matrix))
         indices = np.where(matrix == maxValue)
         indices = list(zip(indices[0], indices[1]))[0]
@@ -94,29 +91,16 @@ def iterateMatrix(matrix, goTerms, goEnrichment, background):
             toKeep = termA
 
         if toKeep != toDelete:
-            if toDelete in tree2:
-                if toKeep in tree2:
-                    tree2[toKeep][toDelete] = tree2[toDelete]
-                else:
-                    tree2[toKeep] = tree2[toDelete]
-            else:
-                if toKeep in tree2:
-                    tree2[toKeep][toDelete] = toDelete
-                else:
-                    tree2[toKeep] = {toDelete: toDelete}
-            tree2.pop(toDelete, None)
-
-        if toKeep != toDelete:
             if toDelete in tree:
                 if toKeep in tree:
-                    tree[toKeep] = {toKeep: tree[toKeep], toDelete: tree[toDelete]}
+                    tree[toKeep][toDelete] = tree[toDelete]
                 else:
-                    tree[toKeep] = {toDelete: tree[toDelete],toKeep: toKeep}
+                    tree[toKeep] = tree[toDelete]
             else:
                 if toKeep in tree:
-                    tree[toKeep] = {toKeep: tree[toKeep], toDelete: toDelete}
+                    tree[toKeep][toDelete] = toDelete
                 else:
-                    tree[toKeep] = [toKeep, toDelete]
+                    tree[toKeep] = {toDelete: toDelete}
             tree.pop(toDelete, None)
         else:
             maxValue = 0
@@ -132,7 +116,7 @@ def iterateMatrix(matrix, goTerms, goEnrichment, background):
         goTerms = np.delete(goTerms, deleteIndex)
         matrix = np.delete(matrix, deleteIndex, 0)
         matrix = np.delete(matrix, deleteIndex, 1)
-    return {"tree": tree, "data": goList, "conditions": list(goEnrichment.columns), "tree2": tree2}
+    return {"tree": tree, "data": goList, "conditions": list(goEnrichment.columns), "tableColumns": ["termID", "description", "frequency", "rejection","uniqueness", "dispensability", "pvalues"] + list(goEnrichment.columns)}
 
 def testGoTerms(termA, termB, goEnrichment, background, goCounts, maxDiff):
     #frequency check
@@ -277,6 +261,42 @@ def correlation():
     corrMatrix = df.corr()
     return corrMatrix.to_json(orient="values")
 
+@app.route("/MultiSpeciesREVIGO", methods=["POST"])
+def MultiSpeciesREVIGO():
+    backgroundFiles = request.files.getlist("backgrounds[]")
+    geneListFiles = request.files.getlist("geneLists[]")
+    conditions = request.form.getlist("conditions[]")
+    backgroundMap = request.form.getlist("backgroundMap[]")
+    ontology = request.form["ontology"]
+    backgroundAnno = dict()
+    for index, file in enumerate(backgroundFiles):
+        backgroundAnno[file.filename]=readBackground(file, ontology)
+    enrichmentResults={}
+    enrichedTerms = list()
+    for index, file in enumerate(geneListFiles):
+        geneList=file.stream.read().decode("utf-8").splitlines()
+        result = np.transpose(GOEA(geneList, backgroundAnno[backgroundMap[index]], ontology)).tolist()
+        if index == 0:
+            for i, term in enumerate(result[0]):
+                enrichmentResults[term]=[result[1][i]]
+        else:
+            for term in enrichmentResults:
+                if term in result[0]:
+                    termIndex = result[0].index(term)
+                    enrichmentResults[term].append(result[1][termIndex])
+                else:
+                    enrichmentResults[term].append(1)
+            for i,term in enumerate(result[0]):
+                if term not in enrichmentResults:
+                    enrichmentResults[term]=np.full(shape=index, fill_value=1, dtype=np.float64).tolist()
+                    enrichmentResults[term].append(result[1][i])
+    enrichmentDF = pd.DataFrame(enrichmentResults).T.astype("float64")
+    enrichmentDF.columns = conditions
+    background = dict()
+    for key in backgroundAnno:
+        background.update(backgroundAnno[key].get_id2gos(namespace=ontology))
+    return MultiGO(enrichmentDF,background, request.form["method"])
+
 @app.route("/GeneListsMultiREVIGO", methods=["POST"])
 def GeneListsMultiREVIGO():
     backgroundFile = request.files["background"]
@@ -294,7 +314,8 @@ def GeneListsMultiREVIGO():
             enrichedTerms = enrichmentResult[:,0]
     enrichmentDF = pd.DataFrame(enrichmentResults)
     enrichmentDF.index = enrichedTerms
-    return MultiGO(enrichmentDF,objanno, ontology, request.form["method"])
+    background = objanno.get_id2gos(namespace=ontology)
+    return MultiGO(enrichmentDF,background, request.form["method"])
 
 @app.route("/GoListsMultiREVIGO", methods=["POST"])
 def GoListsMultiREVIGO():
@@ -303,7 +324,9 @@ def GoListsMultiREVIGO():
     objanno = readBackground(backgroundFile, ontology)
     goEnrichmentFile = request.files["goEnrichment"]
     goEnrichment = pd.read_csv(StringIO(goEnrichmentFile.stream.read().decode("UTF8"), newline=None), sep='\t', index_col =0)
-    return MultiGO(goEnrichment,objanno, ontology, request.form["method"])
+    background = objanno.get_id2gos(namespace=ontology)
+    print(background)
+    return MultiGO(goEnrichment,background, request.form["method"])
 
 """
 ideas to speed up:

@@ -14,11 +14,10 @@ import Tab from "@material-ui/core/Tab";
 import Typography from "@material-ui/core/Typography";
 import TextField from "@material-ui/core/TextField";
 import ListSubheader from "@material-ui/core/ListSubheader";
-import Paper from "@material-ui/core/Paper";
 import Grid from "@material-ui/core/Grid";
 import KeyboardArrowDownIcon from '@material-ui/icons/KeyboardArrowDown';
 import KeyboardArrowUpIcon from '@material-ui/icons/KeyboardArrowUp';
-import {multiRevigoGeneLists, multiRevigoGoLists} from "../parseDataFlask";
+import {multiRevigoGeneLists, multiRevigoGoLists, multiSpeciesRevigo} from "../parseDataFlask";
 import IconButton from "@material-ui/core/IconButton";
 import {DataStore} from "./stores/DataStore";
 import PropTypes from "prop-types";
@@ -27,6 +26,7 @@ import PropTypes from "prop-types";
 const SelectData = (props) => {
     const [goFile, setGoFile] = useState(null);
     const [backgroundFile, setBackgroundFile] = useState(null);
+    const [multiBackground, setMultiBackground] = useState([]);
     const [geneFiles, setGeneFiles] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
     const [ontology, setOntology] = useState("BP");
@@ -49,19 +49,29 @@ const SelectData = (props) => {
     );
     const launch = useCallback(() => {
         setIsLoading(true);
-        if (goFile !== null) {
+        if (selectedTab === 0) {
             multiRevigoGoLists(goFile, backgroundFile, ontology, selectedMeasure, pvalueFilter, response => {
-                props.setDataStore(new DataStore(response.data, response.tree2, response.conditions));
+                console.log(response);
+                props.setDataStore(new DataStore(response.data, response.tree, response.conditions, response.tableColumns));
             });
-        } else if (geneFiles.length > 0) {
+        } else {
             const reorderedFiles = conditions.map(d => {
                 return geneFiles[d.index];
             });
-            multiRevigoGeneLists(reorderedFiles, backgroundFile, conditions.map(d => d.condition), ontology, selectedMeasure, pvalueFilter, response => {
-                props.setDataStore(new DataStore(response.data, response.tree2, response.conditions));
-            });
+            if (selectedTab === 1) {
+                multiRevigoGeneLists(reorderedFiles, backgroundFile, conditions.map(d => d.condition), ontology, selectedMeasure, pvalueFilter, response => {
+                    props.setDataStore(new DataStore(response.data, response.tree, response.conditions, response.tableColumns));
+                });
+            } else {
+                const reorderedFiles = conditions.map(d => {
+                    return geneFiles[d.index];
+                });
+                multiSpeciesRevigo(reorderedFiles, [...multiBackground], conditions.map(d => d.condition), conditions.map(d => d.background), ontology, selectedMeasure, pvalueFilter, response => {
+                    props.setDataStore(new DataStore(response.data, response.tree, response.conditions, response.tableColumns));
+                });
+            }
         }
-    }, [goFile, backgroundFile, selectedMeasure, conditions, pvalueFilter, geneFiles, ontology, props]);
+    }, [goFile, backgroundFile, selectedMeasure, conditions, pvalueFilter, geneFiles, ontology, props, multiBackground, selectedTab]);
     const classes = useStyles();
     return (
         <Grid
@@ -79,139 +89,262 @@ const SelectData = (props) => {
                             textColor="primary"
                             onChange={(e, value) => selectTab(value)}
                         >
-                            <Tab label="GO-Term input">
-                            </Tab>
-                            <Tab label="Gene List input"/>
+                            <Tab label="GO Terms"/>
+                            <Tab label="Single species gene lists"/>
+                            <Tab label="Multi species gene lists"/>
                         </Tabs>
                     </ListItem>
                     <div hidden={selectedTab !== 0} role="tabpanel">
-                        <Paper variant="outlined">
-                            <ListSubheader>Select GO Term file</ListSubheader>
-                            <ListItem>
-                                <Typography>
-                                    <Button className={classes.menuButton}
-                                            variant="contained"
-                                            disabled={isLoading}
-                                            component="label"
-                                    >
-                                        Select File
-                                        <input
-                                            type="file"
-                                            style={{display: "none"}}
-                                            onChange={(event) => setGoFile(event.target.files[0])}
-                                        />
-                                    </Button>
-                                    {goFile !== null ? goFile.name : "No file selected"}
-                                </Typography>
-                            </ListItem>
-                        </Paper>
+                        <ListSubheader>Select GO Term file</ListSubheader>
+                        <ListItem>
+                            <Typography>
+                                <Button className={classes.menuButton}
+                                        variant="contained"
+                                        disabled={isLoading}
+                                        component="label"
+                                >
+                                    Select File
+                                    <input
+                                        type="file"
+                                        style={{display: "none"}}
+                                        onChange={(event) => setGoFile(event.target.files[0])}
+                                    />
+                                </Button>
+                                {goFile !== null ? goFile.name : "No file selected"}
+                            </Typography>
+                        </ListItem>
+                        <ListSubheader>Select Background file</ListSubheader>
+                        <ListItem>
+                            <Typography>
+                                <Button className={classes.menuButton}
+                                        variant="contained"
+                                        disabled={isLoading}
+                                        component="label"
+                                >
+                                    Select File
+                                    <input
+                                        type="file"
+                                        style={{display: "none"}}
+                                        onChange={(event) => setBackgroundFile(event.target.files[0])}
+                                    />
+                                </Button>
+                                {backgroundFile !== null ? backgroundFile.name : "No file selected"}
+                            </Typography>
+                        </ListItem>
                     </div>
                     <div hidden={selectedTab !== 1} role="tabpanel">
-                        <Paper variant="outlined">
-                            <ListSubheader>Select Gene Lists</ListSubheader>
-                            <ListItem>
-                                <Typography>
-                                    <Button className={classes.menuButton}
-                                            variant="contained"
-                                            disabled={isLoading}
-                                            component="label"
-                                    >
-                                        Select Files
-                                        <input
-                                            type="file"
-                                            multiple
-                                            style={{display: "none"}}
-                                            onChange={(event) => {
-                                                setConditions([...event.target.files].map((d, i) => {
-                                                    return ({"index": i, "condition": d.name.slice(0, -4)})
-                                                }));
-                                                setGeneFiles([...event.target.files])
-                                            }}
-                                        />
-                                    </Button>
-                                </Typography>
+                        <ListSubheader>Select Gene Lists</ListSubheader>
+                        <ListItem>
+                            <Typography>
+                                <Button className={classes.menuButton}
+                                        variant="contained"
+                                        disabled={isLoading}
+                                        component="label"
+                                >
+                                    Select Files
+                                    <input
+                                        type="file"
+                                        multiple
+                                        style={{display: "none"}}
+                                        onChange={(event) => {
+                                            setConditions([...event.target.files].map((d, i) => {
+                                                return ({"index": i, "condition": d.name.slice(0, -4)})
+                                            }));
+                                            setGeneFiles([...event.target.files])
+                                        }}
+                                    />
+                                </Button>
+                                {geneFiles.length > 0 ? geneFiles.length + " files selected" : "No file selected"}
+                            </Typography>
+                        </ListItem>
+                        <ListSubheader>Select Background file</ListSubheader>
+                        <ListItem>
+                            <Typography>
+                                <Button className={classes.menuButton}
+                                        variant="contained"
+                                        disabled={isLoading}
+                                        component="label"
+                                >
+                                    Select File
+                                    <input
+                                        type="file"
+                                        style={{display: "none"}}
+                                        onChange={(event) => setBackgroundFile(event.target.files[0])}
+                                    />
+                                </Button>
+                                {backgroundFile !== null ? backgroundFile.name : "No file selected"}
+                            </Typography>
+                        </ListItem>
+                        {conditions.length > 0 ? <ListSubheader>Specify conditions</ListSubheader> : null}
+                        {conditions.map((d, i) =>
+                            <ListItem key={d.index}>
+                                <IconButton onClick={() => {
+                                    const conditionsCopy = conditions.slice();
+                                    if (i > 0) {
+                                        const save = conditionsCopy[i - 1];
+                                        conditionsCopy[i - 1] = conditionsCopy[i];
+                                        conditionsCopy[i] = save;
+                                    } else {
+                                        const save = conditionsCopy[0];
+                                        conditionsCopy[0] = conditionsCopy[conditions.length - 1];
+                                        conditionsCopy[conditions.length - 1] = save;
+                                    }
+                                    setConditions(conditionsCopy);
+                                }}>
+                                    <KeyboardArrowUpIcon fontSize="small"/>
+                                </IconButton>
+                                <IconButton onClick={() => {
+                                    const conditionsCopy = conditions.slice();
+                                    if (i < conditionsCopy.length - 1) {
+                                        const save = conditionsCopy[i + 1];
+                                        conditionsCopy[i + 1] = conditionsCopy[i];
+                                        conditionsCopy[i] = save;
+                                    } else {
+                                        const save = conditionsCopy[0];
+                                        conditionsCopy[0] = conditionsCopy[i];
+                                        conditionsCopy[i] = save;
+                                    }
+                                    setConditions(conditionsCopy);
+                                }}>
+                                    <KeyboardArrowDownIcon fontSize="small"/>
+                                </IconButton>
+                                <TextField required
+                                           label={geneFiles[d.index].name}
+                                           disabled={isLoading}
+                                           onChange={(e) => {
+                                               let conditionsCopy = conditions.slice();
+                                               conditionsCopy[i].condition = e.target.value;
+                                               setConditions(conditionsCopy);
+                                           }}
+                                           value={d.condition}/>
                             </ListItem>
-                            {conditions.length > 0 ? <ListSubheader>Specify conditions</ListSubheader> : null}
-                            {conditions.map((d, i) =>
-                                <ListItem key={d.index}>
-                                    <IconButton onClick={() => {
-                                        const conditionsCopy = conditions.slice();
-                                        if (i > 0) {
-                                            const save = conditionsCopy[i - 1];
-                                            conditionsCopy[i - 1] = conditionsCopy[i];
-                                            conditionsCopy[i] = save;
-                                        } else {
-                                            const save = conditionsCopy[0];
-                                            conditionsCopy[0] = conditionsCopy[conditions.length - 1];
-                                            conditionsCopy[conditions.length - 1] = save;
-                                        }
-                                        setConditions(conditionsCopy);
-                                    }}>
-                                        <KeyboardArrowUpIcon fontSize="small"/>
-                                    </IconButton>
-                                    <IconButton onClick={() => {
-                                        const conditionsCopy = conditions.slice();
-                                        if (i < conditionsCopy.length - 1) {
-                                            const save = conditionsCopy[i + 1];
-                                            conditionsCopy[i + 1] = conditionsCopy[i];
-                                            conditionsCopy[i] = save;
-                                        } else {
-                                            const save = conditionsCopy[0];
-                                            conditionsCopy[0] = conditionsCopy[i];
-                                            conditionsCopy[i] = save;
-                                        }
-                                        setConditions(conditionsCopy);
-                                    }}>
-                                        <KeyboardArrowDownIcon fontSize="small"/>
-                                    </IconButton>
-                                    <TextField required
-                                               label={geneFiles[d.index].name}
-                                               disabled={isLoading}
-                                               onChange={(e) => {
-                                                   let conditionsCopy = conditions.slice();
-                                                   conditionsCopy[i].condition = e.target.value;
-                                                   setConditions(conditionsCopy);
-                                               }}
-                                               value={d.condition}/>
-                                </ListItem>
-                            )}
-                        </Paper>
+                        )}
                     </div>
-                    <ListSubheader>Select Background file</ListSubheader>
-                    <ListItem>
-                        <Typography>
-                            <Button className={classes.menuButton}
-                                    variant="contained"
-                                    disabled={isLoading}
-                                    component="label"
-                            >
-                                Select File
-                                <input
-                                    type="file"
-                                    style={{display: "none"}}
-                                    onChange={(event) => setBackgroundFile(event.target.files[0])}
-                                />
-                            </Button>
-                            {backgroundFile !== null ? backgroundFile.name : "No file selected"}
-                        </Typography>
-                    </ListItem>
-                    {/*}
-                                                <ListItem onClick={() => getGenomes()}>
-                                                <Autocomplete
-                                                id="combo-box-demo"
-                                                options={speciesOptions}
+                    <div hidden={selectedTab !== 2} role="tabpanel">
+                        <ListSubheader>Select Gene Lists</ListSubheader>
+                        <ListItem>
+                            <Typography>
+                                <Button className={classes.menuButton}
+                                        variant="contained"
+                                        disabled={isLoading}
+                                        component="label"
+                                >
+                                    Select Files
+                                    <input
+                                        type="file"
+                                        multiple
+                                        style={{display: "none"}}
+                                        onChange={(event) => {
+                                            setConditions([...event.target.files].map((d, i) => {
+                                                if (multiBackground.length > 0) {
+                                                    return ({
+                                                        index: i,
+                                                        condition: d.name.slice(0, -4),
+                                                        background: multiBackground[0].name
+                                                    })
+
+                                                } else {
+                                                    return ({index: i, condition: d.name.slice(0, -4)})
+                                                }
+                                            }));
+                                            setGeneFiles([...event.target.files])
+                                        }}
+                                    />
+                                </Button>
+                                {geneFiles.length > 0 ? geneFiles.length + " files selected" : "No file selected"}
+                            </Typography>
+                        </ListItem>
+                        <ListSubheader>Select Background files</ListSubheader>
+                        <ListItem>
+                            <Typography>
+                                <Button className={classes.menuButton}
+                                        variant="contained"
+                                        disabled={isLoading}
+                                        component="label"
+                                >
+                                    Select File
+                                    <input
+                                        type="file"
+                                        multiple
+                                        style={{display: "none"}}
+                                        onChange={(event) => {
+                                            if (conditions.length > 0) {
+                                                setConditions(conditions.map(d => {
+                                                    return ({
+                                                        index: d.index,
+                                                        condition: d.condition,
+                                                        background: event.target.files[0].name
+                                                    })
+                                                }))
+                                            }
+                                            setMultiBackground(event.target.files)
+                                        }}
+                                    />
+                                </Button>
+                                {multiBackground.length > 0 ? multiBackground.length + " files selected" : "No file selected"}
+                            </Typography>
+                        </ListItem>
+                        {conditions.length > 0 && multiBackground.length > 0 ?
+                            <div><ListSubheader>Specify conditions</ListSubheader>
+                                {conditions.map((d, i) =>
+                                    <ListItem key={d.index}>
+                                        <IconButton onClick={() => {
+                                            const conditionsCopy = conditions.slice();
+                                            if (i > 0) {
+                                                const save = conditionsCopy[i - 1];
+                                                conditionsCopy[i - 1] = conditionsCopy[i];
+                                                conditionsCopy[i] = save;
+                                            } else {
+                                                const save = conditionsCopy[0];
+                                                conditionsCopy[0] = conditionsCopy[conditions.length - 1];
+                                                conditionsCopy[conditions.length - 1] = save;
+                                            }
+                                            setConditions(conditionsCopy);
+                                        }}>
+                                            <KeyboardArrowUpIcon fontSize="small"/>
+                                        </IconButton>
+                                        <IconButton onClick={() => {
+                                            const conditionsCopy = conditions.slice();
+                                            if (i < conditionsCopy.length - 1) {
+                                                const save = conditionsCopy[i + 1];
+                                                conditionsCopy[i + 1] = conditionsCopy[i];
+                                                conditionsCopy[i] = save;
+                                            } else {
+                                                const save = conditionsCopy[0];
+                                                conditionsCopy[0] = conditionsCopy[i];
+                                                conditionsCopy[i] = save;
+                                            }
+                                            setConditions(conditionsCopy);
+                                        }}>
+                                            <KeyboardArrowDownIcon fontSize="small"/>
+                                        </IconButton>
+                                        <TextField required
+                                                   label={geneFiles[d.index].name}
+                                                   disabled={isLoading}
+                                                   onChange={(e) => {
+                                                       let conditionsCopy = conditions.slice();
+                                                       conditionsCopy[i].condition = e.target.value;
+                                                       setConditions(conditionsCopy);
+                                                   }}
+                                                   value={d.condition}/>
+                                        <FormControl className={classes.formControl}>
+                                            <InputLabel>Background</InputLabel>
+                                            <Select
+                                                value={d.background}
                                                 disabled={isLoading}
-                                                getOptionLabel={(option) => option.label}
-                                                value={selectedSpecies}
-                                                style={{width: 300}}
-                                                onChange={(event, newValue) => {
-                                                selectSpecies(newValue);
+                                                onChange={(e) => {
+                                                    let conditionsCopy = conditions.slice();
+                                                    conditionsCopy[i].background = e.target.value;
+                                                    setConditions(conditionsCopy);
                                                 }}
-                                                renderInput={(params) => <TextField {...params} label="Select Species"
-                                                variant="outlined"/>}
-                                                />
-                                                </ListItem>
-                                                */}
+                                            >
+                                                {[...multiBackground].map(file => <MenuItem key={file.name}
+                                                                                            value={file.name}>{file.name}</MenuItem>)}
+                                            </Select>
+                                        </FormControl>
+                                    </ListItem>
+                                )}</div> : null}
+                    </div>
                     <ListItem>
                         <FormControl className={classes.formControl}>
                             <InputLabel>Similarity measure</InputLabel>

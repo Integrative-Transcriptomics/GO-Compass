@@ -7,9 +7,10 @@ import {VisStore} from "./VisStore";
 
 export class DataStore {
     /* some observable state */
-    constructor(dataTable, tree, conditions) {
+    constructor(dataTable, tree, conditions, tableColumns) {
         this.tableStore = new TableStore();
         this.visStore = new VisStore(this);
+        this.tableColumns = tableColumns;
         extendObservable(this, {
             filterCutoff: 0.7,
             clusterCutoff: 0.1,
@@ -19,10 +20,9 @@ export class DataStore {
             filterHierarchy: {},
             conditions: conditions,
             correlation: [],
-            pca:[],
+            pca: [],
             pcaLoaded: false,
             correlationLoaded: false,
-
 
 
             get clusterHierarchy() {
@@ -84,12 +84,12 @@ export class DataStore {
         reaction(
             () => this.filteredPvalues,
             () => {
-                    performPCA(this.filteredPvalues, response => {
-                        this.pca = response;
-                    });
-                    performCorrelation(this.filteredPvalues, response => {
-                        this.correlation = response;
-                    })
+                performPCA(this.filteredPvalues, response => {
+                    this.pca = response;
+                });
+                performCorrelation(this.filteredPvalues, response => {
+                    this.correlation = response;
+                })
             });
         reaction(
             () => this.filterHierarchy,

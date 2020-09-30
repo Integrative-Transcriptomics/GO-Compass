@@ -23,7 +23,7 @@ function multiRevigoGeneLists(dataFiles, backgroundFile, conditions, ontology, m
     dataFiles.forEach(file => formData.append("geneLists[]", file));
     formData.append("ontology", ontology);
     formData.append("pvalueFilter", pvalueFilter);
-    conditions.forEach(condition => formData.append("conditions[]",condition));
+    conditions.forEach(condition => formData.append("conditions[]", condition));
     formData.append("method", method);
     if (dataFiles.length > 0) {
         axios.post("/GeneListsMultiREVIGO", formData)
@@ -54,4 +54,22 @@ function multiRevigoGoLists(dataFile, backgroundFile, ontology, method, pvalueFi
     }
 }
 
-export {multiRevigoGoLists, multiRevigoGeneLists, getSupportedGenomes, performPCA, performCorrelation};
+function multiSpeciesRevigo(dataFiles, backgroundFiles, conditions, backgroundMap, ontology, method, pvalueFilter, callback) {
+    const formData = new FormData();
+    backgroundFiles.forEach(file => formData.append("backgrounds[]", file));
+    dataFiles.forEach(file => formData.append("geneLists[]", file));
+    formData.append("ontology", ontology);
+    formData.append("pvalueFilter", pvalueFilter);
+    conditions.forEach(condition => formData.append("conditions[]", condition));
+    backgroundMap.forEach(condition => formData.append("backgroundMap[]", condition));
+    formData.append("method", method);
+    if (dataFiles.length > 0 && backgroundFiles.length > 0) {
+        axios.post("/MultiSpeciesREVIGO", formData)
+            .then(response => callback(response.data))
+            .catch(function (error) {
+                console.log(error)
+            });
+    }
+}
+
+export {multiRevigoGoLists, multiRevigoGeneLists, multiSpeciesRevigo, getSupportedGenomes, performPCA, performCorrelation};
