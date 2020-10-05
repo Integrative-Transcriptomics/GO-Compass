@@ -19,8 +19,8 @@ import KeyboardArrowDownIcon from '@material-ui/icons/KeyboardArrowDown';
 import KeyboardArrowUpIcon from '@material-ui/icons/KeyboardArrowUp';
 import {multiRevigoGeneLists, multiRevigoGoLists, multiSpeciesRevigo} from "../parseDataFlask";
 import IconButton from "@material-ui/core/IconButton";
-import {DataStore} from "./stores/DataStore";
 import PropTypes from "prop-types";
+import {RootStore} from "./stores/RootStore";
 
 
 const SelectData = (props) => {
@@ -29,7 +29,6 @@ const SelectData = (props) => {
     const [multiBackground, setMultiBackground] = useState([]);
     const [geneFiles, setGeneFiles] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
-    const [ontology, setOntology] = useState("BP");
     const [conditions, setConditions] = useState([]);
     const [selectedMeasure, selectMeasure] = useState("Edge based");
     const [pvalueFilter, setPvalueFilter] = useState(0.5);
@@ -50,28 +49,35 @@ const SelectData = (props) => {
     const launch = useCallback(() => {
         setIsLoading(true);
         if (selectedTab === 0) {
-            multiRevigoGoLists(goFile, backgroundFile, ontology, selectedMeasure, pvalueFilter, response => {
-                console.log(response);
-                props.setDataStore(new DataStore(response.data, response.tree, response.conditions, response.tableColumns));
+            multiRevigoGoLists(goFile, backgroundFile, selectedMeasure, pvalueFilter, response => {
+                props.setRootStore(new RootStore(response.results, response.conditions, response.tableColumns));
             });
         } else {
             const reorderedFiles = conditions.map(d => {
                 return geneFiles[d.index];
             });
             if (selectedTab === 1) {
-                multiRevigoGeneLists(reorderedFiles, backgroundFile, conditions.map(d => d.condition), ontology, selectedMeasure, pvalueFilter, response => {
-                    props.setDataStore(new DataStore(response.data, response.tree, response.conditions, response.tableColumns));
+                multiRevigoGeneLists(reorderedFiles, backgroundFile, conditions.map(d => d.condition), selectedMeasure, pvalueFilter, response => {
+                    props.setRootStore(new RootStore(response.results, response.conditions, response.tableColumns));
                 });
             } else {
                 const reorderedFiles = conditions.map(d => {
                     return geneFiles[d.index];
                 });
-                multiSpeciesRevigo(reorderedFiles, [...multiBackground], conditions.map(d => d.condition), conditions.map(d => d.background), ontology, selectedMeasure, pvalueFilter, response => {
-                    props.setDataStore(new DataStore(response.data, response.tree, response.conditions, response.tableColumns));
+                multiSpeciesRevigo(reorderedFiles, [...multiBackground], conditions.map(d => d.condition), conditions.map(d => d.background), selectedMeasure, pvalueFilter, response => {
+                    props.setRootStore(new RootStore(response.results, response.conditions, response.tableColumns));
                 });
             }
         }
-    }, [goFile, backgroundFile, selectedMeasure, conditions, pvalueFilter, geneFiles, ontology, props, multiBackground, selectedTab]);
+    }, [goFile, backgroundFile, selectedMeasure, conditions, pvalueFilter, geneFiles, props, multiBackground, selectedTab]);
+    let launchable;
+    if (selectedTab === 0) {
+        launchable = goFile !== null && backgroundFile !== null;
+    } else if (selectedTab === 1) {
+        launchable = geneFiles.length > 0 && backgroundFile !== null;
+    } else {
+        launchable = geneFiles.length > 0 && multiBackground.length > 0;
+    }
     const classes = useStyles();
     return (
         <Grid
@@ -360,20 +366,6 @@ const SelectData = (props) => {
                         </FormControl>
                     </ListItem>
                     <ListItem>
-                        <FormControl className={classes.formControl}>
-                            <InputLabel>Ontology</InputLabel>
-                            <Select
-                                value={ontology}
-                                disabled={isLoading}
-                                onChange={(e) => setOntology(e.target.value)}
-                            >
-                                <MenuItem value="BP">Biological Process</MenuItem>
-                                <MenuItem value="MF">Molecular Function</MenuItem>
-                                <MenuItem value="CC">Cellular Component</MenuItem>
-                            </Select>
-                        </FormControl>
-                    </ListItem>
-                    <ListItem>
                         <TextField
                             id="standard-number"
                             label="P-value filter"
@@ -392,7 +384,7 @@ const SelectData = (props) => {
                         <Button className={classes.menuButton}
                                 variant="contained"
                                 component="label"
-                                disabled={isLoading || (goFile == null && geneFiles.length === 0)}
+                                disabled={isLoading || !launchable}
                                 onClick={launch}
                         >
                             Go!
@@ -407,7 +399,7 @@ const SelectData = (props) => {
     );
 };
 SelectData.propTypes = {
-    setDataStore: PropTypes.func.isRequired,
+    setRootStore: PropTypes.func.isRequired,
 };
 
 export default SelectData;

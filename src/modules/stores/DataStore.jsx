@@ -98,8 +98,8 @@ export class DataStore {
             });
         reaction(() => this.filterCutoff, (cutoff => {
             if (cutoff < this.maxDisp || cutoff >= this.minFilteredDisp) {
-                this.filteredTree = this.filterTree(this.tree);
-                this.filterHierarchy = this.extractHierarchy(this.tree, cutoff, false);
+                    this.filteredTree = this.filterTree(this.tree);
+                    this.filterHierarchy = this.extractHierarchy(this.tree, cutoff, false);
             }
         }));
         this.filteredTree = this.filterTree(this.tree);

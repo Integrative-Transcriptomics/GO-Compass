@@ -27,28 +27,42 @@ const App = () => {
         }),
     );
     const [open, setOpen] = useState(false);
-    const [dataStore, setDataStore] = useState(null);
+    const [rootStore, setRootStore] = useState(null);
 
     const appBar = React.createRef();
 
     useEffect(() => {
-        if (appBar.current != null && dataStore !== null) {
-            dataStore.visStore.setPlotHeight(window.innerHeight - appBar.current.getBoundingClientRect().height);
+        if (appBar.current != null && rootStore !== null) {
+            rootStore.dataStores[rootStore.ontology].visStore.setPlotHeight(window.innerHeight - appBar.current.getBoundingClientRect().height);
         }
-    }, [appBar, dataStore]);
+    }, [appBar, rootStore]);
 
 
     const toggleDrawer = useCallback(() => {
         setOpen(!open);
     }, [open]);
     const classes = useStyles();
+    let views = [];
+    if (rootStore !== null) {
+        rootStore.ontologies.forEach(ont => {
+            views.push(<div style={{display: rootStore.ontology === ont.id ? "block" : "none"}}>
+                <Provider rootStore={rootStore} visStore={rootStore.dataStores[ont.id].visStore}>
+                    <AppDrawer open={open} toggleDrawer={toggleDrawer}/>
+                </Provider>
+                <Provider dataStore={rootStore.dataStores[ont.id]} visStore={rootStore.dataStores[ont.id].visStore}>
+                    <Plots/>
+                </Provider>
+            </div>)
+        });
+    }
+
     return (
         <div className={classes.root}>
             <React.Fragment>
                 <AppBar ref={appBar} position="sticky" style={{backgroundColor: "#A51E37"}}>
                     <Toolbar>
-                        <IconButton onClick={toggleDrawer} disabled={dataStore === null}>
-                            <MenuIcon style={{ color: "white" }}/>
+                        <IconButton onClick={toggleDrawer} disabled={rootStore === null}>
+                            <MenuIcon style={{color: "white"}}/>
                         </IconButton>
                         <Typography className={classes.title} variant="h6">
                             GO Comparison Dashboard
@@ -57,12 +71,7 @@ const App = () => {
                     </Toolbar>
                 </AppBar>
             </React.Fragment>
-            {dataStore !== null ?
-                <Provider dataStore={dataStore} visStore={dataStore.visStore}>
-                    <Plots/>
-                    <AppDrawer open={open} toggleDrawer={toggleDrawer}/>
-                </Provider> :
-                <SelectData setDataStore={setDataStore}/>}
+            {rootStore !== null ? views : <SelectData setRootStore={setRootStore}/>}
         </div>
     );
 };

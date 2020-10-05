@@ -7,8 +7,12 @@ import Drawer from "@material-ui/core/Drawer";
 import React from "react";
 import {inject, observer} from "mobx-react";
 import PropTypes from "prop-types";
+import FormControl from "@material-ui/core/FormControl";
+import InputLabel from "@material-ui/core/InputLabel";
+import Select from "@material-ui/core/Select";
+import MenuItem from "@material-ui/core/MenuItem";
 
-const AppDrawer = inject("dataStore", "visStore")(observer((props) => {
+const AppDrawer = inject("rootStore", "visStore")(observer((props) => {
     return (<Drawer anchor={"left"} open={props.open} onClose={props.toggleDrawer}>
         <List>
             <ListItem>
@@ -16,14 +20,26 @@ const AppDrawer = inject("dataStore", "visStore")(observer((props) => {
                     id="standard-number"
                     label="Significance Threshold"
                     type="number"
-                    value={props.dataStore.visStore.sigThreshold}
-                    onChange={(e) => props.dataStore.visStore.setSigThreshold(e.target.value)}
+                    value={props.visStore.sigThreshold}
+                    onChange={(e) => props.visStore.setSigThreshold(e.target.value)}
                     InputLabelProps={{
                         shrink: true,
                     }}
                     size="small"
                     margin="dense"
                 />
+            </ListItem>
+            <ListItem>
+                <FormControl>
+                    <InputLabel>Ontology</InputLabel>
+                    <Select
+                        value={props.rootStore.ontology}
+                        onChange={(e) => props.rootStore.setOntology(e.target.value)}
+                    >
+                        {props.rootStore.ontologies.map(ontology => <MenuItem key={ontology.id}
+                                                                    value={ontology.id}>{ontology.name}</MenuItem>)}
+                    </Select>
+                </FormControl>
             </ListItem>
             <ListItem>
                 <FormControlLabel
@@ -33,6 +49,7 @@ const AppDrawer = inject("dataStore", "visStore")(observer((props) => {
                     label="Time Series Data"
                 />
             </ListItem>
+
         </List>
     </Drawer>)
 }));

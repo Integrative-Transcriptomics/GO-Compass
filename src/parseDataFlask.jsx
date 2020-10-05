@@ -17,11 +17,10 @@ function getSupportedGenomes(callback) {
         .then(response => callback(response.data.search.output.genomes.genome))
 }
 
-function multiRevigoGeneLists(dataFiles, backgroundFile, conditions, ontology, method, pvalueFilter, callback) {
+function multiRevigoGeneLists(dataFiles, backgroundFile, conditions, method, pvalueFilter, callback) {
     const formData = new FormData();
     formData.append("background", backgroundFile);
     dataFiles.forEach(file => formData.append("geneLists[]", file));
-    formData.append("ontology", ontology);
     formData.append("pvalueFilter", pvalueFilter);
     conditions.forEach(condition => formData.append("conditions[]", condition));
     formData.append("method", method);
@@ -35,12 +34,11 @@ function multiRevigoGeneLists(dataFiles, backgroundFile, conditions, ontology, m
 
 }
 
-function multiRevigoGoLists(dataFile, backgroundFile, ontology, method, pvalueFilter, callback) {
+function multiRevigoGoLists(dataFile, backgroundFile, method, pvalueFilter, callback) {
     if (dataFile != null) {
         const formData = new FormData();
         formData.append("background", backgroundFile);
         formData.append("goEnrichment", dataFile);
-        formData.append("ontology", ontology);
         formData.append("pvalueFilter", pvalueFilter);
         formData.append("method", method);
         axios.post("/GoListsMultiREVIGO", formData)
@@ -54,11 +52,10 @@ function multiRevigoGoLists(dataFile, backgroundFile, ontology, method, pvalueFi
     }
 }
 
-function multiSpeciesRevigo(dataFiles, backgroundFiles, conditions, backgroundMap, ontology, method, pvalueFilter, callback) {
+function multiSpeciesRevigo(dataFiles, backgroundFiles, conditions, backgroundMap, method, pvalueFilter, callback) {
     const formData = new FormData();
     backgroundFiles.forEach(file => formData.append("backgrounds[]", file));
     dataFiles.forEach(file => formData.append("geneLists[]", file));
-    formData.append("ontology", ontology);
     formData.append("pvalueFilter", pvalueFilter);
     conditions.forEach(condition => formData.append("conditions[]", condition));
     backgroundMap.forEach(condition => formData.append("backgroundMap[]", condition));

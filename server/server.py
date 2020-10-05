@@ -9,6 +9,7 @@ from goatools.semantic import TermCounts, resnik_sim, lin_sim, semantic_similari
 from goatools.gosubdag.gosubdag import GoSubDag
 from goatools.godag.go_tasks import get_go2parents
 from goatools.goea.go_enrichment_ns import GOEnrichmentStudyNS
+from goatools.godag.consts import NAMESPACE2NS
 
 from findDescendants import getDescendants
 from sklearn.decomposition import PCA
@@ -24,6 +25,7 @@ app = Flask(__name__)
 
 godag = GODag("go-basic.obo")
 optional_relationships = set()
+ontologies = ["MF", "BP", "CC"]
 parents = get_go2parents(godag, optional_relationships)
 
 def MultiGO(goEnrichment, background, method):
@@ -116,7 +118,7 @@ def iterateMatrix(matrix, goTerms, goEnrichment, background):
         goTerms = np.delete(goTerms, deleteIndex)
         matrix = np.delete(matrix, deleteIndex, 0)
         matrix = np.delete(matrix, deleteIndex, 1)
-    return {"tree": tree, "data": goList, "conditions": list(goEnrichment.columns), "tableColumns": ["termID", "description", "frequency", "rejection","uniqueness", "dispensability", "pvalues"] + list(goEnrichment.columns)}
+    return {"tree": tree, "data": goList}
 
 def testGoTerms(termA, termB, goEnrichment, background, goCounts, maxDiff):
     #frequency check
@@ -202,7 +204,7 @@ def getAssociatedGenes(term, background):
         associatedGenes = filteredBackground[0,:]
     return associatedGenes
 
-def readBackground(backgroundFile,ontology):
+def readBackground(backgroundFile):
     helperFileName= uuid.uuid1().hex + ".txt"
     helperFile= open(helperFileName, "a")
     helperFile.write(StringIO(backgroundFile.stream.read().decode("UTF8"), newline=None).read())
@@ -220,7 +222,7 @@ def flattenBackground(background):
             genes.append(gene)
     return [genes, terms]
 
-def GOEA(genes, objanno, ontology):
+def GOEA(genes, objanno):
     goeaobj = GOEnrichmentStudyNS(
             objanno.get_id2gos().keys(), # List of mouse protein-coding genes
             objanno.get_ns2assc(), # geneid/GO associations
@@ -229,12 +231,12 @@ def GOEA(genes, objanno, ontology):
             alpha = 0.05, # default significance cut-off
             methods = ['fdr_bh']) # defult multipletest correction method
     goea_quiet_all = goeaobj.run_study(genes, prt=None)
-    goea_results = list()
+    goea_results = dict((el,[]) for el in ontologies)
     for r in goea_quiet_all:
-        if r.NS== ontology:
-            goea_results.append([r.GO, r.p_fdr_bh])
-    goea_results = np.array(goea_results)
-    goea_results = goea_results[goea_results[:,0].argsort()]
+        goea_results[r.NS].append([r.GO,r.p_fdr_bh])
+    for ont in goea_results:
+        goea_results[ont] = np.array(goea_results[ont])
+        goea_results[ont] = goea_results[ont][goea_results[ont][:,0].argsort()]
     return goea_results
 
 
@@ -267,66 +269,80 @@ def MultiSpeciesREVIGO():
     geneListFiles = request.files.getlist("geneLists[]")
     conditions = request.form.getlist("conditions[]")
     backgroundMap = request.form.getlist("backgroundMap[]")
-    ontology = request.form["ontology"]
     backgroundAnno = dict()
     for index, file in enumerate(backgroundFiles):
-        backgroundAnno[file.filename]=readBackground(file, ontology)
-    enrichmentResults={}
+        backgroundAnno[file.filename]=readBackground(file)
+    enrichmentResults=dict((el,dict()) for el in ontologies)
     enrichedTerms = list()
     for index, file in enumerate(geneListFiles):
         geneList=file.stream.read().decode("utf-8").splitlines()
-        result = np.transpose(GOEA(geneList, backgroundAnno[backgroundMap[index]], ontology)).tolist()
-        if index == 0:
-            for i, term in enumerate(result[0]):
-                enrichmentResults[term]=[result[1][i]]
-        else:
-            for term in enrichmentResults:
-                if term in result[0]:
-                    termIndex = result[0].index(term)
-                    enrichmentResults[term].append(result[1][termIndex])
-                else:
-                    enrichmentResults[term].append(1)
-            for i,term in enumerate(result[0]):
-                if term not in enrichmentResults:
-                    enrichmentResults[term]=np.full(shape=index, fill_value=1, dtype=np.float64).tolist()
-                    enrichmentResults[term].append(result[1][i])
-    enrichmentDF = pd.DataFrame(enrichmentResults).T.astype("float64")
-    enrichmentDF.columns = conditions
-    background = dict()
-    for key in backgroundAnno:
-        background.update(backgroundAnno[key].get_id2gos(namespace=ontology))
-    return MultiGO(enrichmentDF,background, request.form["method"])
+        result = GOEA(geneList, backgroundAnno[backgroundMap[index]])
+        for ont in ontologies:
+            if index == 0:
+                for i, term in enumerate(result[ont][:,0]):
+                    enrichmentResults[ont][term]=[result[ont][i,1]]
+            else:
+                for term in enrichmentResults[ont]:
+                    if term in result[ont][:,0]:
+                        termIndex = result[ont][:,0].tolist().index(term)
+                        enrichmentResults[ont][term].append(result[ont][termIndex,1])
+                    else:
+                        enrichmentResults[ont][term].append(1)
+                for i,term in enumerate(result[ont][:,0]):
+                    if term not in enrichmentResults[ont]:
+                        enrichmentResults[ont][term]=np.full(shape=index, fill_value=1, dtype=np.float64).tolist()
+                        enrichmentResults[ont][term].append(result[ont][:,1][i])
+    print(enrichmentResults)
+    multiGOresults=dict()
+    for ont in ontologies:
+        enrichmentDF = pd.DataFrame(enrichmentResults[ont]).T.astype("float64")
+        enrichmentDF.columns = conditions
+        if len(enrichmentDF)>0:
+            background = dict()
+            for key in backgroundAnno:
+                background.update(backgroundAnno[key].get_id2gos(ont))
+            multiGOresults[ont]=MultiGO(enrichmentDF,background, request.form["method"])
+    return {"results": multiGOresults, "conditions": conditions, "tableColumns": ["termID", "description", "frequency", "rejection","uniqueness", "dispensability"] + conditions}
 
 @app.route("/GeneListsMultiREVIGO", methods=["POST"])
 def GeneListsMultiREVIGO():
     backgroundFile = request.files["background"]
     geneListFiles = request.files.getlist("geneLists[]")
-    ontology = request.form["ontology"]
     conditions = request.form.getlist("conditions[]")
-    objanno = readBackground(backgroundFile, ontology)
-    enrichmentResults=dict()
-    enrichedTerms = list()
+    objanno = readBackground(backgroundFile)
+    enrichmentResults=dict((el,dict()) for el in ontologies)
+    enrichedTerms = dict((el,[]) for el in ontologies)
     for index, file in enumerate(geneListFiles):
         geneList=file.stream.read().decode("utf-8").splitlines()
-        enrichmentResult = GOEA(geneList, objanno, ontology)
-        enrichmentResults[conditions[index]] = enrichmentResult[:,1].astype(np.float64).tolist()
-        if index == 0:
-            enrichedTerms = enrichmentResult[:,0]
-    enrichmentDF = pd.DataFrame(enrichmentResults)
-    enrichmentDF.index = enrichedTerms
-    background = objanno.get_id2gos(namespace=ontology)
-    return MultiGO(enrichmentDF,background, request.form["method"])
+        enrichmentResult = GOEA(geneList, objanno)
+        for ont in ontologies:
+            enrichmentResults[ont][conditions[index]] = enrichmentResult[ont][:,1].astype(np.float64).tolist()
+            if index == 0:
+                enrichedTerms[ont] = enrichmentResult[ont][:,0]
+    multiGOresults=dict()
+    for ont in ontologies:
+        enrichmentDF = pd.DataFrame(enrichmentResults[ont])
+        enrichmentDF.index = enrichedTerms[ont]
+        if len(enrichmentDF)>0:
+            background = objanno.get_id2gos(namespace=ont)
+            multiGOresults[ont]=MultiGO(enrichmentDF,background, request.form["method"])
+    return {"results": multiGOresults, "conditions": conditions, "tableColumns": ["termID", "description", "frequency", "rejection","uniqueness", "dispensability"] + conditions}
 
 @app.route("/GoListsMultiREVIGO", methods=["POST"])
 def GoListsMultiREVIGO():
     backgroundFile = request.files["background"]
-    ontology = request.form["ontology"]
-    objanno = readBackground(backgroundFile, ontology)
     goEnrichmentFile = request.files["goEnrichment"]
+    objanno = readBackground(backgroundFile)
     goEnrichment = pd.read_csv(StringIO(goEnrichmentFile.stream.read().decode("UTF8"), newline=None), sep='\t', index_col =0)
-    background = objanno.get_id2gos(namespace=ontology)
-    print(background)
-    return MultiGO(goEnrichment,background, request.form["method"])
+    multiGOresults=dict()
+    for ont in ontologies:
+        filteredDAG = [d for d in godag if NAMESPACE2NS[godag[d].namespace] == ont]
+        enrichmentDF = goEnrichment[goEnrichment.index.isin(filteredDAG)]
+        if len(enrichmentDF) >0:
+            background = objanno.get_id2gos(namespace=ont)
+            multiGOresults[ont]=MultiGO(enrichmentDF,background, request.form["method"])
+    conditions = enrichmentDF.columns.values.tolist()
+    return {"results": multiGOresults, "conditions": conditions, "tableColumns": ["termID", "description", "frequency", "rejection","uniqueness", "dispensability"] + conditions}
 
 """
 ideas to speed up:
