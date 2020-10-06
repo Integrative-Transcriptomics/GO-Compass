@@ -50,7 +50,7 @@ const SimpleChart = inject("dataStore", "visStore")(observer((props) => {
             });
             return stackedChildren;
         },
-        get lineData(){
+        get lineData() {
             const lineData = [];
             props.dataStore.nestedData.forEach(parent => {
                 let add = false;
@@ -86,30 +86,33 @@ const SimpleChart = inject("dataStore", "visStore")(observer((props) => {
     }, [props.visStore, store]);
 
     let chart;
-    if (!props.visStore.isTimeSeries) {
+    if (!props.isTimeSeries) {
         chart = <StackedBarChart width={props.width}
                                  height={store.chartHeight}
                                  data={store.stackedData}
-                                 mapper={store.mapper}/>
+                                 mapper={store.mapper}
+                                 sigThreshold={props.sigThreshold}/>
     } else {
         if (props.visStore.tsPlotType === 'lineChart') {
             chart =
                 <LineChart width={props.width}
                            height={store.chartHeight}
                            data={store.lineData}
-                           mapper={store.mapper}/>
+                           mapper={store.mapper}
+                           sigThreshold={props.sigThreshold}/>
         } else {
             chart =
                 <StreamGraph width={props.width}
                              height={store.chartHeight}
-                             data= {store.stackedData}
-                             mapper={store.mapper}/>
+                             data={store.stackedData}
+                             mapper={store.mapper}
+                             sigThreshold={props.sigThreshold}/>
         }
     }
     return (
         <Box>
             <div ref={rest}>
-                {props.visStore.isTimeSeries ?
+                {props.isTimeSeries ?
                     <div>
                         <PlayButton/>
                         <Button aria-controls="simple-menu" aria-haspopup="true"
@@ -141,6 +144,7 @@ const SimpleChart = inject("dataStore", "visStore")(observer((props) => {
 SimpleChart.propTypes = {
     width: PropTypes.number.isRequired,
     height: PropTypes.number.isRequired,
+    sigThreshold: PropTypes.number.isRequired,
 };
 export default SimpleChart;
 

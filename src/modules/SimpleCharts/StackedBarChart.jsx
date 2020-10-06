@@ -61,7 +61,8 @@ const StackedBarChart = inject("dataStore", "visStore")(observer((props) => {
     });
     let sigLine = null;
     if (!props.visStore.showOverview && props.visStore.childHighlight !== null) {
-        sigLine = <SignificanceLine width={width} height={yScale(-Math.log10(props.visStore.sigThreshold))}/>
+        sigLine = <SignificanceLine width={width} height={yScale(-Math.log10(props.sigThreshold))}
+                                    sigThreshold={props.sigThreshold}/>
     }
     const startAnimation = useCallback((index) => {
         let els = d3.selectAll([...highlightRef.current.childNodes]);
@@ -97,6 +98,7 @@ StackedBarChart.propTypes = {
     height: PropTypes.number.isRequired,
     data: PropTypes.arrayOf(PropTypes.object).isRequired,
     mapper: PropTypes.instanceOf(Map).isRequired,
+    sigThreshold: PropTypes.number.isRequired,
 };
 export default StackedBarChart;
 

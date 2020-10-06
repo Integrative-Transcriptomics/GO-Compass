@@ -8,7 +8,7 @@ import {VisStore} from "./VisStore";
 export class DataStore {
     /* some observable state */
     constructor(dataTable, tree, conditions, tableColumns) {
-        this.tableStore = new TableStore();
+        this.tableStore = new TableStore(dataTable, conditions, tableColumns);
         this.visStore = new VisStore(this);
         this.tableColumns = tableColumns;
         extendObservable(this, {

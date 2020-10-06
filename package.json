@@ -24,9 +24,7 @@
   },
   "scripts": {
     "dev": "concurrently \"npm run server\" \"npm run start\"",
-    "devFlask": "concurrently \"npm run flaskServer\" \"npm run start\"",
-    "flaskServer": "cd server && flask run --no-debugger",
-    "server": "Rscript server/runServer.R",
+    "server": "cd server && flask run --no-debugger",
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",

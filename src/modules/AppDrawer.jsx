@@ -12,7 +12,7 @@ import InputLabel from "@material-ui/core/InputLabel";
 import Select from "@material-ui/core/Select";
 import MenuItem from "@material-ui/core/MenuItem";
 
-const AppDrawer = inject("rootStore", "visStore")(observer((props) => {
+const AppDrawer = inject("rootStore")(observer((props) => {
     return (<Drawer anchor={"left"} open={props.open} onClose={props.toggleDrawer}>
         <List>
             <ListItem>
@@ -20,8 +20,8 @@ const AppDrawer = inject("rootStore", "visStore")(observer((props) => {
                     id="standard-number"
                     label="Significance Threshold"
                     type="number"
-                    value={props.visStore.sigThreshold}
-                    onChange={(e) => props.visStore.setSigThreshold(e.target.value)}
+                    value={props.rootStore.sigThreshold}
+                    onChange={(e) => props.rootStore.setSigThreshold(e.target.value)}
                     InputLabelProps={{
                         shrink: true,
                     }}
@@ -43,8 +43,8 @@ const AppDrawer = inject("rootStore", "visStore")(observer((props) => {
             </ListItem>
             <ListItem>
                 <FormControlLabel
-                    control={<Switch checked={props.visStore.isTimeSeries}
-                                     onChange={() => props.visStore.toggleIsTimeSeries()}
+                    control={<Switch checked={props.rootStore.isTimeSeries}
+                                     onChange={() => props.rootStore.toggleIsTimeSeries()}
                                      name="checkedA"/>}
                     label="Time Series Data"
                 />

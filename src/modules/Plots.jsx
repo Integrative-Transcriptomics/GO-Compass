@@ -9,7 +9,7 @@ import Paper from "@material-ui/core/Paper";
 import DataTable from "./DetailedTable/DataTable";
 import CorrelationHeatmap from "./CorrelationHeatmap";
 import PCA from "./PCA";
-import {inject, observer} from "mobx-react";
+import {inject, observer, Provider} from "mobx-react";
 import ClusteredHeatmap from "./ClusteredHeatmap/ClusteredHeatmap";
 import Typography from "@material-ui/core/Typography";
 import Button from "@material-ui/core/Button";
@@ -86,7 +86,8 @@ const Plots = inject("dataStore", "visStore")(observer((props) => {
                         {props.visStore.childHighlight == null ? "Category Overview"
                             : "Highlighted Term: " + props.dataStore.dataTable[props.visStore.childHighlight].description}
                     </Typography>
-                    <SimpleChart width={props.visStore.screenWidth / 3} height={props.visStore.plotHeight / 2}/>
+                    <SimpleChart sigThreshold={props.sigThreshold} isTimeSeries={props.isTimeSeries}
+                                 width={props.visStore.screenWidth / 3} height={props.visStore.plotHeight / 2}/>
                 </Paper>
             </Grid>
             <Grid item xs={4}>
@@ -117,7 +118,8 @@ const Plots = inject("dataStore", "visStore")(observer((props) => {
                             </Button>
                         }
                     />
-                    <AnimatedTreemap width={props.visStore.screenWidth / 3}
+                    <AnimatedTreemap sigThreshold={props.sigThreshold}
+                                     width={props.visStore.screenWidth / 3}
                                      height={props.visStore.plotHeight / 2}/>
                 </Paper>
             </Grid>
@@ -126,12 +128,15 @@ const Plots = inject("dataStore", "visStore")(observer((props) => {
                     <Typography>
                         Treemaps
                     </Typography>
-                    <SmallMultiples width={props.visStore.screenWidth / 3} height={props.visStore.plotHeight / 2}/>
+                    <SmallMultiples sigThreshold={props.sigThreshold} width={props.visStore.screenWidth / 3}
+                                    height={props.visStore.plotHeight / 2}/>
                 </Paper>
             </Grid>
             <Grid item xs={12}>
                 <Paper className={classes.paper}>
-                    <DataTable/>
+                    <Provider tableStore={props.dataStore.tableStore}>
+                        <DataTable sigThreshold={props.sigThreshold}/>
+                    </Provider>
                 </Paper>
             </Grid>
         </Grid>

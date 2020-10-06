@@ -54,7 +54,7 @@ const SmallTreemap = inject("dataStore", "visStore")(observer((props) => {
                     </clipPath>
                 </defs>
                 <text clipPath={'url(#clipSmall' + id + ')'}
-                      opacity={-Math.log10(props.visStore.sigThreshold) < child.value ? 1 : 0}
+                      opacity={-Math.log10(props.sigThreshold) < child.value ? 1 : 0}
                       fontSize={fontSize / scale} y={child.y1 - child.y0}
                       x={child.x1 - child.x0 - fontSize / scale}>*
                 </text>
@@ -91,5 +91,6 @@ SmallTreemap.propTypes = {
     width: PropTypes.number.isRequired,
     parentWidth: PropTypes.number.isRequired,
     index: PropTypes.number.isRequired,
+    sigThreshold: PropTypes.number.isRequired,
 };
 export default SmallTreemap;

@@ -40,7 +40,7 @@ const SmallMultiples = inject("dataStore", "visStore")(observer((props) => {
 SmallMultiples.propTypes = {
     width: PropTypes.number,
     height: PropTypes.number,
-    data: PropTypes.object
+    sigThreshold: PropTypes.number.isRequired,
 };
 SmallMultiples.defaultProps = {
     width: 900,

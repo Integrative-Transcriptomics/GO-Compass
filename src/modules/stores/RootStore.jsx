@@ -11,9 +11,17 @@ export class RootStore {
         });
         extendObservable(this, {
             ontology: "BP",
+            sigThreshold: 0.05,
+            isTimeSeries: false,
             setOntology: action((ontolgy) => {
                 this.ontology = ontolgy;
-            })
+            }),
+            toggleIsTimeSeries: action(() => {
+                this.isTimeSeries = !this.isTimeSeries;
+            }),
+            setSigThreshold: action((threshold) => {
+                this.sigThreshold = threshold;
+            }),
         });
     }
 

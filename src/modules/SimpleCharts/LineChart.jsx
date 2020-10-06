@@ -46,7 +46,8 @@ const LineChart = inject("dataStore", "visStore")(observer((props) => {
     });
     let sigLine = null;
     if (!props.visStore.showOverview && props.visStore.childHighlight !== null) {
-        sigLine = <SignificanceLine width={width} height={yScale(-Math.log10(props.visStore.sigThreshold))}/>
+        sigLine = <SignificanceLine width={width} height={yScale(-Math.log10(props.sigThreshold))}
+                                    sigThreshold={props.sigThreshold}/>
     }
     const xAxis = d3.axisBottom()
         .scale(xScale)
@@ -73,6 +74,7 @@ LineChart.propTypes = {
     width: PropTypes.number.isRequired,
     height: PropTypes.number.isRequired,
     data: PropTypes.arrayOf(PropTypes.object).isRequired,
+    sigThreshold: PropTypes.number.isRequired,
 };
 export default LineChart;
 

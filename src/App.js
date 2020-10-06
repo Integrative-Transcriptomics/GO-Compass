@@ -45,12 +45,9 @@ const App = () => {
     let views = [];
     if (rootStore !== null) {
         rootStore.ontologies.forEach(ont => {
-            views.push(<div style={{display: rootStore.ontology === ont.id ? "block" : "none"}}>
-                <Provider rootStore={rootStore} visStore={rootStore.dataStores[ont.id].visStore}>
-                    <AppDrawer open={open} toggleDrawer={toggleDrawer}/>
-                </Provider>
+            views.push(<div key={ont.id} style={{display: rootStore.ontology === ont.id ? "block" : "none"}}>
                 <Provider dataStore={rootStore.dataStores[ont.id]} visStore={rootStore.dataStores[ont.id].visStore}>
-                    <Plots/>
+                    <Plots sigThreshold={rootStore.sigThreshold} isTimeSeries={rootStore.isTimeSeries}/>
                 </Provider>
             </div>)
         });
@@ -67,11 +64,16 @@ const App = () => {
                         <Typography className={classes.title} variant="h6">
                             GO Comparison Dashboard
                         </Typography>
-
                     </Toolbar>
                 </AppBar>
             </React.Fragment>
-            {rootStore !== null ? views : <SelectData setRootStore={setRootStore}/>}
+            <React.Fragment>
+                {rootStore !== null?<Provider rootStore={rootStore}>
+                    <AppDrawer open={open} toggleDrawer={toggleDrawer}/>
+                </Provider>:null}
+                            {rootStore !== null ? views : <SelectData setRootStore={setRootStore}/>}
+
+            </React.Fragment>
         </div>
     );
 };

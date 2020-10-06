@@ -10,12 +10,10 @@ export class VisStore {
             screenWidth: 1000,
             plotHeight: 700,
             tsPlotType: "lineChart",
-            isTimeSeries: false,
             showOverview: false,
             parentHighlight: null,
             childHighlight: null,
             conditionIndex: 0,
-            sigThreshold: 0.05,
 
             get termColorScale() {
                 return d3.scaleOrdinal(d3.schemeSet2);
