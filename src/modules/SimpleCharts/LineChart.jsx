@@ -22,11 +22,16 @@ const LineChart = inject("dataStore", "visStore")(observer((props) => {
     const yScale = d3.scaleLinear().domain([0, max]).range([height, 0]);
     let childHighlightLine = null;
     const lines = props.data.map(line => {
-        const isHighlighted = ((props.visStore.parentHighlight === null | props.visStore.parentHighlight === line.id) & props.visStore.childHighlight === null) | !props.visStore.showOverview;
-        if (props.visStore.showOverview && props.visStore.childHighlight !== null
-            && props.mapper.get(props.visStore.childHighlight).parent === line.id) {
+        const isHighlighted = props.visStore.childHighlights.length === 0 | !props.visStore.showOverview;
+        if (props.visStore.showOverview && props.visStore.childHighlights.length !== 0
+            && props.visStore.childHighlights.map(d => props.mapper.get(d).parent).includes(line.id)) {
             let childLineString = '';
-            props.mapper.get(props.visStore.childHighlight).values.forEach((value, i) => {
+            const values = props.dataStore.conditions.map((cond,i)=>{
+                return d3.sum(props.visStore.childHighlights
+                .filter(d => props.mapper.get(d).parent === line.id)
+                    .map(d=>props.mapper.get(d).values[i]))
+            });
+            values.forEach((value, i) => {
                 childLineString += xScale(i) + ',' + yScale(value) + ' ';
             });
             childHighlightLine = <polyline fill='none'
@@ -45,7 +50,7 @@ const LineChart = inject("dataStore", "visStore")(observer((props) => {
                          points={linestring}/>
     });
     let sigLine = null;
-    if (!props.visStore.showOverview && props.visStore.childHighlight !== null) {
+    if (props.visStore.childHighlights.length === 1) {
         sigLine = <SignificanceLine width={width} height={yScale(-Math.log10(props.sigThreshold))}
                                     sigThreshold={props.sigThreshold}/>
     }

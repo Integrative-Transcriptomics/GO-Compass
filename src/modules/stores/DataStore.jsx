@@ -73,6 +73,9 @@ export class DataStore {
             get clusterRepresentatives() {
                 return Object.keys(this.clusterHierarchy)
             },
+            get currentGOterms(){
+                return Object.keys(this.filterHierarchy)
+            },
             setFilterCutoff: action((cutoff) => {
                 this.filterCutoff = cutoff;
             }),

@@ -24,6 +24,7 @@ function multiRevigoGeneLists(dataFiles, backgroundFile, conditions, method, pva
     formData.append("pvalueFilter", pvalueFilter);
     conditions.forEach(condition => formData.append("conditions[]", condition));
     formData.append("method", method);
+    console.log(formData)
     if (dataFiles.length > 0) {
         axios.post("/GeneListsMultiREVIGO", formData)
             .then(response => callback(response.data))
@@ -41,6 +42,7 @@ function multiRevigoGoLists(dataFile, backgroundFile, method, pvalueFilter, call
         formData.append("goEnrichment", dataFile);
         formData.append("pvalueFilter", pvalueFilter);
         formData.append("method", method);
+        console.log(formData);
         axios.post("/GoListsMultiREVIGO", formData)
             .then(response => {
                 console.log(response.data);

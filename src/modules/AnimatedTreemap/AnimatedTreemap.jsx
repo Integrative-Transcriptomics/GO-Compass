@@ -60,8 +60,7 @@ const AnimatedTreemap = inject("dataStore", "visStore")(observer((props) => {
     const stars = [];
     layout(index).children.forEach((parent, j) =>
         parent.children.forEach((child, i) => {
-            const isHighlighted = (props.visStore.parentHighlight === null | props.visStore.parentHighlight === parent.data.id)
-                & (props.visStore.childHighlight === null | props.visStore.childHighlight === child.data.id);
+            const isHighlighted = props.visStore.childHighlights.length === 0 || props.visStore.childHighlights.includes(child.data.id);
             const fill = props.visStore.termColorScale(parent.data.id);
             const id = j + '-' + i;
             rects.push(

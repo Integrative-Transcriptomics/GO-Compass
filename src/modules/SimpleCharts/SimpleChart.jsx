@@ -38,11 +38,11 @@ const SimpleChart = inject("dataStore", "visStore")(observer((props) => {
             const stackedChildren = props.dataStore.conditions.map((d, i) => {
                 const tpData = {};
                 props.dataStore.nestedData.forEach(parent => {
-                    if (props.visStore.showOverview || props.visStore.childHighlight === null) {
+                    if (props.visStore.showOverview || props.visStore.childHighlights.length === 0) {
                         tpData[parent.id] = d3.sum(parent.children.map(child => child.values[i]));
                     } else {
                         tpData[parent.id] = d3.sum(parent.children
-                            .filter(child => props.visStore.childHighlight === child.id)
+                            .filter(child => props.visStore.childHighlights.includes(child.id))
                             .map(child => child.values[i]));
                     }
                 });
@@ -57,7 +57,7 @@ const SimpleChart = inject("dataStore", "visStore")(observer((props) => {
                 const values = props.dataStore.conditions.map((d, i) => {
                     let current = 0;
                     parent.children.forEach(child => {
-                        if (props.visStore.showOverview || props.visStore.childHighlight === null || props.visStore.childHighlight === child.id) {
+                        if (props.visStore.showOverview || props.visStore.childHighlights.length === 0 || props.visStore.childHighlights.includes(child.id)) {
                             add = true;
                             current += child.values[i];
                         }

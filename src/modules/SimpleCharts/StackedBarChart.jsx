@@ -35,12 +35,15 @@ const StackedBarChart = inject("dataStore", "visStore")(observer((props) => {
                      x={xScale(i)} y={yScale(max)} fill='none' stroke='black' strokeWidth='2px'/>
     });
     const rects = series.map((category) => {
-        const isHighlighted = ((props.visStore.parentHighlight === null | props.visStore.parentHighlight === category.key) & props.visStore.childHighlight === null) | !props.visStore.showOverview;
+        const isHighlighted = props.visStore.childHighlights.length === 0 | !props.visStore.showOverview;
         return category.map((timepoint, i) => {
             let childHighlightRect = null;
-            if (props.visStore.showOverview && props.visStore.childHighlight !== null
-                && props.mapper.get(props.visStore.childHighlight).parent === category.key) {
-                const childHeight = height - yScale(props.mapper.get(props.visStore.childHighlight).values[i]);
+            if (props.visStore.showOverview && props.visStore.childHighlights.length !== 0
+                && props.visStore.childHighlights.map(d => props.mapper.get(d).parent).includes(category.key)) {
+                const sum = d3.sum(props.visStore.childHighlights
+                    .filter(d => props.mapper.get(d).parent === category.key)
+                    .map(d => props.mapper.get(d).values[i]));
+                const childHeight = height - yScale(sum);
                 childHighlightRect = <rect x={xScale(i)}
                                            y={yScale(timepoint[0]) - childHeight}
                                            fill={props.visStore.termColorScale(category.key)}
@@ -60,7 +63,7 @@ const StackedBarChart = inject("dataStore", "visStore")(observer((props) => {
         })
     });
     let sigLine = null;
-    if (!props.visStore.showOverview && props.visStore.childHighlight !== null) {
+    if (props.visStore.childHighlights.length === 1) {
         sigLine = <SignificanceLine width={width} height={yScale(-Math.log10(props.sigThreshold))}
                                     sigThreshold={props.sigThreshold}/>
     }

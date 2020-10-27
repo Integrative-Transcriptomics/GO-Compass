@@ -22,7 +22,7 @@ const Heatmap = inject("dataStore", "visStore")(observer((props) => {
     let text = [];
     descendants.forEach(descendant => {
         let fontWeight = "normal";
-        if (props.visStore.childHighlight === descendant.data.name) {
+        if (props.visStore.childHighlights.includes(descendant.data.name)) {
             fontWeight = "bold";
         }
         if (props.dataStore.getFilterParent(descendant.data.name) === descendant.data.name) {

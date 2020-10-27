@@ -24,7 +24,7 @@ const Tree = inject("dataStore", "visStore")(observer((props) => {
             fill = props.visStore.termColorScale(props.dataStore.getFilterParent(node.data.name));
             linkColor = fill;
         }
-        if (props.visStore.childHighlight === node.data.name) {
+        if (props.visStore.childHighlights.includes(node.data.name)) {
             strokeColor = "black";
         }
 

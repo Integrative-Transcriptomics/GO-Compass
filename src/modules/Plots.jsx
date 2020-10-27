@@ -8,13 +8,13 @@ import {createStyles} from "@material-ui/core";
 import Paper from "@material-ui/core/Paper";
 import DataTable from "./DetailedTable/DataTable";
 import CorrelationHeatmap from "./CorrelationHeatmap";
-import PCA from "./PCA";
 import {inject, observer, Provider} from "mobx-react";
 import ClusteredHeatmap from "./ClusteredHeatmap/ClusteredHeatmap";
 import Typography from "@material-ui/core/Typography";
 import Button from "@material-ui/core/Button";
 import {KeyboardArrowLeft, KeyboardArrowRight} from "@material-ui/icons";
 import MobileStepper from "@material-ui/core/MobileStepper";
+import UpSet from "./UpSet";
 
 /**
  * @return {null}
@@ -39,6 +39,15 @@ const Plots = inject("dataStore", "visStore")(observer((props) => {
     const changeWidth = useCallback(() => {
         props.visStore.setScreenWidth(window.innerWidth)
     }, [props.visStore]);
+    let detailedHeader;
+    if (props.visStore.childHighlights.length === 0) {
+        detailedHeader = "Category Overview"
+    } else if (props.visStore.childHighlights.length === 1) {
+        console.log(props.visStore.childHighlights);
+        detailedHeader = "Highlighted Term: " + props.dataStore.dataTable[props.visStore.childHighlights[0]].description;
+    } else {
+        detailedHeader = "Subset Overview"
+    }
     useEffect(() => {
         changeWidth();
         window.addEventListener("resize", changeWidth);
@@ -46,15 +55,16 @@ const Plots = inject("dataStore", "visStore")(observer((props) => {
     const classes = useStyles();
     return (
         <Grid className={classes.root} container spacing={1}>
-            <Grid item xs={6}>
+            <Grid item xs={5}>
                 <Paper className={classes.paper}>
                     <Typography>
                         Cutoff Selection in GO Dispensability Tree
                     </Typography>
-                    <ClusteredHeatmap width={props.visStore.screenWidth / 2} height={props.visStore.plotHeight / 2}
+                    <ClusteredHeatmap width={props.visStore.screenWidth / 12 * 5} height={props.visStore.plotHeight / 2}
                     />
                 </Paper>
             </Grid>
+            {/*
             <Grid item xs={3}>
                 <Paper className={classes.paper}>
                     <Typography>
@@ -65,6 +75,17 @@ const Plots = inject("dataStore", "visStore")(observer((props) => {
                              height={props.visStore.plotHeight / 2}
                         /> : null
                     }
+                </Paper>
+            </Grid>
+            */}
+            <Grid item xs={4}>
+                <Paper className={classes.paper}>
+                    <Typography>
+                        Significant enrichment Upset plot
+                    </Typography>
+                    <UpSet width={props.visStore.screenWidth / 3}
+                           height={props.visStore.plotHeight / 2}
+                           sigThreshold={props.sigThreshold}/>
                 </Paper>
             </Grid>
             <Grid item xs={3}>
@@ -83,8 +104,7 @@ const Plots = inject("dataStore", "visStore")(observer((props) => {
             <Grid item xs={4}>
                 <Paper className={classes.paper}>
                     <Typography>
-                        {props.visStore.childHighlight == null ? "Category Overview"
-                            : "Highlighted Term: " + props.dataStore.dataTable[props.visStore.childHighlight].description}
+                        {detailedHeader}
                     </Typography>
                     <SimpleChart sigThreshold={props.sigThreshold} isTimeSeries={props.isTimeSeries}
                                  width={props.visStore.screenWidth / 3} height={props.visStore.plotHeight / 2}/>

@@ -11,16 +11,16 @@ export class VisStore {
             plotHeight: 700,
             tsPlotType: "lineChart",
             showOverview: false,
-            parentHighlight: null,
             childHighlight: null,
+            childHighlights: [],
             conditionIndex: 0,
 
             get termColorScale() {
                 return d3.scaleOrdinal(d3.schemeSet2);
             },
             get treemapLayout() {
-                const width=this.screenWidth/3;
-                const height=this.plotHeight/2;
+                const width = this.screenWidth / 3;
+                const height = this.plotHeight / 2;
                 const treemap = d3.treemap()
                     .tile(d3.treemapResquarify)
                     .size([width, height])
@@ -50,7 +50,7 @@ export class VisStore {
             },
 
             setScreenWidth: action((width) => {
-                this.screenWidth = width -100;
+                this.screenWidth = width - 100;
             }),
             setPlotHeight: action((height) => {
                 this.plotHeight = height - 200;
@@ -65,10 +65,21 @@ export class VisStore {
                 this.showOverview = !this.showOverview
             }),
             setChildHighlight: action((highlight) => {
-                this.childHighlight = highlight;
+                if (highlight === null) {
+                    this.childHighlights = []
+                } else {
+                    this.childHighlights = [highlight];
+                }
+            }),
+            setChildHighlights: action((highlights) => {
+                this.childHighlights = highlights;
             }),
             setParentHighlight: action((highlight) => {
-                this.parentHighlight = highlight;
+                if (highlight !== null) {
+                    this.setChildHighlights(this.dataStore.clusterHierarchy[highlight])
+                } else {
+                    this.setChildHighlights([])
+                }
             }),
             setConditionIndex: action((index) => {
                 this.conditionIndex = index;

@@ -1,4 +1,4 @@
-import React, {useCallback, useState} from 'react';
+import React from 'react';
 import TableContainer from "@material-ui/core/TableContainer";
 import Paper from "@material-ui/core/Paper";
 import Table from "@material-ui/core/Table";
@@ -90,7 +90,7 @@ const Row = inject("visStore", "dataStore", "tableStore")(observer((props) => {
         <TableRow
             onMouseEnter={() => props.visStore.setChildHighlight(props.goTerm)}
             onMouseLeave={() => props.visStore.setChildHighlight(null)}
-            selected={props.visStore.childHighlight === props.goTerm}>
+            selected={props.visStore.childHighlights.includes(props.goTerm)}>
             <TableCell>
                 {props.subTerms.length > 0 ?
                     <IconButton aria-label="expand row" size="small"
@@ -111,6 +111,7 @@ Row.propTypes = {
 };
 
 const DataTable = inject("dataStore", "tableStore")(observer((props) => {
+    console.log(props.dataStore.currentGOterms);
     const classes = useStyles();
     const content = [];
     let header = [];

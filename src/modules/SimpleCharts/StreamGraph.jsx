@@ -32,12 +32,14 @@ const StreamGraph = inject("dataStore", "visStore")(observer((props) => {
     })]).range([height, 0]);
     let childHighlightPath = null;
     const paths = series.map((category) => {
-        const isHighlighted = ((props.visStore.parentHighlight === null | props.visStore.parentHighlight === category.key)
-            & props.visStore.childHighlight === null) | !props.visStore.showOverview;
-            if (!props.visStore.showOverview && props.visStore.childHighlight !== null
-                && props.mapper.get(props.visStore.childHighlight).parent === category.key) {
+            const isHighlighted = props.visStore.childHighlights.length === 0 | !props.visStore.showOverview;
+            if (!props.visStore.showOverview && props.visStore.childHighlights.length !== 0
+                && props.visStore.childHighlights.map(d => props.mapper.get(d).parent).includes(category.key)) {
                 const childD = props.dataStore.conditions.map((tp, i) => {
-                    return [category[i][0], category[i][0] + props.mapper.get(props.visStore.childHighlight).values[i]]
+                    const sum = d3.sum(props.visStore.childHighlights
+                        .filter(d => props.mapper.get(d).parent === category.key)
+                        .map(d => props.mapper.get(d).values[i]));
+                    return [category[i][0], category[i][0] + sum]
                 });
                 childHighlightPath = <path fill={props.visStore.termColorScale(category.key)}
                                            d={area(childD)}/>
@@ -63,7 +65,8 @@ const StreamGraph = inject("dataStore", "visStore")(observer((props) => {
                 <Axis h={height} w={width} axis={yAxis} axisType={'y'} label={'-log10pVal'}/>
                 {paths}
                 {childHighlightPath}
-                <LineHighlighter width={width} height={height} xScale={xScale} xPos={xPos} duration={props.visStore.animationDuration}/>
+                <LineHighlighter width={width} height={height} xScale={xScale} xPos={xPos}
+                                 duration={props.visStore.animationDuration}/>
             </g>
         </svg>
     );

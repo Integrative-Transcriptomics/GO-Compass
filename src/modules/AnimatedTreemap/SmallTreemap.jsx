@@ -28,8 +28,7 @@ const SmallTreemap = inject("dataStore", "visStore")(observer((props) => {
     currentLayout.children.forEach((parent, j) =>
         parent.children.forEach((child, i) => {
             const id = mapId + '-' + j + '-' + i;
-            const isHighlighted = (props.visStore.parentHighlight === null | props.visStore.parentHighlight === parent.data.id)
-                & (props.visStore.childHighlight === null | props.visStore.childHighlight === child.data.id);
+            const isHighlighted = props.visStore.childHighlights.length === 0 || props.visStore.childHighlights.includes(child.data.id);
             const fill = props.visStore.termColorScale(parent.data.id);
             children.push(
                 <g key={child.data.id} transform={'translate(' + child.x0 + ',' + child.y0 + ')'}>

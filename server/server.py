@@ -33,8 +33,8 @@ def MultiGO(goEnrichment, background, method):
     goEnrichment = goEnrichment[mask == False]
     goEnrichment = goEnrichment[goEnrichment.index.isin(godag.keys())]
     goTerms = goEnrichment.index.values
-    matrix = np.array(createMatrix(goTerms, background, method))
-    matrix[matrix is None] = 0
+    matrix = np.array(createMatrix(goTerms, background, method), dtype=float)
+    matrix = np.nan_to_num(matrix)
     return iterateMatrix(matrix, goTerms, goEnrichment, flattenBackground(background))
 
 
