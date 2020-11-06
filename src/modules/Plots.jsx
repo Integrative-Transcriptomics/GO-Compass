@@ -43,7 +43,6 @@ const Plots = inject("dataStore", "visStore")(observer((props) => {
     if (props.visStore.childHighlights.length === 0) {
         detailedHeader = "Category Overview"
     } else if (props.visStore.childHighlights.length === 1) {
-        console.log(props.visStore.childHighlights);
         detailedHeader = "Highlighted Term: " + props.dataStore.dataTable[props.visStore.childHighlights[0]].description;
     } else {
         detailedHeader = "Subset Overview"

@@ -111,7 +111,6 @@ Row.propTypes = {
 };
 
 const DataTable = inject("dataStore", "tableStore")(observer((props) => {
-    console.log(props.dataStore.currentGOterms);
     const classes = useStyles();
     const content = [];
     let header = [];
