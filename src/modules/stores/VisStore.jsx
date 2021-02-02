@@ -1,5 +1,6 @@
 import {extendObservable, action} from "mobx";
 import * as d3 from "d3";
+import {extractSets, generateCombinations} from "@upsetjs/react";
 
 export class VisStore {
     /* some observable state */
@@ -47,6 +48,52 @@ export class VisStore {
                         })
                 });
                 return (layout)
+            },
+            get upSetSets() {
+                const elems = dataStore.currentGOterms.map(goTerm => {
+                    return {
+                        name: goTerm, sets: dataStore.conditions
+                            .filter((cond, i) => dataStore.dataTable[goTerm].pvalues[i] > -Math.log10(dataStore.rootStore.sigThreshold))
+                    }
+                })
+                return extractSets(elems).sort((a, b) => {
+                    if (a.elems.length > b.elems.length) {
+                        return 1
+                    } else return -1
+                });
+            },
+            get upSetCombinations() {
+                let combinations = generateCombinations(this.upSetSets).sort((a, b) => {
+                    if (a.elems.length > b.elems.length) {
+                        return -1
+                    } else if (a.elems.length < b.elems.length) {
+                        return 1
+                    } else if (a.sets.size > b.sets.size) {
+                        return -1
+                    } else {
+                        return 1
+                    }
+                });
+                const filterIndices = []
+                combinations.forEach((item, index, array) => {
+                    if (index < array.length - 1 && !filterIndices.includes(index)) {
+                        let index2;
+                        for (index2 = index + 1; index2 < array.length; index2++) {
+                            if (!filterIndices.includes(index2)) {
+                                let otherItem = array[index2]
+                                if (item.elems.every(elem => otherItem.elems.includes(elem))
+                                    && otherItem.elems.every(elem => item.elems.includes(elem))) {
+                                    if (item.sets.size > otherItem.sets.size) {
+                                        filterIndices.push(index2)
+                                    } else {
+                                        filterIndices.push(index)
+                                    }
+                                }
+                            }
+                        }
+                    }
+                })
+                return(combinations.filter((d, i) => !filterIndices.includes(i)))
             },
 
             setScreenWidth: action((width) => {

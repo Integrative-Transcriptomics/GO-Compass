@@ -8,6 +8,8 @@ from goatools.semantic import TermCounts, resnik_sim, lin_sim, semantic_similari
 from goatools.godag.go_tasks import get_go2parents
 from goatools.goea.go_enrichment_ns import GOEnrichmentStudyNS
 from goatools.godag.consts import NAMESPACE2NS
+from goatools.semsim.termwise.wang import SsWang
+
 
 from findDescendants import getDescendants
 from sklearn.decomposition import PCA
@@ -41,6 +43,9 @@ def MultiGO(goEnrichment, background, method):
 def createMatrix(goTerms, background, method):
     termcounts = TermCounts(godag, background)
     matrix = list()
+    wang_r1 = None
+    if method == "Wang":
+        wang_r1 = SsWang(goTerms,godag)
     # only create half of matrix, fill rest with -1
     i = 0
     for termA in goTerms:
@@ -53,6 +58,8 @@ def createMatrix(goTerms, background, method):
                     sim = lin_sim(termA, termB, godag, termcounts)
                 elif method == "Resnik":
                     sim = resnik_sim(termA, termB, godag, termcounts)
+                elif method == "Wang":
+                    sim = wang_r1.get_sim(termA,termB)
                 else:
                     sim = semantic_similarity(termA, termB, godag)
             row.append(sim)

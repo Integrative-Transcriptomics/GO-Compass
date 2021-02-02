@@ -50,10 +50,10 @@ const StackedBarChart = inject("dataStore", "visStore")(observer((props) => {
                                            width={xScale.bandwidth()}
                                            height={childHeight}/>
             }
-            return <g key={category.key + i}>
-                <rect onMouseEnter={() => props.visStore.setParentHighlight(category.key)}
+            return <g key={category.key + i}
                       onMouseLeave={() => props.visStore.setParentHighlight(null)}
-                      onClick={() => props.visStore.setConditionIndex(i)} x={xScale(i)}
+                      onMouseEnter={() => props.visStore.setParentHighlight(category.key)}>
+                <rect onClick={() => props.visStore.setConditionIndex(i)} x={xScale(i)}
                       y={yScale(timepoint[1])} width={xScale.bandwidth()}
                       height={yScale(timepoint[0]) - yScale(timepoint[1])}
                       opacity={isHighlighted ? 1 : 0.5}
@@ -63,7 +63,7 @@ const StackedBarChart = inject("dataStore", "visStore")(observer((props) => {
         })
     });
     let sigLine = null;
-    if (props.visStore.childHighlights.length === 1) {
+    if (props.visStore.childHighlights.length === 1 && !props.visStore.showOverview) {
         sigLine = <SignificanceLine width={width} height={yScale(-Math.log10(props.sigThreshold))}
                                     sigThreshold={props.sigThreshold}/>
     }

@@ -7,7 +7,8 @@ import {VisStore} from "./VisStore";
 
 export class DataStore {
     /* some observable state */
-    constructor(dataTable, tree, conditions, tableColumns) {
+    constructor(dataTable, tree, conditions, tableColumns, rootStore) {
+        this.rootStore = rootStore
         this.tableStore = new TableStore(dataTable, conditions, tableColumns);
         this.visStore = new VisStore(this);
         this.tableColumns = tableColumns;

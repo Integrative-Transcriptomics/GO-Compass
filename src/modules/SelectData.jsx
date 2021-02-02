@@ -362,6 +362,7 @@ const SelectData = (props) => {
                                 <MenuItem value="Edge based">Edge based</MenuItem>
                                 <MenuItem value="Resnik">Resnik</MenuItem>
                                 <MenuItem value="Lin">Lin</MenuItem>
+                                <MenuItem value="Wang">Wang</MenuItem>
                             </Select>
                         </FormControl>
                     </ListItem>
