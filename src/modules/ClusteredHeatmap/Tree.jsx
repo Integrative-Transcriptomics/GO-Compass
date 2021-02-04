@@ -31,8 +31,8 @@ const Tree = inject("dataStore", "visStore")(observer((props) => {
 
         if (node.parent != null) {
             links.push(<line key={node.data.name} x1={dispScale(node.x)} y1={node.y}
-                              x2={dispScale(node.parent.x)} y2={node.parent.y}
-                              strokeWidth={1} stroke={linkColor}/>);
+                             x2={dispScale(node.parent.x)} y2={node.parent.y}
+                             strokeWidth={1} stroke={linkColor}/>);
         }
 
         return (<g key={node.data.name} onMouseEnter={() => props.visStore.setChildHighlight(node.data.name)}
@@ -51,19 +51,21 @@ const Tree = inject("dataStore", "visStore")(observer((props) => {
                                       min={0}
                                       max={dispScale(props.dataStore.filterCutoff)}
                                       x={dispScale(props.dataStore.clusterCutoff)}
-                                      mouseDown={props.mouseDown}/>;
+                                      mouseDown={props.mouseDown}
+                                      text={"Cluster"}/>;
     const clusterLine = <DraggableLine width={props.width} height={props.height} xPos={props.xPos}
                                        xScale={dispScale} mouseUp={props.dataStore.setFilterCutoff} duration={0}
                                        min={dispScale(props.dataStore.clusterCutoff)}
                                        max={props.width}
                                        x={dispScale(props.dataStore.filterCutoff)}
-                                       mouseDown={props.mouseDown}/>;
+                                       mouseDown={props.mouseDown}
+                                       text={"Filter"}/>;
 
     const xAxis = d3.axisBottom()
         .scale(dispScale);
     return (
         <g>
-            <g >
+            <g>
                 <g>
                     {links}
                     {nodes}

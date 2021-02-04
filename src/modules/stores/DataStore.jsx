@@ -1,8 +1,9 @@
 import {action, extendObservable, reaction} from "mobx"
 import {performCorrelation, performPCA} from "../../parseDataFlask";
 import * as d3 from "d3";
-import {TableStore} from "../DetailedTable/TableStore";
+import {TableStore} from "./TableStore";
 import {VisStore} from "./VisStore";
+import {UpSetStore} from "./UpSetStore";
 
 
 export class DataStore {
@@ -11,6 +12,7 @@ export class DataStore {
         this.rootStore = rootStore
         this.tableStore = new TableStore(dataTable, conditions, tableColumns);
         this.visStore = new VisStore(this);
+        this.upSetStore= new UpSetStore(this, this.visStore)
         this.tableColumns = tableColumns;
         extendObservable(this, {
             filterCutoff: 0.7,

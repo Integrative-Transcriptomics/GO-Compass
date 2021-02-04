@@ -34,6 +34,7 @@ const DraggableLine = inject("visStore")(observer((props) => {
         <polygon points={sliderX0 + "," + sliderY0 + " " +
         sliderX1 + "," + sliderY1 + " " +
         sliderX2 + "," + sliderY2}/>
+        <text x={x-5} y={-15}>{props.text}</text>
     </g>;
     useEffect(() => {
         if (dragging) {
@@ -83,6 +84,7 @@ DraggableLine.propTypes = {
     mouseUp: PropTypes.func.isRequired,
     duration: PropTypes.number.isRequired,
     x: PropTypes.number.isRequired,
+    text: PropTypes.string.isRequired,
 };
 export default DraggableLine;
 

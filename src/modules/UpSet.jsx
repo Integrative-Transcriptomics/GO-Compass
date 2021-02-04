@@ -1,26 +1,29 @@
 import {inject, observer} from "mobx-react";
 import React, {useCallback, useState} from "react";
 import UpSetJS, {VennDiagram} from '@upsetjs/react';
+import {toJS} from "mobx";
 
 
-const UpSet = inject("dataStore", "visStore")(observer((props) => {
+const UpSet = inject("upSetStore", "visStore")(observer((props) => {
     const [localSelection, setLocalSelection] = useState(null)
 
     const select = useCallback((selection) => {
         if (selection === null) {
-            setLocalSelection(null)
+            setLocalSelection(null);
             props.visStore.setChildHighlights([])
         } else {
-            setLocalSelection(selection)
+            setLocalSelection(selection);
             props.visStore.setChildHighlights(selection.elems.map(d => d.name));
         }
-    }, [props.visStore])
-    if (props.visStore.upSetSets.length > 3) {
-        return <UpSetJS sets={props.visStore.upSetSets} combinations={props.visStore.upSetCombinations} width={props.width} height={props.height}
+    }, [props.visStore]);
+    console.log(localSelection)
+    console.log(props.upSetStore.highlights)
+    if (props.upSetStore.upSetSets.length > 3) {
+        return <UpSetJS sets={props.upSetStore.upSetSets} combinations={props.upSetStore.upSetCombinations} width={props.width} height={props.height}
                         selection={localSelection}
                         onHover={select}/>;
     } else {
-        return <VennDiagram sets={props.visStore.upSetSets} width={props.width} height={props.height}
+        return <VennDiagram sets={props.upSetStore.upSetSets} width={props.width} height={props.height}
                             selection={localSelection}
                             onHover={select}/>;
     }

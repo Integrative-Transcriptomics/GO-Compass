@@ -82,9 +82,11 @@ const Plots = inject("dataStore", "visStore")(observer((props) => {
                     <Typography>
                         Significant enrichment Upset plot
                     </Typography>
-                    <UpSet width={props.visStore.screenWidth / 3}
-                           height={props.visStore.plotHeight / 2}
-                           sigThreshold={props.sigThreshold}/>
+                    <Provider upSetStore={props.dataStore.upSetStore}>
+                        <UpSet width={props.visStore.screenWidth / 3}
+                               height={props.visStore.plotHeight / 2}
+                               sigThreshold={props.sigThreshold}/>
+                    </Provider>
                 </Paper>
             </Grid>
             <Grid item xs={3}>
