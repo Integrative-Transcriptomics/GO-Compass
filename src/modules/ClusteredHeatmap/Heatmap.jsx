@@ -3,7 +3,7 @@ import * as d3 from "d3";
 import {inject, observer} from "mobx-react";
 import PropTypes from "prop-types";
 import {cropText} from "../../UtilityFunctions";
-import Legend from "./Legend";
+import GradientLegend from "./GradientLegend";
 
 
 const Heatmap = inject("dataStore", "visStore")(observer((props) => {
@@ -91,8 +91,8 @@ const Heatmap = inject("dataStore", "visStore")(observer((props) => {
             <g transform={"translate(" + ((props.dataStore.conditions.length + 1.5) * props.rectWidth + 5) + "," + 0 + ")"}>
                 {text}
             </g>
-            <g transform={"translate(" + ((props.dataStore.conditions.length + 1.5) * props.rectWidth) + "," + (props.height + 5) + ")"}>
-                <Legend range={range} domain={domain}/>
+            <g transform={"translate(0," + (props.height + 5) + ")"}>
+                <GradientLegend range={range} domain={domain} label={"-log10(pVal)"}/>
             </g>
         </g>
     );

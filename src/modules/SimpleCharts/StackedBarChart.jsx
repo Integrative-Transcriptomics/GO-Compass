@@ -2,11 +2,43 @@ import React, {useCallback, useState} from 'react';
 import PropTypes from "prop-types";
 import * as d3 from "d3";
 import Axis from "./Axis";
-import {inject, observer} from "mobx-react";
+import {inject, observer, useLocalStore} from "mobx-react";
 import SignificanceLine from "./SignificanceLine";
+import FormControlLabel from "@material-ui/core/FormControlLabel";
+import Switch from "@material-ui/core/Switch";
+import {action} from "mobx";
 
 
 const StackedBarChart = inject("dataStore", "visStore")(observer((props) => {
+    const store = useLocalStore(() => ({
+        showOverview: false,
+        setShowOverview: action((showOverview) => {
+            store.showOverview = showOverview
+        }),
+        localHighlight: false,
+        setLocalHighlight: action((highlight)=>{
+            store.localHighlight =highlight;
+        }),
+        get data() {
+            const stackedChildren = props.dataStore.conditions.map((d, i) => {
+                const tpData = {};
+                props.dataStore.nestedData.forEach(parent => {
+                    if (this.showAll || props.visStore.childHighlights.length === 0) {
+                        tpData[parent.id] = d3.sum(parent.children.map(child => child.values[i]));
+                    } else {
+                        tpData[parent.id] = d3.sum(parent.children
+                            .filter(child => props.visStore.childHighlights.includes(child.id))
+                            .map(child => child.values[i]));
+                    }
+                });
+                return tpData
+            });
+            return stackedChildren;
+        },
+        get showAll(){
+            return this.showOverview || this.localHighlight
+        }
+    }));
     const [index, setIndex] = useState(0);
     const highlightRef = React.createRef();
     const margins = {
@@ -17,7 +49,7 @@ const StackedBarChart = inject("dataStore", "visStore")(observer((props) => {
     };
     const series = d3.stack()
         .keys(props.dataStore.clusterRepresentatives)
-        (props.data);
+        (store.data);
 
     const width = props.width - margins.left - margins.right;
     const height = props.height - margins.top - margins.bottom;
@@ -35,10 +67,10 @@ const StackedBarChart = inject("dataStore", "visStore")(observer((props) => {
                      x={xScale(i)} y={yScale(max)} fill='none' stroke='black' strokeWidth='2px'/>
     });
     const rects = series.map((category) => {
-        const isHighlighted = props.visStore.childHighlights.length === 0 | !props.visStore.showOverview;
+        const isHighlighted = props.visStore.childHighlights.length === 0 | !store.showAll;
         return category.map((timepoint, i) => {
             let childHighlightRect = null;
-            if (props.visStore.showOverview && props.visStore.childHighlights.length !== 0
+            if (store.showAll && props.visStore.childHighlights.length !== 0
                 && props.visStore.childHighlights.map(d => props.mapper.get(d).parent).includes(category.key)) {
                 const sum = d3.sum(props.visStore.childHighlights
                     .filter(d => props.mapper.get(d).parent === category.key)
@@ -51,8 +83,14 @@ const StackedBarChart = inject("dataStore", "visStore")(observer((props) => {
                                            height={childHeight}/>
             }
             return <g key={category.key + i}
-                      onMouseLeave={() => props.visStore.setParentHighlight(null)}
-                      onMouseEnter={() => props.visStore.setParentHighlight(category.key)}>
+                      onMouseLeave={() => {
+                          props.visStore.setParentHighlight(null)
+                          store.setLocalHighlight(false)
+                      }}
+                      onMouseEnter={() => {
+                          props.visStore.setParentHighlight(category.key)
+                          store.setLocalHighlight(true)
+                      }}>
                 <rect onClick={() => props.visStore.setConditionIndex(i)} x={xScale(i)}
                       y={yScale(timepoint[1])} width={xScale.bandwidth()}
                       height={yScale(timepoint[0]) - yScale(timepoint[1])}
@@ -63,7 +101,7 @@ const StackedBarChart = inject("dataStore", "visStore")(observer((props) => {
         })
     });
     let sigLine = null;
-    if (props.visStore.childHighlights.length === 1 && !props.visStore.showOverview) {
+    if (props.visStore.childHighlights.length === 1 && !store.showAll) {
         sigLine = <SignificanceLine width={width} height={yScale(-Math.log10(props.sigThreshold))}
                                     sigThreshold={props.sigThreshold}/>
     }
@@ -83,23 +121,29 @@ const StackedBarChart = inject("dataStore", "visStore")(observer((props) => {
     const yAxis = d3.axisLeft()
         .scale(yScale);
     return (
-        <svg width={props.width}
-             height={props.height}>
-            <g transform={'translate(' + margins.left + ',' + margins.top + ')'}>
-                <Axis h={height} w={width} axis={xAxis} axisType={'x'} label={'Condition'}/>
-                <Axis h={height} w={width} axis={yAxis} axisType={'y'} label={'-log10pVal'}/>
-                {rects}
-                <g ref={highlightRef}>{highlighters}</g>
-                {sigLine}
-            </g>
-        </svg>
+        <div>
+            <FormControlLabel
+                control={<Switch checked={store.showOverview}
+                                 onChange={() => store.setShowOverview(!store.showOverview)}/>}
+                label="Overview"
+            />
+            <svg width={props.width}
+                 height={props.height}>
+                <g transform={'translate(' + margins.left + ',' + margins.top + ')'}>
+                    <Axis h={height} w={width} axis={xAxis} axisType={'x'} label={'Condition'}/>
+                    <Axis h={height} w={width} axis={yAxis} axisType={'y'} label={'-log10pVal'}/>
+                    {rects}
+                    <g ref={highlightRef}>{highlighters}</g>
+                    {sigLine}
+                </g>
+            </svg>
+        </div>
     );
 }));
 
 StackedBarChart.propTypes = {
     width: PropTypes.number.isRequired,
     height: PropTypes.number.isRequired,
-    data: PropTypes.arrayOf(PropTypes.object).isRequired,
     mapper: PropTypes.instanceOf(Map).isRequired,
     sigThreshold: PropTypes.number.isRequired,
 };

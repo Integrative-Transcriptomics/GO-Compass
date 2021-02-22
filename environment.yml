@@ -1,4 +1,4 @@
-name: goComparison
+name: MultiGO
 channels:
   - anaconda
   - conda-forge

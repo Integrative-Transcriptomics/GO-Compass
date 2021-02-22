@@ -5,6 +5,8 @@ MultiGO is a tool for the interactive comparison of GO enrichment analyses. Due 
 
 To run MultiGO in the development environment run
 ### `conda env create -f environment.yml`
+### `conda activate MultiGO`
+### `npm install`
 ### `npm run dev`
 
 Open [http://localhost:3000](http://localhost:3000) to view it in the browser.

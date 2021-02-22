@@ -53,14 +53,7 @@ const SelectData = (props) => {
                 props.setRootStore(new RootStore(response.results, response.conditions, response.tableColumns));
             });
         } else {
-            const reorderedFiles = conditions.map(d => {
-                return geneFiles[d.index];
-            });
             if (selectedTab === 1) {
-                multiRevigoGeneLists(reorderedFiles, backgroundFile, conditions.map(d => d.condition), selectedMeasure, pvalueFilter, response => {
-                    props.setRootStore(new RootStore(response.results, response.conditions, response.tableColumns));
-                });
-            } else {
                 const reorderedFiles = conditions.map(d => {
                     return geneFiles[d.index];
                 });
@@ -73,8 +66,6 @@ const SelectData = (props) => {
     let launchable;
     if (selectedTab === 0) {
         launchable = goFile !== null && backgroundFile !== null;
-    } else if (selectedTab === 1) {
-        launchable = geneFiles.length > 0 && backgroundFile !== null;
     } else {
         launchable = geneFiles.length > 0 && multiBackground.length > 0;
     }
@@ -83,8 +74,6 @@ const SelectData = (props) => {
         <Grid
             container
             spacing={0}
-            alignItems="center"
-            justify="center"
         >
             <Grid item xs={4}>
                 <List>
@@ -95,9 +84,8 @@ const SelectData = (props) => {
                             textColor="primary"
                             onChange={(e, value) => selectTab(value)}
                         >
-                            <Tab label="GO Terms"/>
-                            <Tab label="Single species gene lists"/>
-                            <Tab label="Multi species gene lists"/>
+                            <Tab label="GO terms"/>
+                            <Tab label="Gene lists"/>
                         </Tabs>
                     </ListItem>
                     <div hidden={selectedTab !== 0} role="tabpanel">
@@ -139,94 +127,6 @@ const SelectData = (props) => {
                         </ListItem>
                     </div>
                     <div hidden={selectedTab !== 1} role="tabpanel">
-                        <ListSubheader>Select Gene Lists</ListSubheader>
-                        <ListItem>
-                            <Typography>
-                                <Button className={classes.menuButton}
-                                        variant="contained"
-                                        disabled={isLoading}
-                                        component="label"
-                                >
-                                    Select Files
-                                    <input
-                                        type="file"
-                                        multiple
-                                        style={{display: "none"}}
-                                        onChange={(event) => {
-                                            setConditions([...event.target.files].map((d, i) => {
-                                                return ({"index": i, "condition": d.name.slice(0, -4)})
-                                            }));
-                                            setGeneFiles([...event.target.files])
-                                        }}
-                                    />
-                                </Button>
-                                {geneFiles.length > 0 ? geneFiles.length + " files selected" : "No file selected"}
-                            </Typography>
-                        </ListItem>
-                        <ListSubheader>Select Background file</ListSubheader>
-                        <ListItem>
-                            <Typography>
-                                <Button className={classes.menuButton}
-                                        variant="contained"
-                                        disabled={isLoading}
-                                        component="label"
-                                >
-                                    Select File
-                                    <input
-                                        type="file"
-                                        style={{display: "none"}}
-                                        onChange={(event) => setBackgroundFile(event.target.files[0])}
-                                    />
-                                </Button>
-                                {backgroundFile !== null ? backgroundFile.name : "No file selected"}
-                            </Typography>
-                        </ListItem>
-                        {conditions.length > 0 ? <ListSubheader>Specify conditions</ListSubheader> : null}
-                        {conditions.map((d, i) =>
-                            <ListItem key={d.index}>
-                                <IconButton onClick={() => {
-                                    const conditionsCopy = conditions.slice();
-                                    if (i > 0) {
-                                        const save = conditionsCopy[i - 1];
-                                        conditionsCopy[i - 1] = conditionsCopy[i];
-                                        conditionsCopy[i] = save;
-                                    } else {
-                                        const save = conditionsCopy[0];
-                                        conditionsCopy[0] = conditionsCopy[conditions.length - 1];
-                                        conditionsCopy[conditions.length - 1] = save;
-                                    }
-                                    setConditions(conditionsCopy);
-                                }}>
-                                    <KeyboardArrowUpIcon fontSize="small"/>
-                                </IconButton>
-                                <IconButton onClick={() => {
-                                    const conditionsCopy = conditions.slice();
-                                    if (i < conditionsCopy.length - 1) {
-                                        const save = conditionsCopy[i + 1];
-                                        conditionsCopy[i + 1] = conditionsCopy[i];
-                                        conditionsCopy[i] = save;
-                                    } else {
-                                        const save = conditionsCopy[0];
-                                        conditionsCopy[0] = conditionsCopy[i];
-                                        conditionsCopy[i] = save;
-                                    }
-                                    setConditions(conditionsCopy);
-                                }}>
-                                    <KeyboardArrowDownIcon fontSize="small"/>
-                                </IconButton>
-                                <TextField required
-                                           label={geneFiles[d.index].name}
-                                           disabled={isLoading}
-                                           onChange={(e) => {
-                                               let conditionsCopy = conditions.slice();
-                                               conditionsCopy[i].condition = e.target.value;
-                                               setConditions(conditionsCopy);
-                                           }}
-                                           value={d.condition}/>
-                            </ListItem>
-                        )}
-                    </div>
-                    <div hidden={selectedTab !== 2} role="tabpanel">
                         <ListSubheader>Select Gene Lists</ListSubheader>
                         <ListItem>
                             <Typography>

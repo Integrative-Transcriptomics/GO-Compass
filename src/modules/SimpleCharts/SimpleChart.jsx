@@ -3,28 +3,26 @@ import PropTypes from "prop-types";
 import StackedBarChart from "./StackedBarChart";
 import LineChart from "./LineChart";
 import StreamGraph from "./StreamGraph";
-import * as d3 from "d3";
 import Box from "@material-ui/core/Box";
-import FormControlLabel from "@material-ui/core/FormControlLabel";
-import Switch from "@material-ui/core/Switch";
 import {inject, observer} from "mobx-react";
 import PlayButton from "../PlayButton";
 import Button from "@material-ui/core/Button";
 import Menu from "@material-ui/core/Menu";
 import MenuItem from "@material-ui/core/MenuItem";
 import {useLocalStore} from "mobx-react";
+import {action} from "mobx";
 
 
 const SimpleChart = inject("dataStore", "visStore")(observer((props) => {
     const store = useLocalStore(() => ({
         anchorEl: null,
         chartHeight: 100,
-        setAnchorEl(el) {
-            this.anchorEl = el;
-        },
-        setChartHeight(height) {
-            this.chartHeight = height;
-        },
+        setAnchorEl: action((el) => {
+            store.anchorEl = el;
+        }),
+        setChartHeight:action((height) => {
+            store.chartHeight = height;
+        }),
         get mapper() {
             const mapper = new Map();
             props.dataStore.nestedData.forEach(parent => {
@@ -34,42 +32,6 @@ const SimpleChart = inject("dataStore", "visStore")(observer((props) => {
             });
             return mapper;
         },
-        get stackedData() {
-            const stackedChildren = props.dataStore.conditions.map((d, i) => {
-                const tpData = {};
-                props.dataStore.nestedData.forEach(parent => {
-                    if (props.visStore.showOverview || props.visStore.childHighlights.length === 0) {
-                        tpData[parent.id] = d3.sum(parent.children.map(child => child.values[i]));
-                    } else {
-                        tpData[parent.id] = d3.sum(parent.children
-                            .filter(child => props.visStore.childHighlights.includes(child.id))
-                            .map(child => child.values[i]));
-                    }
-                });
-                return tpData
-            });
-            return stackedChildren;
-        },
-        get lineData() {
-            const lineData = [];
-            props.dataStore.nestedData.forEach(parent => {
-                let add = false;
-                const values = props.dataStore.conditions.map((d, i) => {
-                    let current = 0;
-                    parent.children.forEach(child => {
-                        if (props.visStore.showOverview || props.visStore.childHighlights.length === 0 || props.visStore.childHighlights.includes(child.id)) {
-                            add = true;
-                            current += child.values[i];
-                        }
-                    });
-                    return current;
-                });
-                if (add) {
-                    lineData.push({id: parent.id, name: parent.name, values: values});
-                }
-            });
-            return lineData;
-        }
     }));
 
     const rest = createRef();
@@ -89,7 +51,6 @@ const SimpleChart = inject("dataStore", "visStore")(observer((props) => {
     if (!props.isTimeSeries) {
         chart = <StackedBarChart width={props.width}
                                  height={store.chartHeight}
-                                 data={store.stackedData}
                                  mapper={store.mapper}
                                  sigThreshold={props.sigThreshold}/>
     } else {
@@ -97,14 +58,12 @@ const SimpleChart = inject("dataStore", "visStore")(observer((props) => {
             chart =
                 <LineChart width={props.width}
                            height={store.chartHeight}
-                           data={store.lineData}
                            mapper={store.mapper}
                            sigThreshold={props.sigThreshold}/>
         } else {
             chart =
                 <StreamGraph width={props.width}
                              height={store.chartHeight}
-                             data={store.stackedData}
                              mapper={store.mapper}
                              sigThreshold={props.sigThreshold}/>
         }
@@ -130,11 +89,6 @@ const SimpleChart = inject("dataStore", "visStore")(observer((props) => {
                             <MenuItem onClick={() => selectPlottype('streamGraph')}>Streamgraph</MenuItem>
                         </Menu></div> : null
                 }
-                <FormControlLabel
-                    control={<Switch checked={props.visStore.showOverview}
-                                     onChange={() => props.visStore.toggleShowOverview()}/>}
-                    label="Overview"
-                />
             </div>
             {chart}
         </Box>

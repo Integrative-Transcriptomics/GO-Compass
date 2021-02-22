@@ -28,6 +28,9 @@ export class DataStore {
             correlationLoaded: false,
 
 
+            get adaptedDataTable(){
+
+            },
             get clusterHierarchy() {
                 return this.extractHierarchy(this.filteredTree, this.clusterCutoff, true);
             },

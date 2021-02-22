@@ -243,7 +243,7 @@ def GOEA(genes, objanno):
         objanno.get_id2gos().keys(),  # List of mouse protein-coding genes
         objanno.get_ns2assc(),  # geneid/GO associations
         godag,  # Ontologies
-        propagate_counts=True,
+        propagate_counts=False,
         alpha=0.05,  # default significance cut-off
         methods=['fdr_bh'])  # defult multipletest correction method
     goea_quiet_all = goeaobj.run_study(genes, prt=None)

@@ -1,7 +1,6 @@
 import {inject, observer} from "mobx-react";
 import React, {useCallback, useState} from "react";
 import UpSetJS, {VennDiagram} from '@upsetjs/react';
-import {toJS} from "mobx";
 
 
 const UpSet = inject("upSetStore", "visStore")(observer((props) => {
@@ -16,8 +15,6 @@ const UpSet = inject("upSetStore", "visStore")(observer((props) => {
             props.visStore.setChildHighlights(selection.elems.map(d => d.name));
         }
     }, [props.visStore]);
-    console.log(localSelection)
-    console.log(props.upSetStore.highlights)
     if (props.upSetStore.upSetSets.length > 3) {
         return <UpSetJS sets={props.upSetStore.upSetSets} combinations={props.upSetStore.upSetCombinations} width={props.width} height={props.height}
                         selection={localSelection}

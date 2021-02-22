@@ -56,7 +56,7 @@ const App = () => {
     return (
         <div className={classes.root}>
             <React.Fragment>
-                <AppBar ref={appBar} position="sticky" style={{backgroundColor: "#A51E37"}}>
+                <AppBar ref={appBar} position="sticky" style={{backgroundColor: "#a51e37"}}>
                     <Toolbar>
                         <IconButton onClick={toggleDrawer} disabled={rootStore === null}>
                             <MenuIcon style={{color: "white"}}/>
