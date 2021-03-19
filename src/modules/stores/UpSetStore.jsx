@@ -1,8 +1,10 @@
 import {extendObservable} from "mobx";
 import {extractSets, generateCombinations} from "@upsetjs/react";
 
+/**
+ * Store for UpSet plot
+ */
 export class UpSetStore {
-    /* some observable state */
     constructor(dataStore, visStore) {
         this.dataStore = dataStore;
         this.visStore = visStore;
@@ -37,10 +39,17 @@ export class UpSetStore {
                         return (set);
                     } else return null;
                 },
+                /**
+                 * upSet sets
+                 * @returns {ISet<{sets: string[]}>[]}
+                 */
                 get upSetSets() {
                     return createSets(dataStore.currentGOterms)
-                }
-                ,
+                },
+                /**
+                 * upSet combinations
+                 * @returns {ISetCombination<any>[]}
+                 */
                 get upSetCombinations() {
                     let combinations = generateCombinations(this.upSetSets).sort((a, b) => {
                         if (a.elems.length > b.elems.length) {
@@ -73,14 +82,16 @@ export class UpSetStore {
                         }
                     })
                     return (combinations.filter((d, i) => !filterIndices.includes(i)))
-                }
-                ,
+                },
             }
         )
 
-        function
-
-        createSets(goTerms) {
+        /**
+         * crrates sets of goTerms
+         * @param {[string]} goTerms
+         * @returns {ISet<{sets: string[]}>[]}
+         */
+        function createSets(goTerms) {
             const elems = createElements(goTerms);
             return extractSets(elems).sort((a, b) => {
                 if (a.elems.length > b.elems.length) {
@@ -89,13 +100,16 @@ export class UpSetStore {
             });
         }
 
-        function
-
-        createElements(goTerms) {
+        /**
+         * creates set elements
+         * @param {string} goTerms
+         * @returns {[Object]}
+         */
+        function createElements(goTerms) {
             return (goTerms.map(goTerm => {
                 return {
                     name: goTerm, sets: dataStore.conditions
-                        .filter((cond, i) => dataStore.dataTable[goTerm].pvalues[i] > -Math.log10(dataStore.rootStore.sigThreshold))
+                        .filter((cond, i) => dataStore.dataTable[goTerm].pvalues[i] > dataStore.rootStore.logSigThreshold)
                 }
             }));
         }

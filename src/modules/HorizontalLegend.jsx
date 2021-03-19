@@ -11,28 +11,28 @@ const Legend = inject("dataStore", "visStore")(observer((props) => {
         bottom: 20,
         left: 20,
     };
-    const rowHeight=15;
+    const rowHeight = 15;
     const width = props.width - margins.left - margins.right;
 
-    let currX=0;
-    let currY=0;
+    let currX = 0;
+    let currY = 0;
     const legend = props.dataStore.nestedData.map((d, i) => {
-        const element = <g key={d.id} transform={"translate(" + currX+ ","+ currY +")"}>
+        const element = <g key={d.id} transform={"translate(" + currX + "," + currY + ")"}>
             <rect width={10} height={10} x={0} y={0} fill={props.visStore.termColorScale(d.id)}/>
             <text x={15} y={8} fontSize={12}>
                 {d.name}
             </text>
             <title>{d.name}</title>
         </g>;
-        currX += getTextWidth(d.name,14,"normal") + 10;
-        if(currX > width){
-            currX =0;
+        currX += getTextWidth(d.name, 14, "normal") + 10;
+        if (currX > width) {
+            currX = 0;
             currY += rowHeight
         }
-        return(element);
+        return (element);
     });
     return (
-        <svg width={width} height={currY + rowHeight*2}>
+        <svg width={width} height={currY + rowHeight * 2}>
             <g transform={"translate(" + margins.left + "," + margins.top + ")"}>
                 {legend}
             </g>

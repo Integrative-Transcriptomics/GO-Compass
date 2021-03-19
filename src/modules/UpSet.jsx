@@ -16,7 +16,8 @@ const UpSet = inject("upSetStore", "visStore")(observer((props) => {
         }
     }, [props.visStore]);
     if (props.upSetStore.upSetSets.length > 3) {
-        return <UpSetJS sets={props.upSetStore.upSetSets} combinations={props.upSetStore.upSetCombinations} width={props.width} height={props.height}
+        return <UpSetJS sets={props.upSetStore.upSetSets} combinations={props.upSetStore.upSetCombinations}
+                        width={props.width} height={props.height}
                         selection={localSelection}
                         onHover={select}/>;
     } else {

@@ -5,42 +5,76 @@ import {TableStore} from "./TableStore";
 import {VisStore} from "./VisStore";
 import {UpSetStore} from "./UpSetStore";
 
-
+/**
+ * Central store for data operations
+ */
 export class DataStore {
-    /* some observable state */
     constructor(dataTable, tree, conditions, tableColumns, rootStore) {
         this.rootStore = rootStore
         this.tableStore = new TableStore(dataTable, conditions, tableColumns);
         this.visStore = new VisStore(this);
-        this.upSetStore= new UpSetStore(this, this.visStore)
+        this.upSetStore = new UpSetStore(this, this.visStore)
         this.tableColumns = tableColumns;
+        this.dataTable = dataTable;
+        this.tree = this.traverse(tree, dataTable)[0];
+        this.conditions = conditions;
         extendObservable(this, {
             filterCutoff: 0.7,
             clusterCutoff: 0.1,
-            dataTable: dataTable,
-            tree: this.traverse(tree, dataTable)[0],
+            // tree filtered by filter cutoff
             filteredTree: {},
+            // flat hierarchy of filtered go terms and filtered out go terms
             filterHierarchy: {},
-            conditions: conditions,
             correlation: [],
             pca: [],
             pcaLoaded: false,
             correlationLoaded: false,
-
-
-            get adaptedDataTable(){
-
-            },
+            /*
+            get dataTable() {
+                let returnTable = JSON.parse(JSON.stringify(this.rawData));
+                Object.keys(this.rawData).filter((key) => {
+                    if (this.rawData[key].dispensability < this.filterCutoff) {
+                        const subtree = this.getSubtree(this.tree, key);
+                        if (subtree != null && "children" in subtree) {
+                            const children = subtree.children.filter(child => this.rawData[child.name].dispensability > this.filterCutoff)
+                            let pvalues = this.rawData[key].pvalues.slice()
+                            children.forEach(child => {
+                                this.flattenTree(child).forEach(term => {
+                                        pvalues = pvalues.map((d, i) => d + dataTable[term].pvalues[i])
+                                    }
+                                )
+                            })
+                            returnTable[key].pvalues = pvalues;
+                        }
+                    }
+                })
+                return returnTable;
+            },*/
+            /**
+             * flat hierarchy of cluster representatives and other GO terms
+             * @returns {{}}
+             */
             get clusterHierarchy() {
                 return this.extractHierarchy(this.filteredTree, this.clusterCutoff, true);
             },
+            /**
+             * maximum dispensability found in currently visualized GO terms
+             * @returns {number} maximum dispensability
+             */
             get maxDisp() {
                 return (d3.max(Object.keys(this.filterHierarchy).map(key => this.dataTable[key].dispensability)));
             },
+            /**
+             * minimum dispensability found in not visualized GO terms
+             * @returns {number} minimum dispensability
+             */
             get minFilteredDisp() {
                 return (d3.min(Object.values(this.filterHierarchy).flat().map(key => this.dataTable[key].dispensability)));
-
             },
+            /**
+             * filters p-values by terms in filter hierarchy for pca and correlation
+             * @returns {Object}
+             */
             get filteredPvalues() {
                 const pvalues = {"goTerm": []};
                 Object.entries(this.dataTable).forEach(([key, value]) => {
@@ -57,6 +91,10 @@ export class DataStore {
                 return pvalues;
             },
 
+            /**
+             * Nests data for plots
+             * @returns {Object}
+             */
             get nestedData() {
                 const goMap = new Map();
                 Object.keys(this.clusterHierarchy).forEach(goTerm => {
@@ -76,20 +114,35 @@ export class DataStore {
                 });
                 return this.nest(pvalues, d => goMap.get(d.id))
             },
+            /**
+             * gets all GO terms that are cluster representatives
+             * @returns {string[]} cluster representatives
+             */
             get clusterRepresentatives() {
                 return Object.keys(this.clusterHierarchy)
             },
-            get currentGOterms(){
+            /**
+             * gets all GO terms that are currently visualized
+             * @returns {string[]} current GO terms
+             */
+            get currentGOterms() {
                 return Object.keys(this.filterHierarchy)
             },
+            /**
+             * sets filter cutoff
+             */
             setFilterCutoff: action((cutoff) => {
                 this.filterCutoff = cutoff;
             }),
-
+            /**
+             * sets cluster cutoff
+             */
             setClusterCutoff: action((cutoff) => {
                 this.clusterCutoff = cutoff;
             }),
+
         });
+        // when the filter slider is moved, recalculate pca and correlation
         reaction(
             () => this.filteredPvalues,
             () => {
@@ -100,23 +153,32 @@ export class DataStore {
                     this.correlation = response;
                 })
             });
+        // when the filter slider is moved, restructure table
         reaction(
             () => this.filterHierarchy,
             (object) => {
                 this.tableStore.initTermState(Object.keys(object));
             });
+        // when the filter slider is moved and the displayed GO terms change
+        // recalculate filtered tree and filterHierarchy
         reaction(() => this.filterCutoff, (cutoff => {
             if (cutoff < this.maxDisp || cutoff >= this.minFilteredDisp) {
-                    this.filteredTree = this.filterTree(this.tree);
-                    this.filterHierarchy = this.extractHierarchy(this.tree, cutoff, false);
+                this.filteredTree = this.filterTree(this.tree, this.filterCutoff);
+                this.filterHierarchy = this.extractHierarchy(this.tree, cutoff, false);
             }
         }));
-        this.filteredTree = this.filterTree(this.tree);
+        this.filteredTree = this.filterTree(this.tree, this.filterCutoff);
         this.filterHierarchy = this.extractHierarchy(this.tree, this.filterCutoff, false);
+        /**
+         * performs PCA
+         */
         performPCA(this.filteredPvalues, response => {
             this.pca = response;
             this.pcaLoaded = true;
         });
+        /**
+         * Calculates p-value correlation
+         */
         performCorrelation(this.filteredPvalues, response => {
             this.correlation = response;
             this.correlationLoaded = true;
@@ -124,13 +186,24 @@ export class DataStore {
         this.tableStore.initTermState(Object.keys(this.filterHierarchy));
     }
 
+    /**
+     * get parent Term of goTerm in flat clustering
+     * @param {string} goTerm
+     * @returns {string}
+     */
     getFilterParent(goTerm) {
         return Object.keys(this.clusterHierarchy).filter(key => {
             return this.clusterHierarchy[key].includes(goTerm)
         })[0]
     }
 
-
+    /**
+     * extract flat hierarchy (flat clusters)
+     * @param {Object} tree
+     * @param {number} cutoff
+     * @param {boolean} includeRep
+     * @returns {{}} hierarchy
+     */
     extractHierarchy(tree, cutoff, includeRep) {
         const toReturn = {};
         if (this.dataTable[tree.name].dispensability <= cutoff) {
@@ -157,7 +230,11 @@ export class DataStore {
         return toReturn;
     }
 
-
+    /**
+     * returns an array of a node and its children (GO term ids)
+     * @param {Object} node
+     * @returns {[string]} GO ids
+     */
     flattenTree(node) {
         const toReturn = [];
         if ("children" in node) {
@@ -169,6 +246,30 @@ export class DataStore {
         return toReturn
     }
 
+    /**
+     * Stacks p-values
+     * @param {Object} dataTable
+     * @returns {*}
+     */
+    stackPvalues(dataTable) {
+        Object.keys(dataTable).forEach(key => {
+            const subtree = this.getSubtree(this.tree, key)
+            if (subtree !== null) {
+                this.flattenTree(subtree).forEach(term => {
+                        dataTable[key].pvalues = dataTable[key].pvalues.map((d, i) => d + dataTable[term].pvalues[i])
+                    }
+                )
+            }
+        })
+        return dataTable
+    }
+
+    /**
+     * traverses tree and returns it in a format better suited for visualization
+     * @param {Object} tree
+     * @param {Object} dataTable
+     * @returns {({children: [Object], name: string, value: number}|{name: string, value: number})[]|null}
+     */
     traverse(tree, dataTable) {
         if (tree !== null && typeof tree == "object") {
             return (Object.entries(tree).map(([key, child]) => {
@@ -185,13 +286,38 @@ export class DataStore {
         }
     }
 
-    filterTree(tree) {
-        if (this.dataTable[tree.name].dispensability <= this.filterCutoff) {
+    /**
+     * gets the subtree of name
+     * @param {Object} tree
+     * @param {string} name
+     * @returns {Object} subtree
+     */
+    getSubtree(tree, name) {
+        let reduce = [].reduce;
+
+        function runner(result, tree) {
+            if (result || !tree) return result;
+            return (tree.name === name && tree) || //is this the proper node?
+                runner(null, tree.children) || //process this nodes children
+                reduce.call(tree, runner, result);  //maybe this is some ArrayLike Structure
+        }
+
+        return runner(null, tree);
+    }
+
+    /**
+     * filters tree based on filter cutoff
+     * @param {Object} tree
+     * @param {number} cutoff
+     * @returns {{name: string, value: number}|{children: [Object], name: string, value: number}}
+     */
+    filterTree(tree, cutoff) {
+        if (this.dataTable[tree.name].dispensability <= cutoff) {
             if ("children" in tree) {
                 const children = [];
                 tree.children.forEach(child => {
-                    if (this.dataTable[child.name].dispensability <= this.filterCutoff) {
-                        children.push(this.filterTree(child));
+                    if (this.dataTable[child.name].dispensability <= cutoff) {
+                        children.push(this.filterTree(child, cutoff));
                     }
                 });
                 return ({"name": tree.name, "children": children, value: tree.value})
@@ -200,6 +326,12 @@ export class DataStore {
         }
     }
 
+    /**
+     * Nests the data for easier visualization using the d3.nest() function
+     * @param {Object} data
+     * @param {[string]} keys
+     * @returns {[Object]} nested data
+     */
     nest(data, ...keys) {
         const nest = d3.nest();
         for (const key of keys) nest.key(key);

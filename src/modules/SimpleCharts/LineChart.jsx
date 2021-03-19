@@ -11,24 +11,25 @@ import {action} from "mobx";
 const LineChart = inject("dataStore", "visStore")(observer((props) => {
     const store = useLocalStore(() => ({
         localHighlight: false,
-        setLocalHighlight: action((highlight)=>{
-            store.localHighlight =highlight;
+        setLocalHighlight: action((highlight) => {
+            store.localHighlight = highlight;
         }),
         get data() {
-            const lineData = [];
+            const lineData = []
             props.dataStore.nestedData.forEach(parent => {
                 let add = false;
-                const values = props.dataStore.conditions.map((d, i) => {
+                const values = props.dataStore.conditions.map((cond, i) => {
                     let current = 0;
-                    parent.children.forEach(child => {
-                        if (props.visStore.childHighlights.length === 0
-                            || props.visStore.childHighlights.includes(child.id)
-                            || store.localHighlight) {
-                            add = true;
-                            current += child.values[i];
-                        }
+                    const containedChildren = parent.children.filter(child => props.visStore.childHighlights.length === 0
+                        || props.visStore.childHighlights.includes(child.id)
+                        || store.localHighlight)
+                    if (containedChildren.length > 0) {
+                        add = true;
+                    }
+                    containedChildren.forEach(child => {
+                        current += child.values[i];
                     });
-                    return current;
+                    return current / containedChildren.length
                 });
                 if (add) {
                     lineData.push({id: parent.id, name: parent.name, values: values});
@@ -56,9 +57,10 @@ const LineChart = inject("dataStore", "visStore")(observer((props) => {
             && props.visStore.childHighlights.map(d => props.mapper.get(d).parent).includes(line.id)) {
             let childLineString = '';
             const values = props.dataStore.conditions.map((cond, i) => {
-                return d3.sum(props.visStore.childHighlights
-                    .filter(d => props.mapper.get(d).parent === line.id)
-                    .map(d => props.mapper.get(d).values[i]))
+                const containedHighlights = props.visStore.childHighlights
+                    .filter(d => props.mapper.get(d).parent === line.id);
+                return d3.sum(containedHighlights
+                    .map(d => props.mapper.get(d).values[i])) / containedHighlights.length
             });
             values.forEach((value, i) => {
                 childLineString += xScale(i) + ',' + yScale(value) + ' ';
@@ -91,7 +93,7 @@ const LineChart = inject("dataStore", "visStore")(observer((props) => {
     });
     let sigLine = null;
     if (props.visStore.childHighlights.length === 1 && !store.localHighlight) {
-        sigLine = <SignificanceLine width={width} height={yScale(-Math.log10(props.sigThreshold))}
+        sigLine = <SignificanceLine width={width} height={yScale(props.logSigThreshold)}
                                     sigThreshold={props.sigThreshold}/>
     }
     const xAxis = d3.axisBottom()
@@ -118,6 +120,7 @@ LineChart.propTypes = {
     width: PropTypes.number.isRequired,
     height: PropTypes.number.isRequired,
     sigThreshold: PropTypes.number.isRequired,
+    logSigThreshold: PropTypes.number.isRequired,
 };
 export default LineChart;
 

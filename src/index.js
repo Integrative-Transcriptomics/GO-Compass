@@ -6,7 +6,7 @@ import * as serviceWorker from './serviceWorker';
 
 ReactDOM.render(
     <React.Fragment>
-            <App/>
+        <App/>
     </React.Fragment>,
     document.getElementById('root')
 );

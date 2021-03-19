@@ -16,8 +16,8 @@ const StackedBarChart = inject("dataStore", "visStore")(observer((props) => {
             store.showOverview = showOverview
         }),
         localHighlight: false,
-        setLocalHighlight: action((highlight)=>{
-            store.localHighlight =highlight;
+        setLocalHighlight: action((highlight) => {
+            store.localHighlight = highlight;
         }),
         get data() {
             const stackedChildren = props.dataStore.conditions.map((d, i) => {
@@ -35,7 +35,7 @@ const StackedBarChart = inject("dataStore", "visStore")(observer((props) => {
             });
             return stackedChildren;
         },
-        get showAll(){
+        get showAll() {
             return this.showOverview || this.localHighlight
         }
     }));
@@ -102,7 +102,7 @@ const StackedBarChart = inject("dataStore", "visStore")(observer((props) => {
     });
     let sigLine = null;
     if (props.visStore.childHighlights.length === 1 && !store.showAll) {
-        sigLine = <SignificanceLine width={width} height={yScale(-Math.log10(props.sigThreshold))}
+        sigLine = <SignificanceLine width={width} height={yScale(props.logSigThreshold)}
                                     sigThreshold={props.sigThreshold}/>
     }
     const startAnimation = useCallback((index) => {
@@ -146,6 +146,7 @@ StackedBarChart.propTypes = {
     height: PropTypes.number.isRequired,
     mapper: PropTypes.instanceOf(Map).isRequired,
     sigThreshold: PropTypes.number.isRequired,
+    logSigThreshold: PropTypes.number.isRequired,
 };
 export default StackedBarChart;
 

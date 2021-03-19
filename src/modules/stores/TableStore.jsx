@@ -1,5 +1,8 @@
-import {extendObservable, action} from "mobx";
+import {action, extendObservable} from "mobx";
 
+/**
+ * store for reasults table
+ */
 export class TableStore {
     constructor(dataTable, conditions) {
         this.mapper = {};

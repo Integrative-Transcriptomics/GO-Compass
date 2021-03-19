@@ -85,7 +85,7 @@ const Plots = inject("dataStore", "visStore")(observer((props) => {
                     <Provider upSetStore={props.dataStore.upSetStore}>
                         <UpSet width={props.visStore.screenWidth / 3}
                                height={props.visStore.plotHeight / 2}
-                               sigThreshold={props.sigThreshold}/>
+                               logSigThreshold={props.logSigThreshold}/>
                     </Provider>
                 </Paper>
             </Grid>
@@ -107,7 +107,8 @@ const Plots = inject("dataStore", "visStore")(observer((props) => {
                     <Typography>
                         {detailedHeader}
                     </Typography>
-                    <SimpleChart sigThreshold={props.sigThreshold} isTimeSeries={props.isTimeSeries}
+                    <SimpleChart sigThreshold={props.sigThreshold} logSigThreshold={props.logSigThreshold}
+                                 isTimeSeries={props.isTimeSeries}
                                  width={props.visStore.screenWidth / 3} height={props.visStore.plotHeight / 2}/>
                 </Paper>
             </Grid>
@@ -139,7 +140,7 @@ const Plots = inject("dataStore", "visStore")(observer((props) => {
                             </Button>
                         }
                     />
-                    <AnimatedTreemap sigThreshold={props.sigThreshold}
+                    <AnimatedTreemap logSigThreshold={props.logSigThreshold}
                                      width={props.visStore.screenWidth / 3}
                                      height={props.visStore.plotHeight / 2}/>
                 </Paper>
@@ -149,14 +150,14 @@ const Plots = inject("dataStore", "visStore")(observer((props) => {
                     <Typography>
                         Treemaps
                     </Typography>
-                    <SmallMultiples sigThreshold={props.sigThreshold} width={props.visStore.screenWidth / 3}
+                    <SmallMultiples logSigThreshold={props.logSigThreshold} width={props.visStore.screenWidth / 3}
                                     height={props.visStore.plotHeight / 2}/>
                 </Paper>
             </Grid>
             <Grid item xs={12}>
                 <Paper className={classes.paper}>
                     <Provider tableStore={props.dataStore.tableStore}>
-                        <DataTable sigThreshold={props.sigThreshold}/>
+                        <DataTable logSigThreshold={props.logSigThreshold}/>
                     </Provider>
                 </Paper>
             </Grid>

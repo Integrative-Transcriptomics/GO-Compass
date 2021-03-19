@@ -17,7 +17,7 @@ import ListSubheader from "@material-ui/core/ListSubheader";
 import Grid from "@material-ui/core/Grid";
 import KeyboardArrowDownIcon from '@material-ui/icons/KeyboardArrowDown';
 import KeyboardArrowUpIcon from '@material-ui/icons/KeyboardArrowUp';
-import {multiRevigoGeneLists, multiRevigoGoLists, multiSpeciesRevigo} from "../parseDataFlask";
+import {exampleData, multiRevigoGoLists, multiSpeciesRevigo} from "../parseDataFlask";
 import IconButton from "@material-ui/core/IconButton";
 import PropTypes from "prop-types";
 import {RootStore} from "./stores/RootStore";
@@ -28,10 +28,12 @@ const SelectData = (props) => {
     const [backgroundFile, setBackgroundFile] = useState(null);
     const [multiBackground, setMultiBackground] = useState([]);
     const [geneFiles, setGeneFiles] = useState([]);
+    // loading state: After launching but before the server returns the results loading state is true
     const [isLoading, setIsLoading] = useState(false);
     const [conditions, setConditions] = useState([]);
+    // Wang, Lin, Resnik, Edge based
     const [selectedMeasure, selectMeasure] = useState("Edge based");
-    const [pvalueFilter, setPvalueFilter] = useState(0.5);
+    const [pvalueFilter, setPvalueFilter] = useState(0.05);
     const [selectedTab, selectTab] = useState(0);
     const useStyles = makeStyles((theme: Theme) =>
         createStyles({
@@ -46,14 +48,18 @@ const SelectData = (props) => {
             },
         }),
     );
+    /**
+     * Launches the application
+     * @type {function(): void}
+     */
     const launch = useCallback(() => {
         setIsLoading(true);
-        if (selectedTab === 0) {
+        if (selectedTab === 1) {
             multiRevigoGoLists(goFile, backgroundFile, selectedMeasure, pvalueFilter, response => {
                 props.setRootStore(new RootStore(response.results, response.conditions, response.tableColumns));
             });
         } else {
-            if (selectedTab === 1) {
+            if (selectedTab === 0) {
                 const reorderedFiles = conditions.map(d => {
                     return geneFiles[d.index];
                 });
@@ -63,8 +69,35 @@ const SelectData = (props) => {
             }
         }
     }, [goFile, backgroundFile, selectedMeasure, conditions, pvalueFilter, geneFiles, props, multiBackground, selectedTab]);
+    /**
+     * Loads example data
+     * @type {function(): void}
+     */
+    const loadExampleData = useCallback(() => {
+        exampleData((data) => {
+            let backgroundFile = new File([data.background], "scoelicolor.txt", {
+                type: "text/plain",
+            })
+            let geneFiles = Object.keys(data.lists).map(condition => {
+                return (new File([data.lists[condition]], condition + ".txt", {
+                    type: "text/plain",
+                }))
+            })
+            setGeneFiles(geneFiles)
+            setConditions(geneFiles.map((d, i) => {
+                return ({
+                    index: i,
+                    condition: d.name.slice(0, -4),
+                    background: backgroundFile.name
+                })
+            }));
+            setMultiBackground([backgroundFile])
+            selectMeasure("Wang")
+            setPvalueFilter(0.05)
+        })
+    }, [])
     let launchable;
-    if (selectedTab === 0) {
+    if (selectedTab === 1) {
         launchable = goFile !== null && backgroundFile !== null;
     } else {
         launchable = geneFiles.length > 0 && multiBackground.length > 0;
@@ -84,49 +117,17 @@ const SelectData = (props) => {
                             textColor="primary"
                             onChange={(e, value) => selectTab(value)}
                         >
-                            <Tab label="GO terms"/>
                             <Tab label="Gene lists"/>
+                            <Tab label="GO terms"/>
                         </Tabs>
                     </ListItem>
+
                     <div hidden={selectedTab !== 0} role="tabpanel">
-                        <ListSubheader>Select GO Term file</ListSubheader>
                         <ListItem>
-                            <Typography>
-                                <Button className={classes.menuButton}
-                                        variant="contained"
-                                        disabled={isLoading}
-                                        component="label"
-                                >
-                                    Select File
-                                    <input
-                                        type="file"
-                                        style={{display: "none"}}
-                                        onChange={(event) => setGoFile(event.target.files[0])}
-                                    />
-                                </Button>
-                                {goFile !== null ? goFile.name : "No file selected"}
-                            </Typography>
+                            <Button className={classes.menuButton}
+                                    variant="contained"
+                                    component="label" onClick={loadExampleData}>Load Example Data</Button>
                         </ListItem>
-                        <ListSubheader>Select Background file</ListSubheader>
-                        <ListItem>
-                            <Typography>
-                                <Button className={classes.menuButton}
-                                        variant="contained"
-                                        disabled={isLoading}
-                                        component="label"
-                                >
-                                    Select File
-                                    <input
-                                        type="file"
-                                        style={{display: "none"}}
-                                        onChange={(event) => setBackgroundFile(event.target.files[0])}
-                                    />
-                                </Button>
-                                {backgroundFile !== null ? backgroundFile.name : "No file selected"}
-                            </Typography>
-                        </ListItem>
-                    </div>
-                    <div hidden={selectedTab !== 1} role="tabpanel">
                         <ListSubheader>Select Gene Lists</ListSubheader>
                         <ListItem>
                             <Typography>
@@ -250,6 +251,44 @@ const SelectData = (props) => {
                                         </FormControl>
                                     </ListItem>
                                 )}</div> : null}
+                    </div>
+                    <div hidden={selectedTab !== 1} role="tabpanel">
+                        <ListSubheader>Select GO Term file</ListSubheader>
+                        <ListItem>
+                            <Typography>
+                                <Button className={classes.menuButton}
+                                        variant="contained"
+                                        disabled={isLoading}
+                                        component="label"
+                                >
+                                    Select File
+                                    <input
+                                        type="file"
+                                        style={{display: "none"}}
+                                        onChange={(event) => setGoFile(event.target.files[0])}
+                                    />
+                                </Button>
+                                {goFile !== null ? goFile.name : "No file selected"}
+                            </Typography>
+                        </ListItem>
+                        <ListSubheader>Select Background file</ListSubheader>
+                        <ListItem>
+                            <Typography>
+                                <Button className={classes.menuButton}
+                                        variant="contained"
+                                        disabled={isLoading}
+                                        component="label"
+                                >
+                                    Select File
+                                    <input
+                                        type="file"
+                                        style={{display: "none"}}
+                                        onChange={(event) => setBackgroundFile(event.target.files[0])}
+                                    />
+                                </Button>
+                                {backgroundFile !== null ? backgroundFile.name : "No file selected"}
+                            </Typography>
+                        </ListItem>
                     </div>
                     <ListItem>
                         <FormControl className={classes.formControl}>

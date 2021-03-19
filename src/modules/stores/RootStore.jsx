@@ -13,6 +13,9 @@ export class RootStore {
             ontology: "BP",
             sigThreshold: 0.05,
             isTimeSeries: false,
+            get logSigThreshold() {
+                return -Math.log10(this.sigThreshold);
+            },
             setOntology: action((ontolgy) => {
                 this.ontology = ontolgy;
             }),

@@ -15,10 +15,10 @@ const GradientLegend = (props) => {
             <stop offset="0%" style={{stopColor: props.range[0], stopOpacity: 1}}/>
             <stop offset="100%" style={{stopColor: props.range[1], stopOpacity: 1}}/>
         </linearGradient>
-        labels.push(<text x={0} y={(height + fontSize) / 2}
+        labels.push(<text key={0} x={0} y={(height + fontSize) / 2}
                           fontSize={fontSize}>{Math.round(props.domain[0] * 100) / 100}</text>)
         const label2 = Math.round(props.domain[1] * 100) / 100;
-        labels.push(<text x={width - getTextWidth(label2, 12, "normal")}
+        labels.push(<text key={1} x={width - getTextWidth(label2, 12, "normal")}
                           y={(height + fontSize) / 2}
                           fontSize={fontSize}>{label2}</text>)
     } else {
@@ -27,14 +27,14 @@ const GradientLegend = (props) => {
             <stop offset="50%" style={{stopColor: props.range[1], stopOpacity: 1}}/>
             <stop offset="100%" style={{stopColor: props.range[2], stopOpacity: 1}}/>
         </linearGradient>
-        labels.push(<text x={0} y={(height + fontSize) / 2}
+        labels.push(<text key={0} x={0} y={(height + fontSize) / 2}
                           fontSize={fontSize}>{Math.round(props.domain[0] * 100) / 100}</text>)
         const label2 = Math.round(props.domain[1] * 100) / 100;
-        labels.push(<text x={(width - getTextWidth(label2, 12, "normal")) / 2}
+        labels.push(<text key={1} x={(width - getTextWidth(label2, 12, "normal")) / 2}
                           y={(height + fontSize) / 2}
                           fontSize={fontSize}>{label2}</text>)
         const label3 = Math.round(props.domain[2] * 100) / 100;
-        labels.push(<text x={width - getTextWidth(label3, 12, "normal")}
+        labels.push(<text key={2} x={width - getTextWidth(label3, 12, "normal")}
                           y={(height + fontSize) / 2}
                           fontSize={fontSize}>{label3}</text>)
     }

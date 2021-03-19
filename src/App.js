@@ -43,11 +43,13 @@ const App = () => {
     }, [open]);
     const classes = useStyles();
     let views = [];
+    // create one view for each ontology
     if (rootStore !== null) {
         rootStore.ontologies.forEach(ont => {
             views.push(<div key={ont.id} style={{display: rootStore.ontology === ont.id ? "block" : "none"}}>
                 <Provider dataStore={rootStore.dataStores[ont.id]} visStore={rootStore.dataStores[ont.id].visStore}>
-                    <Plots sigThreshold={rootStore.sigThreshold} isTimeSeries={rootStore.isTimeSeries}/>
+                    <Plots logSigThreshold={rootStore.logSigThreshold} sigThreshold={rootStore.sigThreshold}
+                           isTimeSeries={rootStore.isTimeSeries}/>
                 </Provider>
             </div>)
         });
@@ -62,17 +64,16 @@ const App = () => {
                             <MenuIcon style={{color: "white"}}/>
                         </IconButton>
                         <Typography className={classes.title} variant="h6">
-                            GO Comparison Dashboard
+                            GO-Compass
                         </Typography>
                     </Toolbar>
                 </AppBar>
             </React.Fragment>
             <React.Fragment>
-                {rootStore !== null?<Provider rootStore={rootStore}>
+                {rootStore !== null ? <Provider rootStore={rootStore}>
                     <AppDrawer open={open} toggleDrawer={toggleDrawer}/>
-                </Provider>:null}
-                            {rootStore !== null ? views : <SelectData setRootStore={setRootStore}/>}
-
+                </Provider> : null}
+                {rootStore !== null ? views : <SelectData setRootStore={setRootStore}/>}
             </React.Fragment>
         </div>
     );

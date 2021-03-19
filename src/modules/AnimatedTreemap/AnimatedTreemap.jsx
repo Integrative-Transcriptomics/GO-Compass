@@ -18,10 +18,8 @@ const AnimatedTreemap = inject("dataStore", "visStore")(observer((props) => {
     const width = props.width - margins.left - margins.right;
     const fontSize = 12;
 
-
     const leafRef = React.createRef();
     const starRef = React.createRef();
-
 
     const layout = props.visStore.treemapLayout;
 
@@ -48,11 +46,11 @@ const AnimatedTreemap = inject("dataStore", "visStore")(observer((props) => {
             .call(leaf => leaf.select("text")
                 .attr("x", d => d.x1 - d.x0 - fontSize)
                 .attr("y", d => d.y1 - d.y0)
-                .attr("opacity", d => d.value > (-Math.log10(props.sigThreshold)) ? 1 : 0));
+                .attr("opacity", d => d.value > props.logSigThreshold ? 1 : 0));
 
-    }, [leafRef, starRef, layout, props.visStore.animationDuration, props.sigThreshold]);
+    }, [leafRef, starRef, layout, props.visStore.animationDuration, props.logSigThreshold]);
     React.useEffect(() => {
-        if(props.visStore.conditionIndex !== index) {
+        if (props.visStore.conditionIndex !== index) {
             startAnimation(props.visStore.conditionIndex);
         }
     }, [props.visStore.conditionIndex, index, startAnimation]);
@@ -60,7 +58,8 @@ const AnimatedTreemap = inject("dataStore", "visStore")(observer((props) => {
     const stars = [];
     layout(index).children.forEach((parent, j) =>
         parent.children.forEach((child, i) => {
-            const isHighlighted = props.visStore.childHighlights.length === 0 || props.visStore.childHighlights.includes(child.data.id);
+            const isHighlighted = props.visStore.childHighlights.length === 0
+                || props.visStore.childHighlights.includes(child.data.id);
             const fill = props.visStore.termColorScale(parent.data.id);
             const id = j + '-' + i;
             rects.push(
@@ -87,7 +86,7 @@ const AnimatedTreemap = inject("dataStore", "visStore")(observer((props) => {
                 </g>
             );
             stars.push(<g key={child.data.name} transform={'translate(' + child.x0 + ',' + child.y0 + ')'}>
-                <text clipPath={'url(#clip' + id + ')'} opacity={-Math.log10(props.sigThreshold) < child.value ? 1 : 0}
+                <text clipPath={'url(#clip' + id + ')'} opacity={props.logSigThreshold < child.value ? 1 : 0}
                       fontSize={fontSize} y={child.y1 - child.y0}
                       x={child.x1 - child.x0 - fontSize}>*
                 </text>
@@ -96,7 +95,7 @@ const AnimatedTreemap = inject("dataStore", "visStore")(observer((props) => {
     );
     return (
         <svg width={props.width} height={props.height}>
-            <g transform={"translate(" + margins.left + "," + margins.top + ")scale("+ width/props.width+ ")"}>
+            <g transform={"translate(" + margins.left + "," + margins.top + ")scale(" + width / props.width + ")"}>
                 <g ref={leafRef}>{rects}</g>
                 <g ref={starRef}>{stars}</g>
             </g>
@@ -107,7 +106,7 @@ const AnimatedTreemap = inject("dataStore", "visStore")(observer((props) => {
 AnimatedTreemap.propTypes = {
     width: PropTypes.number,
     height: PropTypes.number,
-    sigThreshold: PropTypes.number.isRequired,
+    logSigThreshold: PropTypes.number.isRequired,
 };
 AnimatedTreemap.defaultProps = {
     width: 900,

@@ -10,7 +10,7 @@ const Legend = inject("dataStore", "visStore")(observer((props) => {
         bottom: 20,
         left: 20,
     };
-    const rowHeight=15;
+    const rowHeight = 15;
     const width = props.width - margins.left - margins.right;
     let height = (props.dataStore.nestedData.length + 1) * rowHeight;
 

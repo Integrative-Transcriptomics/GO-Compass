@@ -25,6 +25,7 @@ export function cropText(text, fontSize, fontweight, maxWidth) {
     }
     return returnText;
 }
+
 /**
  * crops the text to a certain width and adds "..." in the end
  * @param {string} text

@@ -1,8 +1,10 @@
-import {extendObservable, action} from "mobx";
+import {action, extendObservable} from "mobx";
 import * as d3 from "d3";
 
+/**
+ * store for visualization operations
+ */
 export class VisStore {
-    /* some observable state */
     constructor(dataStore) {
         this.dataStore = dataStore;
         this.animationDuration = 1500;
@@ -15,9 +17,19 @@ export class VisStore {
             childHighlights: [],
             conditionIndex: 0,
 
+            /**
+             * color Scale for terms
+             * @returns {*}
+             */
             get termColorScale() {
-                return d3.scaleOrdinal(d3.schemeSet2);
+                return d3.scaleOrdinal(['#8dd3c7', '#ffffb3', '#bebada', '#fb8072', '#80b1d3'
+                    , '#fdb462', '#b3de69', '#fccde5', '#d9d9d9', '#bc80bd', '#ccebc5', '#ffed6f']);
             },
+            /**
+             * layout function for treemaps. Created in store to ensure that
+             * small multiples and selected Treemap have the same layout
+             * @returns {function(*): *}
+             */
             get treemapLayout() {
                 const width = this.screenWidth / 3;
                 const height = this.plotHeight / 2;

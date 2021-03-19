@@ -22,7 +22,7 @@ const SmallMultiples = inject("dataStore", "visStore")(observer((props) => {
     const treemaps = [];
     props.dataStore.conditions.forEach((key, i) => {
         treemaps.push(<g key={key} transform={"translate(" + x + "," + y + ")"}>
-            <SmallTreemap sigThreshold={props.sigThreshold}
+            <SmallTreemap logSigThreshold={props.logSigThreshold}
                           index={i} parentWidth={props.width} width={width} height={height}/>
         </g>);
         if (Math.round(x + width) >= Math.round(props.width)) {
@@ -40,7 +40,7 @@ const SmallMultiples = inject("dataStore", "visStore")(observer((props) => {
 SmallMultiples.propTypes = {
     width: PropTypes.number,
     height: PropTypes.number,
-    sigThreshold: PropTypes.number.isRequired,
+    logSigThreshold: PropTypes.number.isRequired,
 };
 SmallMultiples.defaultProps = {
     width: 900,

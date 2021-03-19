@@ -1,7 +1,7 @@
 function calculateTreeLayout(tree, height) {
     const flatDescendants = getDescendants(tree);
-    const stepsize = height / (flatDescendants.length +1);
-    return(traverseTree(tree, null, stepsize, 0));
+    const stepsize = height / (flatDescendants.length + 1);
+    return (traverseTree(tree, null, stepsize, 0));
 }
 
 function traverseTree(node, parent, stepSize, currY) {
@@ -12,10 +12,10 @@ function traverseTree(node, parent, stepSize, currY) {
     if ("children" in node) {
         node.children.sort((a, b) => b.value - a.value).forEach((child, i) => {
             nodes.push(...traverseTree(child, parentNode, stepSize, currY));
-            currY += (getDescendants(child).length+1) * stepSize;
+            currY += (getDescendants(child).length + 1) * stepSize;
         });
     }
-    return(nodes)
+    return (nodes)
 }
 
 

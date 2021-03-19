@@ -11,20 +11,6 @@ class Axis extends React.Component {
         this.axis = React.createRef()
     }
 
-    componentDidMount() {
-        this.renderAxis();
-    }
-
-    componentDidUpdate() {
-        this.renderAxis();
-    }
-
-    renderAxis() {
-        // eslint-disable-next-line react/no-find-dom-node
-        const node = this.axis.current;
-        d3.select(node).call(this.props.axis);
-    }
-
     /**
      * computes the width of a text
      * @param {string} text
@@ -37,6 +23,26 @@ class Axis extends React.Component {
         return context.measureText(text).width;
     }
 
+    componentDidMount() {
+        this.renderAxis();
+    }
+
+    componentDidUpdate() {
+        this.renderAxis();
+    }
+
+    renderAxis() {
+        // eslint-disable-next-line react/no-find-dom-node
+        const node = this.axis.current;
+        d3.select(node).call(this.props.axis)
+        /*
+        .selectAll("text")
+        .attr("y", 0)
+        .attr("x", 9)
+        .attr("dy", ".35em")
+        .attr("transform", "rotate(90)")
+        .style("text-anchor", "start");*/
+    }
 
     render() {
         const translatex = `translate(0,${this.props.h})`;

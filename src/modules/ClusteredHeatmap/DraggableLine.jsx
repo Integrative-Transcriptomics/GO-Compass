@@ -34,7 +34,7 @@ const DraggableLine = inject("visStore")(observer((props) => {
         <polygon points={sliderX0 + "," + sliderY0 + " " +
         sliderX1 + "," + sliderY1 + " " +
         sliderX2 + "," + sliderY2}/>
-        <text x={x-5} y={-15}>{props.text}</text>
+        <text x={x - 5} y={-15}>{props.text}</text>
     </g>;
     useEffect(() => {
         if (dragging) {
@@ -60,7 +60,7 @@ const DraggableLine = inject("visStore")(observer((props) => {
                     setX(props.x)
                 });
         }
-    }, [x0, x, dragging, props, inverseX,  ref]);
+    }, [x0, x, dragging, props, inverseX, ref]);
     useEffect(() => {
         if (!props.mouseDown) {
             setDragging(false);

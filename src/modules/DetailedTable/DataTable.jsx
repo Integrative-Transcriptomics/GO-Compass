@@ -62,15 +62,15 @@ const Row = inject("visStore", "dataStore", "tableStore")(observer((props) => {
             align = "left";
         }
         let value = props.tableStore.mapper[props.goTerm][key];
-        if(props.dataStore.conditions.includes(key)){
-            value = Math.round(value*1000)/1000;
-        } else if(typeof value ==="number"){
-            value = Math.round(value*100)/100;
+        if (props.dataStore.conditions.includes(key)) {
+            value = Math.round(value * 1000) / 1000;
+        } else if (typeof value === "number") {
+            value = Math.round(value * 100) / 100;
         }
         return <Cell key={key} color="black" align={align} value={value}
                      isTerm={key === "termID"}
                      significant={props.dataStore.conditions.includes(key)
-                     && props.tableStore.mapper[props.goTerm][key] > -Math.log10(props.sigThreshold)}/>;
+                     && props.tableStore.mapper[props.goTerm][key] > props.logSigThreshold}/>;
     });
     let subRows = null;
     if ((props.open) && props.subTerms.length > 0) {
@@ -78,10 +78,16 @@ const Row = inject("visStore", "dataStore", "tableStore")(observer((props) => {
             <TableRow hover key={subTerm}>
                 <TableCell/>
                 {props.keys.map(key => {
-                    return <Cell key={key} color="gray" align="right" value={props.tableStore.mapper[subTerm][key]}
+                    let value = props.tableStore.mapper[subTerm][key];
+                    if (props.dataStore.conditions.includes(key)) {
+                        value = Math.round(value * 1000) / 1000;
+                    } else if (typeof value === "number") {
+                        value = Math.round(value * 100) / 100;
+                    }
+                    return <Cell key={key} color="gray" align="right" value={value}
                                  isTerm={key === "termID"}
                                  significant={props.dataStore.conditions.includes(key)
-                                 && props.tableStore.mapper[props.goTerm][key] > -Math.log10(props.sigThreshold)}/>
+                                 && props.tableStore.mapper[props.goTerm][key] > props.logSigThreshold}/>
                 })}
             </TableRow>
         ))
@@ -107,7 +113,7 @@ Row.propTypes = {
     keys: PropTypes.arrayOf(PropTypes.string).isRequired,
     goTerm: PropTypes.string.isRequired,
     open: PropTypes.bool.isRequired,
-    sigThreshold: PropTypes.number.isRequired,
+    logSigThreshold: PropTypes.number.isRequired,
 };
 
 const DataTable = inject("dataStore", "tableStore")(observer((props) => {
@@ -130,7 +136,7 @@ const DataTable = inject("dataStore", "tableStore")(observer((props) => {
         content.push(<Row key={goTerm}
                           open={props.tableStore.termState.filter(d => d.goTerm === goTerm)[0].open}
                           subTerms={props.dataStore.filterHierarchy[goTerm]}
-                          sigThreshold={props.sigThreshold}
+                          logSigThreshold={props.logSigThreshold}
                           keys={keys} goTerm={goTerm}/>);
     });
     return (
@@ -156,7 +162,7 @@ const DataTable = inject("dataStore", "tableStore")(observer((props) => {
     );
 }));
 DataTable.propTypes = {
-    sigThreshold: PropTypes.number.isRequired,
+    logSigThreshold: PropTypes.number.isRequired,
 };
 export default DataTable;
 
