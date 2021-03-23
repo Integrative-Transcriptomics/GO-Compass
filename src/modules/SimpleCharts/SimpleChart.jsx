@@ -15,7 +15,7 @@ const SimpleChart = inject("dataStore", "visStore")(observer((props) => {
     const store = useLocalStore(() => ({
         anchorEl: null,
         chartHeight: 100,
-        scaleLocked: false,
+        scaleLocked: true,
         setAnchorEl: action((el) => {
             store.anchorEl = el;
         }),

@@ -38,7 +38,7 @@ const SmallTreemap = inject("dataStore", "visStore")(observer((props) => {
                           id={"rectSmall" + id}
                           width={child.x1 - child.x0} height={child.y1 - child.y0}
                           fill={fill}
-                          stroke={"white"}
+                          stroke={props.visStore.childHighlights.includes(child.data.id) ? "black" : "white"}
                           strokeWidth={1}
                           opacity={isHighlighted ? 1 : 0.5}/>
                     <title>

@@ -66,6 +66,12 @@ const App = () => {
                         <Typography className={classes.title} variant="h6">
                             GO-Compass
                         </Typography>
+                        {rootStore != null ?
+                            <Typography>
+                                {"Ontology: " + rootStore.ontologies_map[rootStore.ontology] + ", Method: "
+                                + rootStore.selectedMeasure + ", p-Value Filter: " + rootStore.pvalueFilter}
+                            </Typography> : null
+                        }
                     </Toolbar>
                 </AppBar>
             </React.Fragment>
