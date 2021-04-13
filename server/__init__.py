@@ -10,7 +10,7 @@ from goatools.goea.go_enrichment_ns import GOEnrichmentStudyNS
 from goatools.godag.consts import NAMESPACE2NS
 from goatools.semsim.termwise.wang import SsWang
 
-from findDescendants import getDescendants
+from .findDescendants import getDescendants
 from sklearn.decomposition import PCA
 
 import numpy as np

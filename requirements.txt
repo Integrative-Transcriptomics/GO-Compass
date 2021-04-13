@@ -20,7 +20,7 @@ requests==2.25.1
 scipy==1.6.1
 six==1.15.0
 statsmodels==0.12.2
-urllib3==1.26.3
+urllib3==1.26.4
 Werkzeug==1.0.1
 wget==3.2
 xlrd==1.2.0
