@@ -12,7 +12,7 @@ virtualenv <your-venv>
 Install required Python packages by referring to the requirements.txt-file.
 ```
 source <your-venv>/bin/activate
-pip install <path/to/OmicsTIDE>/requirements.txt
+pip install <path/to/go-compass>/requirements.txt
 ```
 Install required js packages using
 ```
