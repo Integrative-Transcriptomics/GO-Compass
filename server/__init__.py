@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, send_file
 from flask import request
 from io import StringIO
 
@@ -10,7 +10,7 @@ from goatools.goea.go_enrichment_ns import GOEnrichmentStudyNS
 from goatools.godag.consts import NAMESPACE2NS
 from goatools.semsim.termwise.wang import SsWang
 
-from .findDescendants import getDescendants
+from findDescendants import getDescendants
 from sklearn.decomposition import PCA
 
 import numpy as np
@@ -30,10 +30,22 @@ parents = get_go2parents(godag, optional_relationships)
 
 
 def MultiGO(goEnrichment, background, method):
+    """ Return a dictionary
+
+    Keyword arguments:
+    goTerms -- list of go terms
+    background -- backgound (objanno)
+    method -- semantic similarity method, either "Lin", "Resnik", "Wang" or "Edge-based"
+    Creates semantic similarity matrix
+    Performs clustering
+    """
     goEnrichment.sort_index(inplace=True)
+
+    # filter GO enrichment by p-values
     mask = goEnrichment[goEnrichment < float(request.form['pvalueFilter'])].isnull().all(axis=1)
     goEnrichment = goEnrichment[mask == False]
     goEnrichment = goEnrichment[goEnrichment.index.isin(godag.keys())]
+
     goTerms = goEnrichment.index.values
     matrix = np.array(createMatrix(goTerms, background, method))
     matrix[matrix == None] = 0
@@ -41,6 +53,14 @@ def MultiGO(goEnrichment, background, method):
 
 
 def createMatrix(goTerms, background, method):
+    """ Return a numerical matrix
+
+    Keyword arguments:
+    goTerms -- list of go terms
+    background -- flattened background: lists of genes and GO Terms
+    method -- semantic similarity method, either "Lin", "Resnik", "Wang" or "Edge-based"
+    Creates semantic similarity matrix
+    """
     termcounts = TermCounts(godag, background)
     matrix = list()
     wang_r1 = None
@@ -70,28 +90,51 @@ def createMatrix(goTerms, background, method):
 
 
 def iterateMatrix(matrix, goTerms, goEnrichment, background):
+    """ return a dictionary
+
+    Keyword arguments:
+    matrix -- numerical matrix of semantic similarities
+    goTerms -- list of goTerms
+    goEnrichment -- GO enrichment result
+    background -- flattened background: lists of genes and GO Terms
+    iterates through semantic similarity matrix in decreasing ss order
+    """
     numGenes = len(list(dict.fromkeys(background[0])))
     max = goEnrichment.max().max()
     min = goEnrichment.min().min()
+
+    # p-values are considered similar if they have a maximum difference of 5%
     maxDiff = (max - min) * 0.05
+
+    # frequencies of GO temrs
     frequencies = dict(Counter(background[1]))
     frequencies = {k: v / numGenes for k, v in frequencies.items()}
     avgs = dict()
+
+    # calculate averages for each term for uniqueness value
     for index, term in enumerate(goTerms):
         col = matrix[:, index]
         row = matrix[index, :]
         col = col[col != -1]
         row = row[row != -1]
         avgs[term] = (col.sum() + row.sum()) / (len(goTerms) - 1)
+
+    # stores tree structure
     tree = dict()
+    # stores additional data for each GO term
     goList = dict()
     while len(goTerms) > 0:
         maxValue = np.amax(np.ravel(matrix))
+
+        # get most similar pair of GO terms
         indices = np.where(matrix == maxValue)
         indices = list(zip(indices[0], indices[1]))[0]
         termA = goTerms[indices[0]]
         termB = goTerms[indices[1]]
+
+        # calculate which GO term is rejected
         delete = testGoTerms(termA, termB, goEnrichment, background, frequencies, maxDiff)
+
         toDelete = delete["term"]
         if toDelete == termA:
             deleteIndex = indices[0]
@@ -100,21 +143,31 @@ def iterateMatrix(matrix, goTerms, goEnrichment, background):
             deleteIndex = indices[1]
             toKeep = termA
 
+        # add GO terms to current tree dict
         if toKeep != toDelete:
             if toDelete in tree:
                 if toKeep in tree:
+                    # if both terms are in the tree dict, it means that they form non-connected subtrees.
+                    # The tree dict of the rejected term is placed as the child of the kept term
                     tree[toKeep][toDelete] = tree[toDelete]
                 else:
-                    tree[toKeep] = tree[toDelete]
+                    # if the kept term is not in the tree dict but the rejected is,
+                    # the kept term will be placed as the parent of the rejected term
+                    tree[toKeep] = {}
+                    tree[toKeep][toDelete] = tree[toDelete]
             else:
                 if toKeep in tree:
+                    # if the kept term is in the tree dict, but the rejected is not,
+                    # the rejected term is added as a child of the kept term
                     tree[toKeep][toDelete] = toDelete
                 else:
+                    # if none of the terms are in the tree dict, a new entry is created
                     tree[toKeep] = {toDelete: toDelete}
+            # not connected trees that have the rejected term as a parent are deleted
+            # as the rejected term is now incorporated in the final tree dict structure
             tree.pop(toDelete, None)
         else:
             maxValue = 0
-        print(godag[toDelete].level)
         goList[toDelete] = {
             "termID": toDelete,
             "description": godag[toDelete].name,
@@ -124,6 +177,7 @@ def iterateMatrix(matrix, goTerms, goEnrichment, background):
             "dispensability": maxValue,
             "pvalues": np.negative(2 * np.log(goEnrichment.loc[toDelete, :].values)).tolist()
         }
+        # delete rejected term from list of GO terms and from ss matrix
         goTerms = np.delete(goTerms, deleteIndex)
         matrix = np.delete(matrix, deleteIndex, 0)
         matrix = np.delete(matrix, deleteIndex, 1)
@@ -131,7 +185,15 @@ def iterateMatrix(matrix, goTerms, goEnrichment, background):
 
 
 def testGoTerms(termA, termB, goEnrichment, background, goCounts, maxDiff):
-    # frequency check
+    """ returns a dictionary
+
+    Keyword arguments:
+    termA -- goTerm
+    termB -- goTerm
+    goEnrichment -- GO enrichment result
+    applies rejection criteria to pairs of GO terms
+    """
+    # frequency check: Reject very general GO terms
     frequencyA = calculateFrequency(termA, goCounts)
     frequencyB = calculateFrequency(termB, goCounts)
     if frequencyA > 0.05:
@@ -149,80 +211,74 @@ def testGoTerms(termA, termB, goEnrichment, background, goCounts, maxDiff):
         if frequencyB > 0.05:
             return {"rejection": "frequency" + termA, "term": termB}
             # return termB
+        # p-value reject: Reject GO terms with lower p-values
         else:
-            if godag[termB].level < godag[termA].level:
-                return {"rejection": "level" + termB, "term": termA}
+            pvaluesA = np.array(goEnrichment.loc[termA, :].values.tolist())
+            pvaluesB = np.array(goEnrichment.loc[termB, :].values.tolist())
+            filterMask = (abs(pvaluesA - pvaluesB) * (1 - np.minimum(pvaluesA, pvaluesB))) > maxDiff
+            filteredPvaluesA = pvaluesA[filterMask]
+            filteredPvaluesB = pvaluesB[filterMask]
+            bbiggera = len(np.where(filteredPvaluesA < filteredPvaluesB)[0])
+            abiggerb = len(np.where(filteredPvaluesA > filteredPvaluesB)[0])
+            if bbiggera < abiggerb:
+                return {"rejection": "pval" + termB, "term": termA}
+                # return termA
             else:
-                if godag[termA].level < godag[termB].level:
-                    return {"rejection": "level" + termA, "term": termB}
+                if bbiggera > abiggerb:
+                    return {"rejection": "pval" + termA, "term": termB}
+                    # return termB
                 else:
-                    pvaluesA = np.array(goEnrichment.loc[termA, :].values.tolist())
-                    pvaluesB = np.array(goEnrichment.loc[termB, :].values.tolist())
-                    filterMask = (abs(pvaluesA - pvaluesB) * (1 - np.minimum(pvaluesA, pvaluesB))) > maxDiff
-                    filteredPvaluesA = pvaluesA[filterMask]
-                    filteredPvaluesB = pvaluesB[filterMask]
-                    if len(np.where(filteredPvaluesA < filteredPvaluesB)[0]) < len(
-                            np.where(filteredPvaluesA > filteredPvaluesB)[0]):
-                        return {"rejection": "pval" + termB, "term": termA}
-                        # return termA
-                    else:
-                        if len(np.where(filteredPvaluesA < filteredPvaluesB)[0]) > len(
-                                np.where(filteredPvaluesA > filteredPvaluesB)[0]):
+                    if bbiggera != 0 and abiggerb != 0:
+                        if np.average(filteredPvaluesA) < np.average(filteredPvaluesB):
                             return {"rejection": "pval" + termA, "term": termB}
-                            # return termB
                         else:
-                            seed = int(termA[3:-1])
-                            random.seed(seed)
-                            if bool(random.getrandbits(1)):
-                                return {"rejection": "random" + termB, "term": termA}
-                                # return termA
-                            else:
-                                return {"rejection": "random" + termA, "term": termB}
-                            # return termB
-
-        # parent reject
-        '''
-        else:
-            parentsA = parents[termA]
-            parentsB = parents[termB]
-            genesA = getAssociatedGenes(termA, background)
-            genesB = getAssociatedGenes(termB, background)
-            intersection = np.intersect1d(genesA, genesB)
-            if termB in parentsA:
-                return {"rejection": "child" + termB, "term": termA}
-                            # return termA
-            else:
-                if termA in parentsB:
-                    return {"rejection": "child" + termA, "term": termB}
-                                # return termB
-                else:
-                    pvaluesA = np.array(goEnrichment.loc[termA, :].values.tolist())
-                    pvaluesB = np.array(goEnrichment.loc[termB, :].values.tolist())
-                    filterMask = (abs(pvaluesA - pvaluesB) * (1 - np.minimum(pvaluesA, pvaluesB))) > maxDiff
-                    filteredPvaluesA = pvaluesA[filterMask]
-                    filteredPvaluesB = pvaluesB[filterMask]
-                    if len(np.where(filteredPvaluesA < filteredPvaluesB)[0]) < len(
-                        np.where(filteredPvaluesA > filteredPvaluesB)[0]):
-                        return {"rejection": "pval" + termB, "term": termA}
-                            # return termA
+                            return {"rejection": "pval" + termB, "term": termA}
+                    # parent reject: Reject terms based on their relationship in the GO dag
                     else:
-                        if len(np.where(filteredPvaluesA < filteredPvaluesB)[0]) > len(
-                            np.where(filteredPvaluesA > filteredPvaluesB)[0]):
-                            return {"rejection": "pval" + termA, "term": termB}
+                        parentsA = parents[termA]
+                        parentsB = parents[termB]
+                        genesA = getAssociatedGenes(termA, background)
+                        genesB = getAssociatedGenes(termB, background)
+                        intersection = np.intersect1d(genesA, genesB)
+                        if termB in parentsA:
+                            # if the parent term is composed almost exclusively of the child term, reject parent
+                            if len(genesB) * 0.75 < len(intersection):
+                                return {"rejection": "parent" + termA, "term": termB}
+                                # return termB
+                            else:
+                                # if not, reject child
+                                return {"rejection": "child" + termB, "term": termA}
+                                # return termA
+                        else:
+                            if termA in parentsB:
+                                if len(genesA) * 0.75 < len(intersection):
+                                    return {"rejection": "parent" + termB, "term": termA}
+                                    # return termA
+                                else:
+                                    return {"rejection": "child" + termA, "term": termB}
                                     # return termB
-                        else:
-                            seed = int(termA[3:-1])
-                            random.seed(seed)
-                            if bool(random.getrandbits(1)):
-                                return {"rejection": "random" + termB, "term": termA}
-                                # return termA
+                            # pseudo random reject
                             else:
-                                return {"rejection": "random" + termA, "term": termB}
-                                # return termB
-                                '''
+                                seed = int(termA[3:-1])
+                                random.seed(seed)
+                                if bool(random.getrandbits(1)):
+                                    return {"rejection": "random" + termB, "term": termA}
+                                    # return termA
+                                else:
+                                    return {"rejection": "random" + termA, "term": termB}
+                                    # return termB
 
 
+# calculates frequency of a go Term (including its descendants)
 def calculateFrequency(term, frequencies):
+    """ returns a float
+
+    Keyword arguments:
+    term -- GO term
+    frequencies -- dictionary of frequencies
+
+    calculates frequency of a go Term (including its descendants)
+    """
     descendants = getDescendants(term)
     frequency = 0
     for descendant in descendants:
@@ -234,6 +290,13 @@ def calculateFrequency(term, frequencies):
 
 
 def getAssociatedGenes(term, background):
+    """ returns list of genes
+
+    Keyword arguments:
+    term -- goTerm
+    background -- flattened background: lists of genes and GO terms
+    gets genes associated with a GO term
+    """
     npBackground = np.array(background)
     associatedGenes = list()
     filteredBackground = npBackground[:, npBackground[1] == term]
@@ -243,6 +306,13 @@ def getAssociatedGenes(term, background):
 
 
 def readBackground(backgroundFile):
+    """ return a dictionary
+
+    Keyword arguments:
+    backgroundFile -- background as string
+    reads background file
+    """
+    # helper file needs to be created since GOAtools method is only able to read files
     helperFileName = uuid.uuid1().hex + ".txt"
     helperFile = open(os.path.join(here, helperFileName), "a")
     helperFile.write(StringIO(backgroundFile.stream.read().decode("UTF8"), newline=None).read())
@@ -253,6 +323,12 @@ def readBackground(backgroundFile):
 
 
 def flattenBackground(background):
+    """ returns list of lists
+
+    Keyword arguments:
+    background -- background dictionary
+    flattens background dict to two lists: List of genes and list of GO terms
+    """
     genes = list()
     terms = list()
     for gene in background:
@@ -263,11 +339,18 @@ def flattenBackground(background):
 
 
 def GOEA(genes, objanno):
+    """ returns go term enrichment
+
+    Keyword arguments:
+    genes -- list of genes
+    objanno -- background dict
+    performs GO term enrichment
+    """
     goeaobj = GOEnrichmentStudyNS(
         objanno.get_id2gos().keys(),  # List of mouse protein-coding genes
         objanno.get_ns2assc(),  # geneid/GO associations
         godag,  # Ontologies
-        propagate_counts=False,
+        propagate_counts=True,
         alpha=0.05,  # default significance cut-off
         methods=['fdr_bh'])  # defult multipletest correction method
     goea_quiet_all = goeaobj.run_study(genes, prt=None)
@@ -282,6 +365,9 @@ def GOEA(genes, objanno):
 
 @app.route('/pca', methods=["POST"])
 def pca():
+    """ returns dict
+    performs PCA
+    """
     data = request.json["data"]
     pvalues = list()
     for key in data:
@@ -298,6 +384,9 @@ def pca():
 
 @app.route('/correlation', methods=["POST"])
 def correlation():
+    """ returns numerical matrix
+    performs correlation of GO terms
+    """
     data = request.json["data"]
     df = pd.DataFrame(data)
     df.drop(["goTerm"], axis=1)
@@ -307,15 +396,19 @@ def correlation():
 
 @app.route("/MultiSpeciesREVIGO", methods=["POST"])
 def MultiSpeciesREVIGO():
+    """ returns dict
+    performs clustering with multiple backgrounds
+    """
     backgroundFiles = request.files.getlist("backgrounds[]")
     geneListFiles = request.files.getlist("geneLists[]")
     conditions = request.form.getlist("conditions[]")
     backgroundMap = request.form.getlist("backgroundMap[]")
     backgroundAnno = dict()
+    # read background for each background file
     for index, file in enumerate(backgroundFiles):
         backgroundAnno[file.filename] = readBackground(file)
     enrichmentResults = dict((el, dict()) for el in ontologies)
-    enrichedTerms = list()
+    # for each file perform GOEA
     for index, file in enumerate(geneListFiles):
         geneList = file.stream.read().decode("utf-8").splitlines()
         result = GOEA(geneList, backgroundAnno[backgroundMap[index]])
@@ -340,6 +433,7 @@ def MultiSpeciesREVIGO():
         enrichmentDF.columns = conditions
         if len(enrichmentDF) > 0:
             background = dict()
+            # merge backgrounds for the different species
             for key in backgroundAnno:
                 background.update(backgroundAnno[key].get_id2gos(ont))
             multiGOresults[ont] = MultiGO(enrichmentDF, background, request.form["method"])
@@ -350,6 +444,9 @@ def MultiSpeciesREVIGO():
 
 @app.route("/GeneListsMultiREVIGO", methods=["POST"])
 def GeneListsMultiREVIGO():
+    """ returns dict
+    performs clustering for multiple gene list
+    """
     backgroundFile = request.files["background"]
     geneListFiles = request.files.getlist("geneLists[]")
     conditions = request.form.getlist("conditions[]")
@@ -377,6 +474,9 @@ def GeneListsMultiREVIGO():
 
 @app.route("/GoListsMultiREVIGO", methods=["POST"])
 def GoListsMultiREVIGO():
+    """ returns dict
+    performs clustering for GO terms with associated p-values
+    """
     backgroundFile = request.files["background"]
     goEnrichmentFile = request.files["goEnrichment"]
     objanno = readBackground(backgroundFile)
@@ -396,6 +496,22 @@ def GoListsMultiREVIGO():
                              "dispensability"] + conditions}
 
 
+@app.route("/exampleBackground", methods=["GET"])
+def getExampleBackground():
+    """ returns example background as string
+    """
+    background = os.path.join(here, "data/scoelicolor.txt")
+    return send_file(background)
+
+
+@app.route("/exampleCondition", methods=["GET"])
+def getCondition():
+    """ returns example condition as string
+    """
+    filename = request.args.get("name")
+    condition = os.path.join(here, "data/scoelicolor/", filename)
+    return send_file(condition)
+
 @app.route('/')
 def index():
     return app.send_static_file('index.html')
@@ -403,6 +519,7 @@ def index():
 
 if __name__ == "__main__":
     app.run()
+
 
 """
 ideas to speed up:

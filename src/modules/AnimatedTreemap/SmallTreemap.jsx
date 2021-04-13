@@ -17,12 +17,10 @@ const SmallTreemap = inject("dataStore", "visStore")(observer((props) => {
         left: 20,
     };
     const width = props.width - margins.left - margins.right;
-    const fontSize = 10;
     const highlightRect = createRef();
     const scale = width / props.parentWidth;
 
     const currentLayout = props.visStore.treemapLayout(props.index);
-    const stars = [];
     const children = [];
     const mapId = uuidv4();
     currentLayout.children.forEach((parent, j) =>
@@ -32,12 +30,18 @@ const SmallTreemap = inject("dataStore", "visStore")(observer((props) => {
             const fill = props.visStore.termColorScale(parent.data.id);
             children.push(
                 <g key={child.data.id} transform={'translate(' + child.x0 + ',' + child.y0 + ')'}>
+                    <defs>
+                        <pattern id={id} patternUnits="userSpaceOnUse" width="4.5" height="4.5"
+                                 patternTransform="rotate(45)">
+                            <line x1="0" y="0" x2="0" y2="4.5" stroke={fill} strokeWidth="5"/>
+                        </pattern>
+                    </defs>
                     <rect onMouseEnter={() => props.visStore.setChildHighlight(child.data.id)}
                           onMouseLeave={() => props.visStore.setChildHighlight(null)}
                           onClick={() => props.visStore.setConditionIndex(props.index)}
                           id={"rectSmall" + id}
                           width={child.x1 - child.x0} height={child.y1 - child.y0}
-                          fill={fill}
+                          fill={props.logSigThreshold < child.value ? fill : "url(#" + id + ")"}
                           stroke={props.visStore.childHighlights.includes(child.data.id) ? "black" : "white"}
                           strokeWidth={1}
                           opacity={isHighlighted ? 1 : 0.5}/>
@@ -46,18 +50,6 @@ const SmallTreemap = inject("dataStore", "visStore")(observer((props) => {
                     </title>
                 </g>
             );
-            stars.push(<g key={child.data.name} transform={'translate(' + child.x0 + ',' + child.y0 + ')'}>
-                <defs>
-                    <clipPath id={"clipSmall" + id}>
-                        <use xlinkHref={"#rectSmall" + id}/>
-                    </clipPath>
-                </defs>
-                <text clipPath={'url(#clipSmall' + id + ')'}
-                      opacity={props.logSigThreshold < child.value ? 1 : 0}
-                      fontSize={fontSize / scale} y={child.y1 - child.y0}
-                      x={child.x1 - child.x0 - fontSize / scale}>*
-                </text>
-            </g>);
         })
     );
     const startAnimation = useCallback(() => {
@@ -76,7 +68,6 @@ const SmallTreemap = inject("dataStore", "visStore")(observer((props) => {
 
             <g transform={"scale(" + scale + ")"}>
                 {children}
-                {stars}
                 <rect ref={highlightRect} x={currentLayout.x0} y={currentLayout.y0}
                       width={currentLayout.x1 - currentLayout.x0}
                       height={currentLayout.y1 - currentLayout.y0} stroke="black" strokeWidth={2 / scale} fill="none"

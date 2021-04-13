@@ -1,16 +1,27 @@
 
-## Welcome to "MultiGO"!
+## Welcome to GO-Compass!
 
-MultiGO is a tool for the interactive comparison of GO enrichment analyses. Due to the structure of the GO graph there can be a lot of redundance in enrichment results, since enrichment of child terms propagates to parent terms. Therefore, MultiGO clusters GO terms hierarchically based on their dispensability. Users can interactively select dispensability cutoffs to filter the data and to create flat clusters from the hierarchical clustering.  
+GO-Compass is a tool for the interactive comparison of GO enrichment analyses. Due to the structure of the GO graph there can be a lot of redundance in enrichment results, since enrichment of child terms propagates to parent terms. Therefore, MultiGO clusters GO terms hierarchically based on their dispensability. Users can interactively select dispensability cutoffs to filter the data and to create flat clusters from the hierarchical clustering.  
 
-To run MultiGO in the development environment run
-### `conda env create -f environment.yml`
-### `conda activate MultiGO`
-### `npm install`
-### `npm run dev`
-
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
-
+To run GO-Compass in the development environment do the following:
+cd to the directory where the venv should be located and create the venv.
+```
+cd <path/to/venv-parent-dir>
+virtualenv <your-venv>
+```
+Install required Python packages by referring to the requirements.txt-file.
+```
+source <your-venv>/bin/activate
+pip install <path/to/OmicsTIDE>/requirements.txt
+```
+Install required js packages using
+```
+npm install
+```
+run development environment
+```
+npm run dev
+```
 ### Data Input
 
 MultiGO has two input options:
