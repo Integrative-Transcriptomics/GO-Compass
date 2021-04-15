@@ -11,18 +11,6 @@ class Axis extends React.Component {
         this.axis = React.createRef()
     }
 
-    /**
-     * computes the width of a text
-     * @param {string} text
-     * @param {number} fontSize
-     * @returns {number}
-     */
-    static getTextWidth(text, fontSize) {
-        const context = document.createElement('canvas').getContext('2d');
-        context.font = `${fontSize}px Arial`;
-        return context.measureText(text).width;
-    }
-
     componentDidMount() {
         this.renderAxis();
     }
@@ -34,7 +22,18 @@ class Axis extends React.Component {
     renderAxis() {
         // eslint-disable-next-line react/no-find-dom-node
         const node = this.axis.current;
-        d3.select(node).call(this.props.axis)
+        if (this.props.rotate && d3.max(this.props.axis.scale().domain().map(d => d.length)) > 1) {
+            d3.select(node).call(this.props.axis)
+                .selectAll("text")
+                .attr("y", 0)
+                .attr("x", 9)
+                .attr("dy", ".35em")
+                .attr("transform", "rotate(60)")
+                .style("text-anchor", "start");
+        } else {
+            d3.select(node).call(this.props.axis)
+        }
+
         /*
         .selectAll("text")
         .attr("y", 0)
@@ -47,13 +46,13 @@ class Axis extends React.Component {
     render() {
         const translatex = `translate(0,${this.props.h})`;
         const translatey = 'translate(-10, 0)';
-        const textWidth = Axis.getTextWidth(this.props.label, 12);
-        const textTranslateX = `translate(${(this.props.w - textWidth) / 2},${30})`;
-        const textTranslateY = `translate(-30, ${(this.props.h - textWidth) / 2})rotate(270)`;
+        const textTranslateX = `translate(${this.props.w / 2},${30})`;
+        const textTranslateY = `translate(-30, ${this.props.h / 2})rotate(270)`;
         return (
             <g className="axis" ref={this.axis} transform={this.props.axisType === 'x' ? translatex : translatey}>
                 <text
                     fill="black"
+                    textAnchor={"middle"}
                     transform={this.props.axisType === 'x' ? textTranslateX : textTranslateY}
                 >
                     {this.props.label}
@@ -66,6 +65,7 @@ class Axis extends React.Component {
 Axis.propTypes = {
     h: PropTypes.number.isRequired,
     w: PropTypes.number.isRequired,
+    rotate: PropTypes.bool,
     axis: PropTypes.func.isRequired,
     axisType: PropTypes.string.isRequired,
     label: PropTypes.string.isRequired,

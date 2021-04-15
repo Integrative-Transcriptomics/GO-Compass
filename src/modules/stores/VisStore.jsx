@@ -1,5 +1,6 @@
 import {action, extendObservable} from "mobx";
 import * as d3 from "d3";
+import {getTextWidth} from "../../UtilityFunctions";
 
 /**
  * store for visualization operations
@@ -11,6 +12,7 @@ export class VisStore {
         extendObservable(this, {
             screenWidth: 1000,
             plotHeight: 700,
+            treemapHeight: 100,
             tsPlotType: "lineChart",
             showOverview: false,
             childHighlight: null,
@@ -25,6 +27,9 @@ export class VisStore {
                 return d3.scaleOrdinal(['#8dd3c7', '#ffffb3', '#bebada', '#fb8072', '#80b1d3'
                     , '#fdb462', '#b3de69', '#fccde5', '#d9d9d9', '#bc80bd', '#ccebc5', '#ffed6f']);
             },
+            get maxConditionTextSize() {
+                return d3.max(this.dataStore.conditions.map(d => getTextWidth(d, 12, "normal")))
+            },
             /**
              * layout function for treemaps. Created in store to ensure that
              * small multiples and selected Treemap have the same layout
@@ -32,7 +37,7 @@ export class VisStore {
              */
             get treemapLayout() {
                 const width = this.screenWidth / 3;
-                const height = this.plotHeight / 2;
+                const height = this.treemapHeight;
                 const treemap = d3.treemap()
                     .tile(d3.treemapResquarify)
                     .size([width, height])
@@ -61,10 +66,13 @@ export class VisStore {
                 return (layout)
             },
             setScreenWidth: action((width) => {
-                this.screenWidth = width - 100;
+                this.screenWidth = width-36;
             }),
             setPlotHeight: action((height) => {
                 this.plotHeight = height - 200;
+            }),
+            setTreemapHeight: action((height) => {
+                this.treemapHeight = height
             }),
             setTsPlotType: action((type) => {
                 this.tsPlotType = type;

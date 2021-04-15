@@ -37,14 +37,14 @@ const LineChart = inject("dataStore", "visStore")(observer((props) => {
         const [xPos, setXPos] = useState(0);
         const margins = {
             top: 20,
-            right: 20,
-            bottom: 40,
+            right: 25,
+            bottom: props.visStore.maxConditionTextSize +10,
             left: 60,
         };
         const width = props.width - margins.left - margins.right;
         const height = props.height - margins.top - margins.bottom;
         const max = d3.max(store.data.map(d => d3.max(d.values)));
-        const xScale = d3.scalePoint().domain([...Array(props.dataStore.conditions.length).keys()]).range([0, width]);
+        const xScale = d3.scalePoint().domain(props.dataStore.conditions).range([0, width]);
         let yScale = d3.scaleLinear().domain([0, max]).range([height, 0]);
         if (props.scaleLocked) {
             yScale = d3.scaleLinear().domain([0, store.globalMax]).range([height, 0]);
@@ -53,7 +53,7 @@ const LineChart = inject("dataStore", "visStore")(observer((props) => {
             const isHighlighted = props.visStore.childHighlights.length === 0 || props.visStore.childHighlights.includes(line.id);
             let linestring = "";
             line.values.forEach((value, i) => {
-                linestring += xScale(i) + ',' + yScale(value) + ' ';
+                linestring += xScale(props.dataStore.conditions[i]) + ',' + yScale(value) + ' ';
             });
             return <g key={line.id}>
                 <polyline
@@ -73,14 +73,13 @@ const LineChart = inject("dataStore", "visStore")(observer((props) => {
         });
         const xAxis = d3.axisBottom()
             .scale(xScale)
-            .tickFormat(d => props.dataStore.conditions[d]);
         const yAxis = d3.axisLeft()
             .scale(yScale);
         return (
             <svg onMouseMove={(e) => setXPos(e.pageX)} width={props.width}
                  height={props.height}>
                 <g transform={'translate(' + margins.left + ',' + margins.top + ')'}>
-                    <Axis h={height} w={width} axis={xAxis} axisType={'x'} label={'Condition'}/>
+                    <Axis h={height} w={width} axis={xAxis} axisType={'x'} label={''} rotate={true}/>
                     <Axis h={height} w={width} axis={yAxis} axisType={'y'} label={'-log10pVal'}/>
                     {lines}
                     <LineHighlighter width={width} height={height} xScale={xScale} xPos={xPos} i

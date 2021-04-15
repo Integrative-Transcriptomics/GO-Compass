@@ -12,7 +12,7 @@ const ClusteredHeatmap = inject("dataStore", "visStore")(observer((props) => {
     const [descendants, setDescendants] = useState([]);
 
     const margins = {
-        top: 40,
+        top: props.visStore.maxConditionTextSize > 40 ? props.visStore.maxConditionTextSize : 40,
         right: 30,
         bottom: 40,
         left: 20,

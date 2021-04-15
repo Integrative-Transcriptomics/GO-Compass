@@ -10,8 +10,8 @@ const CorrelationHeatmap = inject("dataStore", "visStore")(observer((props) => {
     const margins = {
         top: 20,
         right: 20,
-        bottom: 60,
-        left: 60,
+        bottom: props.visStore.maxConditionTextSize + 10,
+        left: props.visStore.maxConditionTextSize + 20,
     };
     const width = props.width - margins.left - margins.right;
     const height = props.height - margins.top - margins.bottom;
@@ -40,7 +40,7 @@ const CorrelationHeatmap = inject("dataStore", "visStore")(observer((props) => {
     return (
         <svg height={props.height} width={props.width}>
             <g transform={"translate(" + margins.left + "," + margins.top + ")"}>
-                <Axis h={height} w={width} axis={xAxis} axisType={'x'} label={''}/>
+                <Axis h={height} w={width} axis={xAxis} axisType={'x'} label={''} rotate={true}/>
                 <Axis h={height} w={width} axis={yAxis} axisType={'y'} label={''}/>
                 {rects}
             </g>

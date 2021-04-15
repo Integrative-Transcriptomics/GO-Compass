@@ -11,9 +11,6 @@ import CorrelationHeatmap from "./CorrelationHeatmap";
 import {inject, observer, Provider} from "mobx-react";
 import ClusteredHeatmap from "./ClusteredHeatmap/ClusteredHeatmap";
 import Typography from "@material-ui/core/Typography";
-import Button from "@material-ui/core/Button";
-import {KeyboardArrowLeft, KeyboardArrowRight} from "@material-ui/icons";
-import MobileStepper from "@material-ui/core/MobileStepper";
 import UpSet from "./UpSet";
 
 /**
@@ -117,29 +114,6 @@ const Plots = inject("dataStore", "visStore")(observer((props) => {
                     <Typography>
                         {"Currently Selected Condition: " + props.dataStore.conditions[props.visStore.conditionIndex]}
                     </Typography>
-                    {/* eslint-disable-next-line react/jsx-no-undef */}
-                    <MobileStepper
-                        steps={props.dataStore.conditions.length}
-                        position="static"
-                        variant="text"
-                        activeStep={props.visStore.conditionIndex}
-                        nextButton={
-                            <Button size="small"
-                                    onClick={() => props.visStore.setConditionIndex(props.visStore.conditionIndex + 1)}
-                                    disabled={props.visStore.conditionIndex === props.dataStore.conditions.length - 1}>
-                                Next
-                                <KeyboardArrowRight/>
-                            </Button>
-                        }
-                        backButton={
-                            <Button size="small"
-                                    onClick={() => props.visStore.setConditionIndex(props.visStore.conditionIndex - 1)}
-                                    disabled={props.visStore.conditionIndex === 0}>
-                                <KeyboardArrowLeft/>
-                                Back
-                            </Button>
-                        }
-                    />
                     <AnimatedTreemap logSigThreshold={props.logSigThreshold}
                                      width={props.visStore.screenWidth / 3}
                                      height={props.visStore.plotHeight / 2}/>

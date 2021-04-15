@@ -8,8 +8,8 @@ import BarChart from "./BarChart";
 const MultiBarChart = inject("dataStore", "visStore")(observer((props) => {
     const margins = {
         top: 10,
-        right: 0,
-        bottom: 15,
+        right: 5,
+        bottom: props.visStore.maxConditionTextSize + 10,
         left: 60,
     };
     let max = 0;
@@ -26,7 +26,7 @@ const MultiBarChart = inject("dataStore", "visStore")(observer((props) => {
     }).filter(parent => parent.children.length > 0)
     const width = props.width - margins.left - margins.right;
     const height = (props.height - margins.top - margins.bottom) / filteredData.length;
-    const xScale = d3.scaleBand().domain([...Array(props.dataStore.conditions.length).keys()]).range([0, width]).padding(0.25);
+    const xScale = d3.scaleBand().domain(props.dataStore.conditions).range([0, width]).padding(0.25);
     const barCharts = filteredData.map((parent, i) => {
         const dispValues = parent.children.map(d => props.dataStore.dataTable[d.id].dispensability)
         const minChild = parent.children[dispValues.indexOf(Math.min(...dispValues))]
@@ -47,6 +47,9 @@ const MultiBarChart = inject("dataStore", "visStore")(observer((props) => {
                  height={props.height}>
                 <g transform={'translate(0,' + margins.top + ')'}>
                     {barCharts}
+                </g>
+                <g>
+                    <text transform={"translate(20,"+(props.height/2)+")rotate(270)"} textAnchor={"middle"}>-log10 p-value</text>
                 </g>
             </svg>
         </div>

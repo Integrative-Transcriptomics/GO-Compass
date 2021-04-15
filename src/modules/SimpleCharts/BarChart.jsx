@@ -21,11 +21,10 @@ const BarChart = inject("dataStore", "visStore")(observer((props) => {
     let yScale = d3.scaleLinear().domain([0, d3.max(props.values)]).range([height, 0]);
     if (props.scaleLocked) {
         yScale = d3.scaleLinear().domain([0, props.maxY]).range([height, 0]);
-
     }
     const highlighters = props.dataStore.conditions.map((condition, i) => {
         return <rect key={condition} opacity={i === index ? 1 : 0}
-                     x={props.xScale(i)}
+                     x={props.xScale(condition)}
                      y={yScale(props.values[i])} width={props.xScale.bandwidth()}
                      height={height - yScale(props.values[i])} fill='none' stroke='black' strokeWidth='2px'/>
     });
@@ -37,7 +36,7 @@ const BarChart = inject("dataStore", "visStore")(observer((props) => {
                    onMouseEnter={() => {
                        props.visStore.setChildHighlight(props.id)
                    }}>
-            <rect onClick={() => props.visStore.setConditionIndex(i)} x={props.xScale(i)}
+            <rect onClick={() => props.visStore.setConditionIndex(i)} x={props.xScale(condition)}
                   y={yScale(props.values[i])} width={props.xScale.bandwidth()}
                   height={height - yScale(props.values[i])}
                   fill={props.visStore.termColorScale(props.parent)}/>
@@ -57,13 +56,13 @@ const BarChart = inject("dataStore", "visStore")(observer((props) => {
     }, [props.visStore.conditionIndex, startAnimation]);
     const xAxis = d3.axisBottom()
         .scale(props.xScale)
-        .tickFormat(props.fullAxis ? d => props.dataStore.conditions[d] : "");
+        .tickFormat(props.fullAxis ? (d) => d : "");
     const yAxis = d3.axisLeft()
         .scale(yScale);
     return (
         <g transform={'translate(' + margins.left + ',' + margins.top + ')'}>
-            <Axis h={height} w={width} axis={xAxis} axisType={'x'} label={''}/>
-            <Axis h={height} w={width} axis={yAxis} axisType={'y'} label={'-log10pVal'}/>
+            <Axis h={height} w={width} axis={xAxis} axisType={'x'} label={''} rotate={true}/>
+            <Axis h={height} w={width} axis={yAxis} axisType={'y'} label={''}/>
             {rects}
             <g ref={highlightRef}>{highlighters}</g>
             {sigLine}
