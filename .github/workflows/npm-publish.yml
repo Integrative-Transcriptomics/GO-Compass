@@ -28,7 +28,7 @@ jobs:
       uses: easingthemes/ssh-deploy@v2
       env:
         # Private Key
-        SSH_PRIVATE_KEY: 
+        SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
         # Remote host
         REMOTE_HOST: ${{ secrets.REMOTE_HOST }}
         REMOTE_USER: ${{ secrets.REMOTE_USER }}
