@@ -22,17 +22,13 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     steps:
-    - name: ssh deploy
-  # You may pin to the exact commit or the version.
-  # uses: easingthemes/ssh-deploy@9ab39935552e9fe6706e9c9bf2a70a3328a4a5e6
-      uses: easingthemes/ssh-deploy@v2
-      env:
-        # Private Key
-        SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-        # Remote host
-        REMOTE_HOST: ${{ secrets.REMOTE_HOST }}
-        REMOTE_USER: ${{ secrets.REMOTE_USER }}
-        TARGET: ${{ secrets.REMOTE_TARGET }}
-        # An array of folder to exclude
-        EXCLUDE: /node_modules/,/src/,/.gitignore,/README.md 
+    - name: Install SSH Key
+      uses: shimataro/ssh-key-action@v2.30
+      with:
+        key: ${{ secrets.SSH_PRIVATE_KEY }} 
+        known_hosts: 'just-a-placeholder-so-we-dont-get-errors'
+    - name: Adding Known Hosts
+      run: ssh-keyscan -H ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
+    - name: Deploy with rsync
+      run: rsync -azvn --exclude={'node_modules','src', 'public','.gitignore', 'README.md'} . ${{ secrets.SSH_HOST }}:${{ secrets.REMOTE_TARGET }}/gocompass
       
