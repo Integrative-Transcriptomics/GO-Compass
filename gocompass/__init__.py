@@ -1,6 +1,12 @@
 from flask import Flask, send_file
 from flask import request
 from io import StringIO
+import numpy as np
+import pandas as pd
+import os
+import random
+import tempfile
+from collections import Counter
 
 from goatools.obo_parser import GODag
 from goatools.anno.factory import get_objanno
@@ -9,16 +15,11 @@ from goatools.godag.go_tasks import get_go2parents
 from goatools.goea.go_enrichment_ns import GOEnrichmentStudyNS
 from goatools.godag.consts import NAMESPACE2NS
 from goatools.semsim.termwise.wang import SsWang
-
-from .findDescendants import getDescendants
 from sklearn.decomposition import PCA
 
-import numpy as np
-import pandas as pd
-import uuid
-import os
-import random
-from collections import Counter
+
+from gocompass.findDescendants import getDescendants
+
 
 app = Flask(__name__, static_folder='../build', static_url_path='/')
 here = os.path.dirname(__file__)
@@ -313,12 +314,9 @@ def readBackground(backgroundFile):
     reads background file
     """
     # helper file needs to be created since GOAtools method is only able to read files
-    helperFileName = uuid.uuid1().hex + ".txt"
-    helperFile = open(os.path.join(here, helperFileName), "a")
-    helperFile.write(StringIO(backgroundFile.stream.read().decode("UTF8"), newline=None).read())
-    helperFile.close()
-    objanno = get_objanno(helperFileName, 'id2gos', godag=godag)
-    os.remove(helperFileName)
+    helperFile = tempfile.NamedTemporaryFile()
+    helperFile.write(backgroundFile.stream.read())
+    objanno = get_objanno(helperFile.name, 'id2gos', godag=godag)
     return (objanno)
 
 

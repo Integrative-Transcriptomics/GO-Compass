@@ -3,7 +3,7 @@ import Plots from "./modules/Plots";
 import Toolbar from "@material-ui/core/Toolbar";
 import AppBar from "@material-ui/core/AppBar";
 import Typography from "@material-ui/core/Typography";
-import {createStyles} from "@material-ui/core";
+import {createStyles, Theme} from "@material-ui/core";
 import {makeStyles} from "@material-ui/core/styles";
 import SelectData from "./modules/SelectData";
 import {Provider} from "mobx-react";

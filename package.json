@@ -26,7 +26,7 @@
   },
   "scripts": {
     "dev": "concurrently \"npm run server\" \"npm run start\"",
-    "server": "cd server && flask run --no-debugger",
+    "server": "cd gocompass && flask run --no-debugger",
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",

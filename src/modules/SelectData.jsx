@@ -1,5 +1,5 @@
 import React, {useCallback, useState} from 'react';
-import {createStyles} from "@material-ui/core";
+import {createStyles, Theme} from "@material-ui/core";
 import {makeStyles} from "@material-ui/core/styles";
 import Button from "@material-ui/core/Button";
 import FormControl from "@material-ui/core/FormControl";
@@ -28,7 +28,7 @@ const SelectData = (props) => {
     const [backgroundFile, setBackgroundFile] = useState(null);
     const [multiBackground, setMultiBackground] = useState([]);
     const [geneFiles, setGeneFiles] = useState([]);
-    // loading state: After launching but before the server returns the results loading state is true
+    // loading state: After launching but before the gocompass returns the results loading state is true
     const [isLoading, setIsLoading] = useState(false);
     const [conditions, setConditions] = useState([]);
     // Wang, Lin, Resnik, Edge based
