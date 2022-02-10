@@ -7,7 +7,13 @@ export class RootStore {
         this.dataStores = {};
         this.selectedMeasure = selectedMeasure;
         this.pvalueFilter = pvalueFilter;
-        Object.keys(results).forEach(ont => this.dataStores[ont] = new DataStore(results[ont].data, results[ont].tree, conditions, tableColumns, this));
+        Object.keys(results).forEach(ont => {
+            if (Object.keys(results[ont].tree).length !== 0) {
+                this.dataStores[ont] = new DataStore(results[ont].data, results[ont].tree, conditions, tableColumns, this)
+            }else{
+                this.dataStores[ont]=null
+            }
+        });
         this.ontologies = Object.keys(results).map(ont => {
             return ({id: ont, name: this.ontologies_map[ont]})
         });

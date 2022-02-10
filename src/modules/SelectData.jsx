@@ -21,12 +21,17 @@ import {exampleData, multiRevigoGoLists, multiSpeciesRevigo} from "../parseDataF
 import IconButton from "@material-ui/core/IconButton";
 import PropTypes from "prop-types";
 import {RootStore} from "./stores/RootStore";
+import FormLabel from "@material-ui/core/FormLabel";
+import RadioGroup from "@material-ui/core/RadioGroup";
+import FormControlLabel from "@material-ui/core/FormControlLabel";
+import Radio from "@material-ui/core/Radio";
 
 
 const SelectData = (props) => {
     const [goFile, setGoFile] = useState(null);
     const [backgroundFile, setBackgroundFile] = useState(null);
     const [multiBackground, setMultiBackground] = useState([]);
+    const [direction, setDirection]=useState("+");
     const [geneFiles, setGeneFiles] = useState([]);
     // loading state: After launching but before the gocompass returns the results loading state is true
     const [isLoading, setIsLoading] = useState(false);
@@ -63,12 +68,12 @@ const SelectData = (props) => {
                 const reorderedFiles = conditions.map(d => {
                     return geneFiles[d.index];
                 });
-                multiSpeciesRevigo(reorderedFiles, [...multiBackground], conditions.map(d => d.condition), conditions.map(d => d.background), selectedMeasure, pvalueFilter, response => {
+                multiSpeciesRevigo(reorderedFiles, [...multiBackground], conditions.map(d => d.condition), conditions.map(d => d.background), selectedMeasure, pvalueFilter, direction,response => {
                     props.setRootStore(new RootStore(response.results, response.conditions, response.tableColumns, selectedMeasure, pvalueFilter));
                 });
             }
         }
-    }, [goFile, backgroundFile, selectedMeasure, conditions, pvalueFilter, geneFiles, props, multiBackground, selectedTab]);
+    }, [selectedTab, goFile, backgroundFile, selectedMeasure, pvalueFilter, props, conditions, multiBackground, direction, geneFiles]);
     /**
      * Loads example data
      * @type {function(): void}
@@ -251,6 +256,12 @@ const SelectData = (props) => {
                                         </FormControl>
                                     </ListItem>
                                 )}</div> : null}
+                        <FormControl component="fieldset">
+                            <RadioGroup value={direction} onChange={(e)=>setDirection(e.target.value)}>
+                                <FormControlLabel value="+" control={<Radio/>} label="Find overrepresented GO Terms"/>
+                                <FormControlLabel value="-" control={<Radio/>} label="Find underrepresented GO terms"/>
+                            </RadioGroup>
+                        </FormControl>
                     </div>
                     <div hidden={selectedTab !== 1} role="tabpanel">
                         <ListSubheader>Select GO Term file</ListSubheader>

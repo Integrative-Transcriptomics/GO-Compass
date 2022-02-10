@@ -7,6 +7,7 @@ import DraggableLine from "./DraggableLine";
 
 
 const Tree = inject("dataStore", "visStore")(observer((props) => {
+    console.log(props.descendants)
     const dispScale = d3.scaleLinear().domain([0, d3.max(Object.values(props.dataStore.dataTable)
         .map(d => d.dispensability))]).range([0, props.width]);
     const links = [];

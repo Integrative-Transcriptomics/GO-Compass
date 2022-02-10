@@ -354,7 +354,11 @@ def GOEA(genes, objanno):
     goea_quiet_all = goeaobj.run_study(genes, prt=None)
     goea_results = dict((el, []) for el in ontologies)
     for r in goea_quiet_all:
-        goea_results[r.NS].append([r.GO, r.p_fdr_bh])
+        print(r)
+        direction="+"
+        if r.enrichment=="p":
+            direction="-"
+        goea_results[r.NS].append([r.GO, r.p_fdr_bh,direction])
     for ont in goea_results:
         goea_results[ont] = np.array(goea_results[ont])
         goea_results[ont] = goea_results[ont][goea_results[ont][:, 0].argsort()]
@@ -413,7 +417,8 @@ def MultiSpeciesREVIGO():
         for ont in ontologies:
             if index == 0:
                 for i, term in enumerate(result[ont][:, 0]):
-                    enrichmentResults[ont][term] = [result[ont][i, 1]]
+                    if result[ont][i,2] == request.form["direction"]:
+                        enrichmentResults[ont][term] = [result[ont][i, 1]]
             else:
                 for term in enrichmentResults[ont]:
                     if term in result[ont][:, 0]:
@@ -422,9 +427,10 @@ def MultiSpeciesREVIGO():
                     else:
                         enrichmentResults[ont][term].append(1)
                 for i, term in enumerate(result[ont][:, 0]):
-                    if term not in enrichmentResults[ont]:
-                        enrichmentResults[ont][term] = np.full(shape=index, fill_value=1, dtype=np.float64).tolist()
-                        enrichmentResults[ont][term].append(result[ont][:, 1][i])
+                    if result[ont][i,2] == request.form["direction"]:
+                        if term not in enrichmentResults[ont]:
+                            enrichmentResults[ont][term] = np.full(shape=index, fill_value=1, dtype=np.float64).tolist()
+                            enrichmentResults[ont][term].append(result[ont][:, 1][i])
     multiGOresults = dict()
     for ont in ontologies:
         enrichmentDF = pd.DataFrame(enrichmentResults[ont]).T.astype("float64")

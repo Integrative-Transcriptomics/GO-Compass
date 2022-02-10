@@ -36,7 +36,7 @@ const AppDrawer = inject("rootStore")(observer((props) => {
                         value={props.rootStore.ontology}
                         onChange={(e) => props.rootStore.setOntology(e.target.value)}
                     >
-                        {props.rootStore.ontologies.map(ontology => <MenuItem key={ontology.id}
+                        {props.rootStore.ontologies.filter(ontology=>props.rootStore.dataStores[ontology.id]!==null).map(ontology => <MenuItem key={ontology.id}
                                                                               value={ontology.id}>{ontology.name}</MenuItem>)}
                     </Select>
                 </FormControl>
