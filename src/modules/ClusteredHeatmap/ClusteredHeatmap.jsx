@@ -20,10 +20,10 @@ const ClusteredHeatmap = inject("dataStore", "visStore")(observer((props) => {
     const height = props.height - margins.top - margins.bottom;
     let width = props.width - margins.left - margins.right;
 
-    const textWidth = 100;
+    const gapWidth = 100;
     const rectWidth = 10;
-    const heatmapWidth = textWidth + (props.dataStore.conditions.length + 1) * rectWidth;
-    const treeWidth = width - heatmapWidth - rectWidth;
+    const heatmapWidth = (props.dataStore.conditions.length + 1) * rectWidth+1.5*rectWidth;
+    const treeWidth = width - heatmapWidth;
     useEffect(() => {
         setDescendants(calculateTreeLayout(props.dataStore.filteredTree, height));
     }, [props.dataStore.filteredTree, height]);
@@ -32,10 +32,10 @@ const ClusteredHeatmap = inject("dataStore", "visStore")(observer((props) => {
             <svg width={props.width} height={props.height} onMouseMove={(e) => setXPos(e.pageX)}
                  onMouseDown={() => setMouseDown(true)} onMouseUp={() => setMouseDown(false)}>
                 <g transform={"translate(" + margins.left + "," + margins.top + ")"}>
-                    <Tree width={treeWidth} height={height} descendants={descendants} xPos={xPos}
+                    <Tree width={treeWidth} treeWidth={treeWidth-gapWidth} height={height} descendants={descendants} xPos={xPos}
                           mouseDown={mouseDown}/>
-                    <g transform={"translate(" + (treeWidth + rectWidth) + ",0)"}>
-                        <Heatmap width={heatmapWidth} textWidth={textWidth} rectWidth={rectWidth} height={height}
+                    <g transform={"translate(" + treeWidth + ",0)"}>
+                        <Heatmap width={heatmapWidth} gapWidth={gapWidth} rectWidth={rectWidth} height={height}
                                  descendants={descendants}/>
                     </g>
                 </g>

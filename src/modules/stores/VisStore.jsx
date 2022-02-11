@@ -11,7 +11,7 @@ export class VisStore {
         this.animationDuration = 1500;
         extendObservable(this, {
             screenWidth: 1000,
-            plotHeight: 700,
+            plotHeight: 900,
             treemapHeight: 100,
             tsPlotType: "lineChart",
             showOverview: false,
@@ -69,7 +69,7 @@ export class VisStore {
                 this.screenWidth = width-36;
             }),
             setPlotHeight: action((height) => {
-                this.plotHeight = height - 200;
+                this.plotHeight = height - 100;
             }),
             setTreemapHeight: action((height) => {
                 this.treemapHeight = height
