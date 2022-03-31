@@ -21,7 +21,6 @@ import {exampleData, multiRevigoGoLists, multiSpeciesRevigo} from "../parseDataF
 import IconButton from "@material-ui/core/IconButton";
 import PropTypes from "prop-types";
 import {RootStore} from "./stores/RootStore";
-import FormLabel from "@material-ui/core/FormLabel";
 import RadioGroup from "@material-ui/core/RadioGroup";
 import FormControlLabel from "@material-ui/core/FormControlLabel";
 import Radio from "@material-ui/core/Radio";
@@ -69,7 +68,6 @@ const SelectData = (props) => {
                     return geneFiles[d.index];
                 });
                 multiSpeciesRevigo(reorderedFiles, [...multiBackground], conditions.map(d => d.condition), conditions.map(d => d.background), selectedMeasure, pvalueFilter, direction,response => {
-                    console.log(response)
                     props.setRootStore(new RootStore(response.results, response.conditions, response.tableColumns, selectedMeasure, pvalueFilter));
                 });
             }
