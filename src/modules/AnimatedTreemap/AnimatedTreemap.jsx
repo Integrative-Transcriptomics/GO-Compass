@@ -28,7 +28,7 @@ const AnimatedTreemap = inject("dataStore", "visStore")(observer((props) => {
         if (stepperRef.current != null) {
             props.visStore.setTreemapHeight(props.height - stepperRef.current.getBoundingClientRect().height)
         }
-    }, [stepperRef, props.height]);
+    }, [stepperRef, props.height, props.visStore]);
     const layout = props.visStore.treemapLayout;
 
     const startAnimation = useCallback((index) => {

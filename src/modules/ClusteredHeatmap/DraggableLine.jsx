@@ -13,6 +13,7 @@ const DraggableLine = inject("visStore")(observer((props) => {
 
 
     const mouseDown = useCallback((event) => {
+        event.preventDefault();
         setDragging(true);
         setX0(event.pageX);
     }, []);

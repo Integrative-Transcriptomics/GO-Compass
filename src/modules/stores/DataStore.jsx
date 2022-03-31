@@ -29,33 +29,19 @@ export class DataStore {
             pca: [],
             pcaLoaded: false,
             correlationLoaded: false,
-            /*
-            get dataTable() {
-                let returnTable = JSON.parse(JSON.stringify(this.rawData));
-                Object.keys(this.rawData).filter((key) => {
-                    if (this.rawData[key].dispensability < this.filterCutoff) {
-                        const subtree = this.getSubtree(this.tree, key);
-                        if (subtree != null && "children" in subtree) {
-                            const children = subtree.children.filter(child => this.rawData[child.name].dispensability > this.filterCutoff)
-                            let pvalues = this.rawData[key].pvalues.slice()
-                            children.forEach(child => {
-                                this.flattenTree(child).forEach(term => {
-                                        pvalues = pvalues.map((d, i) => d + dataTable[term].pvalues[i])
-                                    }
-                                )
-                            })
-                            returnTable[key].pvalues = pvalues;
-                        }
-                    }
-                })
-                return returnTable;
-            },*/
             /**
              * flat hierarchy of cluster representatives and other GO terms
              * @returns {{}}
              */
             get clusterHierarchy() {
-                return this.extractHierarchy(this.filteredTree, this.clusterCutoff, true);
+                return this.extractHierarchy(this.filteredTree, this.clusterCutoff, true,false);
+            },
+                   /**
+             * flat hierarchy of cluster representatives and other GO terms
+             * @returns {{}}
+             */
+            get clusterChildren() {
+                return this.extractHierarchy(this.filteredTree, this.clusterCutoff, true, true);
             },
             /**
              * maximum dispensability found in currently visualized GO terms
@@ -146,9 +132,6 @@ export class DataStore {
         reaction(
             () => this.filteredPvalues,
             () => {
-                performPCA(this.filteredPvalues, response => {
-                    this.pca = response;
-                });
                 performCorrelation(this.filteredPvalues, response => {
                     this.correlation = response;
                 })
@@ -164,11 +147,11 @@ export class DataStore {
         reaction(() => this.filterCutoff, (cutoff => {
             if (cutoff < this.maxDisp || cutoff >= this.minFilteredDisp) {
                 this.filteredTree = this.filterTree(this.tree, this.filterCutoff);
-                this.filterHierarchy = this.extractHierarchy(this.tree, cutoff, false);
+                this.filterHierarchy = this.extractHierarchy(this.tree, cutoff, false,false);
             }
         }));
         this.filteredTree = this.filterTree(this.tree, this.filterCutoff);
-        this.filterHierarchy = this.extractHierarchy(this.tree, this.filterCutoff, false);
+        this.filterHierarchy = this.extractHierarchy(this.tree, this.filterCutoff, false,false);
         /**
          * performs PCA
          */
@@ -204,7 +187,7 @@ export class DataStore {
      * @param {boolean} includeRep
      * @returns {{}} hierarchy
      */
-    extractHierarchy(tree, cutoff, includeRep) {
+    extractHierarchy(tree, cutoff, includeRep,includeAll) {
         const toReturn = {};
         if (this.dataTable[tree.name].dispensability <= cutoff) {
             toReturn[tree.name] = [];
@@ -216,7 +199,10 @@ export class DataStore {
                     if (this.dataTable[child.name].dispensability > cutoff) {
                         toReturn[tree.name].push(...this.flattenTree(child))
                     } else {
-                        const hierarchy = this.extractHierarchy(child, cutoff, includeRep);
+                        if(includeAll){
+                            toReturn[tree.name].push(...this.flattenTree(child))
+                        }
+                        const hierarchy = this.extractHierarchy(child, cutoff, includeRep, includeAll);
                         Object.keys(hierarchy).forEach(key => {
                             if (!(key in toReturn)) {
                                 toReturn[key] = []

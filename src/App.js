@@ -46,12 +46,14 @@ const App = () => {
     // create one view for each ontology
     if (rootStore !== null) {
         rootStore.ontologies.forEach(ont => {
-            views.push(<div key={ont.id} style={{display: rootStore.ontology === ont.id ? "block" : "none"}}>
-                <Provider dataStore={rootStore.dataStores[ont.id]} visStore={rootStore.dataStores[ont.id].visStore}>
-                    <Plots logSigThreshold={rootStore.logSigThreshold} sigThreshold={rootStore.sigThreshold}
-                           isTimeSeries={rootStore.isTimeSeries}/>
-                </Provider>
-            </div>)
+            if(rootStore.dataStores[ont.id]!==null) {
+                views.push(<div key={ont.id} style={{display: rootStore.ontology === ont.id ? "block" : "none"}}>
+                    <Provider dataStore={rootStore.dataStores[ont.id]} visStore={rootStore.dataStores[ont.id].visStore}>
+                        <Plots logSigThreshold={rootStore.logSigThreshold} sigThreshold={rootStore.sigThreshold}
+                               isTimeSeries={rootStore.isTimeSeries}/>
+                    </Provider>
+                </div>)
+            }
         });
     }
 

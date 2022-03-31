@@ -11,7 +11,7 @@ export class VisStore {
         this.animationDuration = 1500;
         extendObservable(this, {
             screenWidth: 1000,
-            plotHeight: 700,
+            plotHeight: 900,
             treemapHeight: 100,
             tsPlotType: "lineChart",
             showOverview: false,
@@ -24,7 +24,7 @@ export class VisStore {
              * @returns {*}
              */
             get termColorScale() {
-                return d3.scaleOrdinal(['#8dd3c7', '#ffffb3', '#bebada', '#fb8072', '#80b1d3'
+                return d3.scaleOrdinal(['#8dd3c7', '#bebada', '#fb8072', '#80b1d3'
                     , '#fdb462', '#b3de69', '#fccde5', '#d9d9d9', '#bc80bd', '#ccebc5', '#ffed6f']);
             },
             get maxConditionTextSize() {
@@ -69,7 +69,7 @@ export class VisStore {
                 this.screenWidth = width-36;
             }),
             setPlotHeight: action((height) => {
-                this.plotHeight = height - 200;
+                this.plotHeight = height - 100;
             }),
             setTreemapHeight: action((height) => {
                 this.treemapHeight = height

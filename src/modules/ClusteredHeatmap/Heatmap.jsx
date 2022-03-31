@@ -49,18 +49,17 @@ const Heatmap = inject("dataStore", "visStore")(observer((props) => {
                       alignmentBaseline="central"
                       fontSize={textHeight}
                       fontWeight={fontWeight}>
-                    {cropText(props.dataStore.dataTable[descendant.data.name].description, textHeight, fontWeight, props.textWidth)}
+                    {cropText(props.dataStore.dataTable[descendant.data.name].description, textHeight, fontWeight, props.gapWidth)}
                 </text>
                 <title>{props.dataStore.dataTable[descendant.data.name].description}</title>
             </g>);
         clusterCells.push(
             <rect key={descendant.data.name} onMouseEnter={() => props.visStore.setChildHighlight(descendant.data.name)}
                   onMouseLeave={() => props.visStore.setChildHighlight(null)} y={descendant.y - 0.5 * rectHeight}
-                  x={0.5 * props.rectWidth}
-                  width={0.5 * props.rectWidth}
+                  width={props.rectWidth}
                   height={rectHeight}
                   fill={props.visStore.termColorScale(props.dataStore.getFilterParent(descendant.data.name))}/>);
-        if (descendant.data.value <= props.dataStore.clusterCutoff) {
+        /*if (descendant.data.value <= props.dataStore.clusterCutoff) {
             const x1 = props.rectWidth;
             const x2 = x1;
             const x3 = x1 + 0.5 * props.rectWidth;
@@ -71,7 +70,7 @@ const Heatmap = inject("dataStore", "visStore")(observer((props) => {
                          points={x1 + "," + y1 + " " + x2 + "," + y2 + " " + x3 + "," + y1}
                          fill={props.visStore.termColorScale(props.dataStore.getFilterParent(descendant.data.name))}/>
             );
-        }
+        }*/
 
     });
     const conditionLabels = props.dataStore.conditions.map(condition =>
@@ -82,15 +81,16 @@ const Heatmap = inject("dataStore", "visStore")(observer((props) => {
     return (
         <g>
             <g>
+                {clusterCells}
+            </g>
+            <g transform={"translate(" + 1.5*props.rectWidth + ",0)"}>
                 {heatmapCells}
                 {conditionLabels}
             </g>
-            <g transform={"translate(" + props.dataStore.conditions.length * props.rectWidth + ",0)"}>
-                {clusterCells}
-            </g>
-            <g transform={"translate(" + ((props.dataStore.conditions.length + 1.5) * props.rectWidth + 5) + "," + 0 + ")"}>
+
+            {/*<g transform={"translate(" + ((props.dataStore.conditions.length + 1.5) * props.rectWidth + 5) + "," + 0 + ")"}>
                 {text}
-            </g>
+            </g>*/}
             <g transform={"translate(0," + (props.height + 5) + ")"}>
                 <GradientLegend range={range} domain={domain} label={"-log10(pVal)"}/>
             </g>
@@ -99,7 +99,7 @@ const Heatmap = inject("dataStore", "visStore")(observer((props) => {
 }));
 Heatmap.propTypes = {
     width: PropTypes.number.isRequired,
-    textWidth: PropTypes.number.isRequired,
+    gapWidth: PropTypes.number.isRequired,
     height: PropTypes.number.isRequired,
     descendants: PropTypes.arrayOf(PropTypes.object).isRequired,
 };

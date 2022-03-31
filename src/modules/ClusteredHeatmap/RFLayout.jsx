@@ -1,6 +1,4 @@
-function calculateTreeLayout(tree, height) {
-    const flatDescendants = getDescendants(tree);
-    const stepsize = height / (flatDescendants.length + 1);
+function calculateTreeLayout(tree, stepsize) {
     return (traverseTree(tree, null, stepsize, 0));
 }
 
