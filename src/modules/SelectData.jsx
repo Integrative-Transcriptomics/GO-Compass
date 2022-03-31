@@ -69,6 +69,7 @@ const SelectData = (props) => {
                     return geneFiles[d.index];
                 });
                 multiSpeciesRevigo(reorderedFiles, [...multiBackground], conditions.map(d => d.condition), conditions.map(d => d.background), selectedMeasure, pvalueFilter, direction,response => {
+                    console.log(response)
                     props.setRootStore(new RootStore(response.results, response.conditions, response.tableColumns, selectedMeasure, pvalueFilter));
                 });
             }

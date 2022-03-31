@@ -354,11 +354,11 @@ def GOEA(genes, objanno):
     goea_quiet_all = goeaobj.run_study(genes, prt=None)
     goea_results = dict((el, []) for el in ontologies)
     for r in goea_quiet_all:
-        print(r)
+        print(dir(r))
         direction="+"
         if r.enrichment=="p":
             direction="-"
-        goea_results[r.NS].append([r.GO, r.p_fdr_bh,direction])
+        goea_results[r.NS].append([r.GO, r.p_fdr_bh,direction,r.pop_n,r.study_items])
     for ont in goea_results:
         goea_results[ont] = np.array(goea_results[ont])
         goea_results[ont] = goea_results[ont][goea_results[ont][:, 0].argsort()]
@@ -431,6 +431,7 @@ def MultiSpeciesREVIGO():
                         if term not in enrichmentResults[ont]:
                             enrichmentResults[ont][term] = np.full(shape=index, fill_value=1, dtype=np.float64).tolist()
                             enrichmentResults[ont][term].append(result[ont][:, 1][i])
+    print(enrichmentResults)
     multiGOresults = dict()
     for ont in ontologies:
         enrichmentDF = pd.DataFrame(enrichmentResults[ont]).T.astype("float64")

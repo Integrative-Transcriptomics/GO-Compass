@@ -4,13 +4,15 @@ import {inject, observer} from "mobx-react";
 import Axis from "./../SimpleCharts/Axis";
 import PropTypes from "prop-types";
 import DraggableLine from "./DraggableLine";
-import {getTextWidth} from "../../UtilityFunctions";
+import {getTextWidth, increase_brightness} from "../../UtilityFunctions";
 
 
 const Tree = inject("dataStore", "visStore")(observer((props) => {
     const dispScale = d3.scaleLinear().domain([0, d3.max(Object.values(props.dataStore.dataTable)
         .map(d => d.dispensability))]).range([0, props.treeWidth]);
     const links = [];
+    const clusterRects = [];
+    const heatmapLines = [];
     const nodes = props.descendants.map(node => {
         const dispensability = props.dataStore.dataTable[node.data.name].dispensability;
         let fill;
@@ -18,6 +20,15 @@ const Tree = inject("dataStore", "visStore")(observer((props) => {
         let fontWeight = "normal";
         if (dispensability < props.dataStore.clusterCutoff) {
             fill = props.visStore.termColorScale(node.data.name);
+            clusterRects.push(<rect x={dispScale(node.x) - 4} y={node.y - 0.5 * props.stepsize}
+                                    height={props.stepsize * props.dataStore.clusterChildren[node.data.name].length}
+                                    width={props.width - dispScale(node.x) + 4}
+                                    fill={increase_brightness(fill, 80)}/>)
+            heatmapLines.push(<line x1={props.width}
+                                    x2={props.width + props.heatmapWidth}
+                                    y1={node.y - 0.5 * props.stepsize}
+                                    y2={node.y - 0.5 * props.stepsize}
+                                    stroke={"white"} strokeWidth={2}/>)
             if (node.parent !== null) {
                 linkColor = props.visStore.termColorScale(node.parent.data.name);
             } else {
@@ -48,8 +59,8 @@ const Tree = inject("dataStore", "visStore")(observer((props) => {
                 x1={dispScale(node.x) + getTextWidth(props.dataStore.dataTable[node.data.name].description, 10, fontWeight)}
                 x2={props.width} y1={node.y} y2={node.y} strokeWidth={4} strokeDasharray="4 1"
                 stroke="none"/>
-            <circle cx={dispScale(node.x)} cy={node.y} r={2} fill={"lightgray"}/>
-            <text x={dispScale(node.x) + 3} y={node.y + 3} fill={fill} fontSize={9}
+            {/*<circle cx={dispScale(node.x)} cy={node.y} r={2} fill={"lightgray"}/>*/}
+            <text x={dispScale(node.x) + 3} y={node.y + 3} fill={"black"} fontSize={9}
                   fontWeight={fontWeight}>{props.dataStore.dataTable[node.data.name].description}</text>
 
         </g>)
@@ -75,11 +86,12 @@ const Tree = inject("dataStore", "visStore")(observer((props) => {
         <g>
             <defs>
                 <clipPath id="myClip">
-                    <rect x={-2} y={-4} width={props.width} height={props.height}/>
+                    <rect x={-6} y={-10} width={props.width + 6} height={props.height + 10}/>
                 </clipPath>
             </defs>
             <g clipPath="url(#myClip)">
                 <g>
+                    {clusterRects}
                     {links}
                     {nodes}
                 </g>
@@ -87,6 +99,7 @@ const Tree = inject("dataStore", "visStore")(observer((props) => {
             <Axis h={props.height} w={props.treeWidth} axis={xAxis} axisType={'x'} label={'Dispensability'}/>
             {cutoffLine}
             {clusterLine}
+            {heatmapLines}
         </g>
     );
 }));

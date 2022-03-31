@@ -37,7 +37,6 @@ const Heatmap = inject("dataStore", "visStore")(observer((props) => {
                         <rect y={descendant.y - 0.5 * rectHeight} x={heatmapX(condition)}
                               width={props.rectWidth}
                               height={rectHeight}
-                              stroke={"white"}
                               fill={heatmapColor(props.dataStore.dataTable[descendant.data.name]["pvalues"][i])}/>
                         <title>{props.dataStore.dataTable[descendant.data.name]["pvalues"][i]}</title>
                     </g>)
