@@ -8,7 +8,7 @@ function traverseTree(node, parent, stepSize, currY) {
     nodes.push(parentNode);
     currY += stepSize;
     if ("children" in node) {
-        node.children.sort((a, b) => b.value - a.value).forEach((child, i) => {
+        node.children.slice().sort((a, b) => b.value - a.value).forEach((child, i) => {
             nodes.push(...traverseTree(child, parentNode, stepSize, currY));
             currY += (getDescendants(child).length + 1) * stepSize;
         });

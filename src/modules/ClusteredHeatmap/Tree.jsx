@@ -20,11 +20,11 @@ const Tree = inject("dataStore", "visStore")(observer((props) => {
         let fontWeight = "normal";
         if (dispensability < props.dataStore.clusterCutoff) {
             fill = props.visStore.termColorScale(node.data.name);
-            clusterRects.push(<rect x={dispScale(node.x) - 4} y={node.y - 0.5 * props.stepsize}
+            clusterRects.push(<rect key={node.data.name} x={dispScale(node.x) - 4} y={node.y - 0.5 * props.stepsize}
                                     height={props.stepsize * props.dataStore.clusterChildren[node.data.name].length}
                                     width={props.width - dispScale(node.x) + 4}
                                     fill={increase_brightness(fill, 80)}/>)
-            heatmapLines.push(<line x1={props.width}
+            heatmapLines.push(<line key={node.data.name} x1={props.width}
                                     x2={props.width + props.heatmapWidth}
                                     y1={node.y - 0.5 * props.stepsize}
                                     y2={node.y - 0.5 * props.stepsize}

@@ -30,7 +30,7 @@ const MultiBarChart = inject("dataStore", "visStore")(observer((props) => {
     const barCharts = filteredData.map((parent, i) => {
         const dispValues = parent.children.map(d => props.dataStore.dataTable[d.id].dispensability)
         const minChild = parent.children[dispValues.indexOf(Math.min(...dispValues))]
-        return (<g transform={'translate(0,' + i * height + ')'}>
+        return (<g key={parent.id} transform={'translate(0,' + i * height + ')'}>
             <BarChart width={props.width} height={height}
                       sigThreshold={props.sigThreshold}
                       logSigThreshold={props.logSigThreshold}
