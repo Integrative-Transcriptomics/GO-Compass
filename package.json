@@ -20,6 +20,7 @@
     "prop-types": "^15.7.2",
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
+    "react-refresh": "^0.12.0",
     "react-scripts": "3.4.1",
     "react-select": "^3.1.0",
     "uuid": "latest"
@@ -27,7 +28,7 @@
   "scripts": {
     "dev": "concurrently \"npm run server\" \"npm run start\"",
     "server": "cd gocompass && flask run --no-debugger",
-    "start": "react-scripts start",
+    "start": "react-scripts start -FAST_REFRESH=true",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"

@@ -34,9 +34,9 @@ export class DataStore {
              * @returns {{}}
              */
             get clusterHierarchy() {
-                return this.extractHierarchy(this.filteredTree, this.clusterCutoff, true,false);
+                return this.extractHierarchy(this.filteredTree, this.clusterCutoff, true, false);
             },
-                   /**
+            /**
              * flat hierarchy of cluster representatives and other GO terms
              * @returns {{}}
              */
@@ -100,6 +100,39 @@ export class DataStore {
                 });
                 return this.nest(pvalues, d => goMap.get(d.id))
             },
+            get geneInformation() {
+                const upDown = {}
+                Object.keys(this.rootStore.go2genes)
+                    .forEach(go => {
+                        if(rootStore.hasFCs) {
+                            upDown[go] = Array.from({length: conditions.length},
+                                () => ({
+                                    up: 0,
+                                    total: 0,
+                                    setSize: this.rootStore.goSetSize[go]
+                                }))
+                        }
+                        else{
+                            upDown[go] = Array.from({length: conditions.length},
+                                () => ({
+                                    total: 0,
+                                    setSize: this.rootStore.goSetSize[go]
+                                }))
+                        }
+                        this.rootStore.go2genes[go]
+                            .forEach(gene => {
+                                this.rootStore.geneValues[gene].forEach((fc, i) => {
+                                    if(this.rootStore.hasFCs) {
+                                        if (fc > 0) {
+                                            upDown[go][i].up += 1
+                                        }
+                                    }
+                                    upDown[go][i].total +=1;
+                                })
+                            })
+                    })
+                return upDown;
+            },
             /**
              * gets all GO terms that are cluster representatives
              * @returns {string[]} cluster representatives
@@ -147,11 +180,11 @@ export class DataStore {
         reaction(() => this.filterCutoff, (cutoff => {
             if (cutoff < this.maxDisp || cutoff >= this.minFilteredDisp) {
                 this.filteredTree = this.filterTree(this.tree, this.filterCutoff);
-                this.filterHierarchy = this.extractHierarchy(this.tree, cutoff, false,false);
+                this.filterHierarchy = this.extractHierarchy(this.tree, cutoff, false, false);
             }
         }));
         this.filteredTree = this.filterTree(this.tree, this.filterCutoff);
-        this.filterHierarchy = this.extractHierarchy(this.tree, this.filterCutoff, false,false);
+        this.filterHierarchy = this.extractHierarchy(this.tree, this.filterCutoff, false, false);
         /**
          * performs PCA
          */
@@ -167,6 +200,36 @@ export class DataStore {
             this.correlationLoaded = true;
         });
         this.tableStore.initTermState(Object.keys(this.filterHierarchy));
+    }
+
+    getGoSetSize(GO) {
+        return (this.rootStore.goSetSize[GO])
+    }
+
+    getNumSigGenes(GO, index, direction) {
+        const genes = this.rootStore.go2genes[GO];
+        const values = genes.map(d => this.getGeneValue(d, index)).filter(d => d !== false)
+        if (this.rootStore.hasFCs) {
+            switch (direction) {
+                case "up":
+                    return (values.filter(d => d > 0).length);
+                case "down":
+                    return (values.filter(d => d < 0).length);
+                default:
+                    return (values.length);
+            }
+        } else {
+            return (values.length);
+        }
+
+    }
+
+    getGeneValue(gene, index) {
+        if (!Object.keys(this.rootStore.geneValues).includes(gene)) {
+            return false
+        } else {
+            return this.rootStore.geneValues[gene][index];
+        }
     }
 
     /**
@@ -187,7 +250,7 @@ export class DataStore {
      * @param {boolean} includeRep
      * @returns {{}} hierarchy
      */
-    extractHierarchy(tree, cutoff, includeRep,includeAll) {
+    extractHierarchy(tree, cutoff, includeRep, includeAll) {
         const toReturn = {};
         if (this.dataTable[tree.name].dispensability <= cutoff) {
             toReturn[tree.name] = [];
@@ -199,7 +262,7 @@ export class DataStore {
                     if (this.dataTable[child.name].dispensability > cutoff) {
                         toReturn[tree.name].push(...this.flattenTree(child))
                     } else {
-                        if(includeAll){
+                        if (includeAll) {
                             toReturn[tree.name].push(...this.flattenTree(child))
                         }
                         const hierarchy = this.extractHierarchy(child, cutoff, includeRep, includeAll);

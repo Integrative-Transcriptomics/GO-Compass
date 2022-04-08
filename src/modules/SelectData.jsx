@@ -18,7 +18,7 @@ import ListSubheader from "@material-ui/core/ListSubheader";
 import Grid from "@material-ui/core/Grid";
 import KeyboardArrowDownIcon from '@material-ui/icons/KeyboardArrowDown';
 import KeyboardArrowUpIcon from '@material-ui/icons/KeyboardArrowUp';
-import {exampleData, multiRevigoGoLists, multiSpeciesRevigo} from "../parseDataFlask";
+import {exampleData, exampleDataWithFC, multiRevigoGoLists, multiSpeciesRevigo} from "../parseDataFlask";
 import IconButton from "@material-ui/core/IconButton";
 import PropTypes from "prop-types";
 import {RootStore} from "./stores/RootStore";
@@ -61,7 +61,7 @@ const SelectData = (props) => {
         setIsLoading(true);
         if (selectedTab === 1) {
             multiRevigoGoLists(goFile, backgroundFile, selectedMeasure, pvalueFilter, response => {
-                props.setRootStore(new RootStore(response.results, response.conditions, response.tableColumns, selectedMeasure, pvalueFilter));
+                props.setRootStore(new RootStore(response.results, response.conditions, response.tableColumns, false, {},{},{},selectedMeasure, pvalueFilter));
             });
         } else {
             if (selectedTab === 0) {
@@ -69,7 +69,7 @@ const SelectData = (props) => {
                     return geneFiles[d.index];
                 });
                 multiSpeciesRevigo(reorderedFiles, [...multiBackground], conditions.map(d => d.condition), conditions.map(d => d.background), selectedMeasure, pvalueFilter, direction,response => {
-                    props.setRootStore(new RootStore(response.results, response.conditions, response.tableColumns, selectedMeasure, pvalueFilter));
+                    props.setRootStore(new RootStore(response.results, response.conditions, response.tableColumns, response.hasFC, response.geneValues, response.go2genes, response.goSetSize, selectedMeasure, pvalueFilter));
                 });
             }
         }
@@ -79,7 +79,7 @@ const SelectData = (props) => {
      * @type {function(): void}
      */
     const loadExampleData = useCallback(() => {
-        exampleData((data) => {
+        exampleDataWithFC((data) => {
             let backgroundFile = new File([data.background], "scoelicolor.txt", {
                 type: "text/plain",
             })

@@ -1,25 +1,23 @@
-from flask import Flask, send_file
-from flask import request
-from io import StringIO
-import numpy as np
-import pandas as pd
 import os
 import random
 import tempfile
 from collections import Counter
+from io import StringIO
 
-from goatools.obo_parser import GODag
+import numpy as np
+import pandas as pd
+from flask import Flask, send_file
+from flask import request
 from goatools.anno.factory import get_objanno
-from goatools.semantic import TermCounts, resnik_sim, lin_sim, semantic_similarity
+from goatools.godag.consts import NAMESPACE2NS
 from goatools.godag.go_tasks import get_go2parents
 from goatools.goea.go_enrichment_ns import GOEnrichmentStudyNS
-from goatools.godag.consts import NAMESPACE2NS
+from goatools.obo_parser import GODag
+from goatools.semantic import TermCounts, resnik_sim, lin_sim, semantic_similarity
 from goatools.semsim.termwise.wang import SsWang
 from sklearn.decomposition import PCA
 
-
 from gocompass.findDescendants import getDescendants
-
 
 app = Flask(__name__, static_folder='../build', static_url_path='/')
 here = os.path.dirname(__file__)
@@ -173,10 +171,9 @@ def iterateMatrix(matrix, goTerms, goEnrichment, background):
             "termID": toDelete,
             "description": godag[toDelete].name,
             "frequency": calculateFrequency(toDelete, frequencies),
-            "rejection": delete["rejection"],
             "uniqueness": 1 - avgs[toDelete],
             "dispensability": maxValue,
-            "pvalues": np.negative(2 * np.log(goEnrichment.loc[toDelete, :].values)).tolist()
+            "pvalues": np.negative(np.log10(goEnrichment.loc[toDelete, :].values)).tolist()
         }
         # delete rejected term from list of GO terms and from ss matrix
         goTerms = np.delete(goTerms, deleteIndex)
@@ -345,7 +342,7 @@ def GOEA(genes, objanno):
     performs GO term enrichment
     """
     goeaobj = GOEnrichmentStudyNS(
-        objanno.get_id2gos().keys(),  # List of mouse protein-coding genes
+        objanno.get_id2gos().keys(),  # List of  protein-coding genes
         objanno.get_ns2assc(),  # geneid/GO associations
         godag,  # Ontologies
         propagate_counts=True,
@@ -354,11 +351,12 @@ def GOEA(genes, objanno):
     goea_quiet_all = goeaobj.run_study(genes, prt=None)
     goea_results = dict((el, []) for el in ontologies)
     for r in goea_quiet_all:
-        print(dir(r))
-        direction="+"
-        if r.enrichment=="p":
-            direction="-"
-        goea_results[r.NS].append([r.GO, r.p_fdr_bh,direction,r.pop_n,r.study_items])
+        direction = "+"
+        if r.enrichment == "p":
+            direction = "-"
+        goea_results[r.NS].append([r.GO, r.p_fdr_bh, direction,r.pop_count,r.study_items])
+        if r.p_fdr_bh<0.05:
+            print(r)
     for ont in goea_results:
         goea_results[ont] = np.array(goea_results[ont])
         goea_results[ont] = goea_results[ont][goea_results[ont][:, 0].argsort()]
@@ -411,28 +409,66 @@ def MultiSpeciesREVIGO():
         backgroundAnno[file.filename] = readBackground(file)
     enrichmentResults = dict((el, dict()) for el in ontologies)
     # for each file perform GOEA
+    genesDFs = []
+    go2genes=dict()
+    goSetSize=dict()
+    hasFC=False
     for index, file in enumerate(geneListFiles):
-        geneList = file.stream.read().decode("utf-8").splitlines()
-        result = GOEA(geneList, backgroundAnno[backgroundMap[index]])
+        genesDF = pd.read_csv(StringIO(file.stream.read().decode("utf-8"), newline=None), sep='\t', index_col=0,
+                              header=None)
+        if len(genesDF.columns) > 0:
+            genesDF.columns = [index]
+            genesDFs.append(genesDF)
+            hasFC=True
+        else:
+            genesDF[index]=True
+            genesDFs.append(genesDF)
+
+        #print("------",str(index),"------")
+        result = GOEA(genesDF.index.tolist(), backgroundAnno[backgroundMap[index]])
+        #print(result)
+
         for ont in ontologies:
             if index == 0:
                 for i, term in enumerate(result[ont][:, 0]):
-                    if result[ont][i,2] == request.form["direction"]:
+                    if result[ont][i, 2] == request.form["direction"]:
                         enrichmentResults[ont][term] = [result[ont][i, 1]]
+                        if not (term in go2genes):
+                            go2genes[term] = set()
+                            goSetSize[term] = result[ont][i, 3]
+                        go2genes[term].update(result[ont][i, 4])
             else:
                 for term in enrichmentResults[ont]:
                     if term in result[ont][:, 0]:
                         termIndex = result[ont][:, 0].tolist().index(term)
-                        enrichmentResults[ont][term].append(result[ont][termIndex, 1])
+                        if result[ont][termIndex, 2] == request.form["direction"]:
+                            enrichmentResults[ont][term].append(result[ont][termIndex, 1])
+                            if not (term in go2genes):
+                                go2genes[term] = set()
+                                goSetSize[term] = result[ont][termIndex, 3]
+                            go2genes[term].update(result[ont][termIndex, 4])
+                        else:
+                            enrichmentResults[ont][term].append(1)
                     else:
                         enrichmentResults[ont][term].append(1)
                 for i, term in enumerate(result[ont][:, 0]):
-                    if result[ont][i,2] == request.form["direction"]:
+                    if result[ont][i, 2] == request.form["direction"]:
+                        if not (term in go2genes):
+                            go2genes[term] = set()
+                            goSetSize[term] = result[ont][i, 3]
+                        go2genes[term].update(result[ont][i, 4])
                         if term not in enrichmentResults[ont]:
                             enrichmentResults[ont][term] = np.full(shape=index, fill_value=1, dtype=np.float64).tolist()
                             enrichmentResults[ont][term].append(result[ont][:, 1][i])
-    print(enrichmentResults)
+    #print(enrichmentResults)
     multiGOresults = dict()
+    if hasFC:
+        genes = pd.concat(genesDFs, axis=1)
+        genes = genes.fillna(False).T.to_dict(orient="list")
+    else:
+        genes = pd.concat(genesDFs, axis=1)
+        genes = genes.fillna(False).T.to_dict(orient="list")
+        print(genes)
     for ont in ontologies:
         enrichmentDF = pd.DataFrame(enrichmentResults[ont]).T.astype("float64")
         enrichmentDF.columns = conditions
@@ -442,38 +478,9 @@ def MultiSpeciesREVIGO():
             for key in backgroundAnno:
                 background.update(backgroundAnno[key].get_id2gos(ont))
             multiGOresults[ont] = MultiGO(enrichmentDF, background, request.form["method"])
-    return {"results": multiGOresults, "conditions": conditions,
-            "tableColumns": ["termID", "description", "frequency", "rejection", "uniqueness",
-                             "dispensability"] + conditions}
-
-
-@app.route("/GeneListsMultiREVIGO", methods=["POST"])
-def GeneListsMultiREVIGO():
-    """ returns dict
-    performs clustering for multiple gene list
-    """
-    backgroundFile = request.files["background"]
-    geneListFiles = request.files.getlist("geneLists[]")
-    conditions = request.form.getlist("conditions[]")
-    objanno = readBackground(backgroundFile)
-    enrichmentResults = dict((el, dict()) for el in ontologies)
-    enrichedTerms = dict((el, []) for el in ontologies)
-    for index, file in enumerate(geneListFiles):
-        geneList = file.stream.read().decode("utf-8").splitlines()
-        enrichmentResult = GOEA(geneList, objanno)
-        for ont in ontologies:
-            enrichmentResults[ont][conditions[index]] = enrichmentResult[ont][:, 1].astype(np.float64).tolist()
-            if index == 0:
-                enrichedTerms[ont] = enrichmentResult[ont][:, 0]
-    multiGOresults = dict()
-    for ont in ontologies:
-        enrichmentDF = pd.DataFrame(enrichmentResults[ont])
-        enrichmentDF.index = enrichedTerms[ont]
-        if len(enrichmentDF) > 0:
-            background = objanno.get_id2gos(namespace=ont)
-            multiGOresults[ont] = MultiGO(enrichmentDF, background, request.form["method"])
-    return {"results": multiGOresults, "conditions": conditions,
-            "tableColumns": ["termID", "description", "frequency", "rejection", "uniqueness",
+    go2genes = {key: list(value) for key, value in go2genes.items()}
+    return {"results": multiGOresults, "geneValues": genes, "hasFC":hasFC, "go2genes": go2genes, "goSetSize":goSetSize,"conditions": conditions,
+            "tableColumns": ["termID", "description", "frequency", "uniqueness",
                              "dispensability"] + conditions}
 
 
@@ -497,7 +504,7 @@ def GoListsMultiREVIGO():
             multiGOresults[ont] = MultiGO(enrichmentDF, background, request.form["method"])
         conditions = enrichmentDF.columns.values.tolist()
     return {"results": multiGOresults, "conditions": conditions,
-            "tableColumns": ["termID", "description", "frequency", "rejection", "uniqueness",
+            "tableColumns": ["termID", "description", "frequency", "uniqueness",
                              "dispensability"] + conditions}
 
 
@@ -517,6 +524,7 @@ def getCondition():
     condition = os.path.join(here, "data/scoelicolor/", filename)
     return send_file(condition)
 
+
 @app.route('/')
 def index():
     return app.send_static_file('index.html')
@@ -524,7 +532,6 @@ def index():
 
 if __name__ == "__main__":
     app.run()
-
 
 """
 ideas to speed up:

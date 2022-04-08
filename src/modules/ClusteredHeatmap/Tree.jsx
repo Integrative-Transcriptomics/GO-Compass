@@ -5,6 +5,8 @@ import Axis from "./../SimpleCharts/Axis";
 import PropTypes from "prop-types";
 import DraggableLine from "./DraggableLine";
 import {getTextWidth, increase_brightness} from "../../UtilityFunctions";
+import { v4 as uuidv4 } from 'uuid'
+
 
 
 const Tree = inject("dataStore", "visStore")(observer((props) => {
@@ -82,14 +84,15 @@ const Tree = inject("dataStore", "visStore")(observer((props) => {
 
     const xAxis = d3.axisBottom()
         .scale(dispScale);
+    const clipID=uuidv4();
     return (
         <g>
             <defs>
-                <clipPath id="myClip">
+                <clipPath id={clipID}>
                     <rect x={-6} y={-10} width={props.width + 6} height={props.height + 10}/>
                 </clipPath>
             </defs>
-            <g clipPath="url(#myClip)">
+            <g clipPath={"url(#"+clipID+")"}>
                 <g>
                     {clusterRects}
                     {links}
