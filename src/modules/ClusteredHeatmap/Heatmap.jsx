@@ -2,7 +2,6 @@ import React from 'react';
 import * as d3 from "d3";
 import {inject, observer} from "mobx-react";
 import PropTypes from "prop-types";
-import {cropText} from "../../UtilityFunctions";
 import GradientLegend from "./GradientLegend";
 
 
@@ -19,15 +18,7 @@ const Heatmap = inject("dataStore", "visStore")(observer((props) => {
     const heatmapColor = d3.scaleLinear().domain(domain).range(range);
     let heatmapCells = [];
     let clusterCells = [];
-    let text = [];
     descendants.forEach(descendant => {
-        let fontWeight = "normal";
-        if (props.visStore.childHighlights.includes(descendant.data.name)) {
-            fontWeight = "bold";
-        }
-        if (props.dataStore.getFilterParent(descendant.data.name) === descendant.data.name) {
-            fontWeight = "bold";
-        }
         heatmapCells.push(
             <g key={descendant.data.name}
                onMouseEnter={() => props.visStore.setChildHighlight(descendant.data.name)}
@@ -41,17 +32,6 @@ const Heatmap = inject("dataStore", "visStore")(observer((props) => {
                         <title>{props.dataStore.dataTable[descendant.data.name]["pvalues"][i]}</title>
                     </g>)
             })}
-            </g>);
-        text.push(
-            <g key={descendant.data.name} onMouseEnter={() => props.visStore.setChildHighlight(descendant.data.name)}
-               onMouseLeave={() => props.visStore.setChildHighlight(null)}>
-                <text y={descendant.y}
-                      alignmentBaseline="central"
-                      fontSize={textHeight}
-                      fontWeight={fontWeight}>
-                    {cropText(props.dataStore.dataTable[descendant.data.name].description, textHeight, fontWeight, props.gapWidth)}
-                </text>
-                <title>{props.dataStore.dataTable[descendant.data.name].description}</title>
             </g>);
         clusterCells.push(
             <rect key={descendant.data.name} onMouseEnter={() => props.visStore.setChildHighlight(descendant.data.name)}
@@ -87,10 +67,6 @@ const Heatmap = inject("dataStore", "visStore")(observer((props) => {
                 {heatmapCells}
                 {conditionLabels}
             </g>
-
-            {/*<g transform={"translate(" + ((props.dataStore.conditions.length + 1.5) * props.rectWidth + 5) + "," + 0 + ")"}>
-                {text}
-            </g>*/}
             <g transform={"translate(0," + (props.height + 5) + ")"}>
                 <GradientLegend range={range} domain={domain} label={"-log10(pVal)"}/>
             </g>

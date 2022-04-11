@@ -22,9 +22,9 @@ const ClusteredHeatmap = inject("dataStore", "visStore")(observer((props) => {
 
     const gapWidth = 100;
     const rectWidth = 10;
-    const heatmapWidth = (props.dataStore.conditions.length + 1) * rectWidth+1.5*rectWidth;
+    const heatmapWidth = (props.dataStore.conditions.length + 1) * rectWidth + 1.5 * rectWidth;
     const treeWidth = width - heatmapWidth;
-    const stepsize = height / (props.dataStore.currentGOterms.length + 1);
+    const stepsize = height / props.dataStore.currentGOterms.length;
     useEffect(() => {
         setDescendants(calculateTreeLayout(props.dataStore.filteredTree, stepsize));
     }, [props.dataStore.filteredTree, height, stepsize]);
@@ -37,7 +37,9 @@ const ClusteredHeatmap = inject("dataStore", "visStore")(observer((props) => {
                         <Heatmap width={heatmapWidth} gapWidth={gapWidth} rectWidth={rectWidth} height={height}
                                  descendants={descendants}/>
                     </g>
-                     <Tree width={treeWidth} treeWidth={treeWidth-gapWidth} stepsize={stepsize} heatmapWidth={heatmapWidth} height={height} descendants={descendants} xPos={xPos}
+                    <Tree width={treeWidth} treeWidth={treeWidth - gapWidth} stepsize={stepsize}
+                          heatmapWidth={heatmapWidth} height={height}
+                          descendants={descendants} xPos={xPos}
                           mouseDown={mouseDown}/>
                 </g>
             </svg>
