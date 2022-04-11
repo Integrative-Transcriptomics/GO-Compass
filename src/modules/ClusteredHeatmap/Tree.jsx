@@ -107,12 +107,12 @@ const Tree = inject("dataStore", "visStore")(observer((props) => {
 Tree.propTypes = {
     width: PropTypes.number.isRequired,
     treeWidth: PropTypes.number.isRequired,
-    stepSize: PropTypes.number.isRequired,
+    stepsize: PropTypes.number.isRequired,
     heatmapWidth: PropTypes.number.isRequired,
     height: PropTypes.number.isRequired,
     xPos: PropTypes.number.isRequired,
     descendants: PropTypes.arrayOf(PropTypes.object).isRequired,
-    mouseDown: PropTypes.func.isRequired,
+    mouseDown: PropTypes.bool.isRequired,
 };
 
 export default Tree;
