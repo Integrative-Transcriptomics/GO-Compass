@@ -5,7 +5,7 @@ import {inject, observer} from "mobx-react";
 import MobileStepper from "@material-ui/core/MobileStepper";
 import Button from "@material-ui/core/Button";
 import {KeyboardArrowLeft, KeyboardArrowRight} from "@material-ui/icons";
-import { v4 as uuidv4 } from 'uuid'
+import {v4 as uuidv4} from 'uuid'
 
 
 /**
@@ -37,31 +37,38 @@ const AnimatedTreemap = inject("dataStore", "visStore")(observer((props) => {
 
     const startAnimation = useCallback((index) => {
         let leaf = d3.selectAll([...leafRef.current.childNodes]);
-        leaf.data(layout(index).leaves()).transition()
-            .duration(props.visStore.animationDuration)
-            .ease(d3.easeLinear)
-            .attr("transform", d => `translate(${d.x0},${d.y0})`)
-            .on("end", () => {
-                setIndex(index);
-            })
-            .call(leaf => leaf.select("rect")
-                .attr("width", d => d.x1 - d.x0)
-                .attr("height", d => d.y1 - d.y0)
-                .attr("opacity", d => props.logSigThreshold < d.value ? 1 : 0))
-        ;
         let stripe = d3.selectAll([...stripedRef.current.childNodes]);
-        stripe.data(layout(index).leaves()).transition()
-            .duration(props.visStore.animationDuration)
-            .ease(d3.easeLinear)
-            .attr("transform", d => `translate(${d.x0},${d.y0})`)
-            .on("end", () => {
-                setIndex(index);
-            })
-            .call(stripe => stripe.select("rect")
-                .attr("width", d => d.x1 - d.x0)
-                .attr("height", d => d.y1 - d.y0));
-
-    }, [leafRef, stripedRef, layout, props.visStore.animationDuration, props.logSigThreshold]);
+        let helperVis = d3.selectAll([...propRef.current.childNodes]);
+        helperVis.transition()
+            .duration(props.visStore.animationDuration / 5)
+            .attr('opacity', 0)
+            .on('end', () => {
+                leaf.data(layout(index).leaves()).transition()
+                    .duration(props.visStore.animationDuration)
+                    .ease(d3.easeLinear)
+                    .attr("transform", d => `translate(${d.x0},${d.y0})`)
+                    .on("end", () => {
+                        helperVis.attr('opacity', 1)
+                        setIndex(index);
+                    })
+                    .call(leaf => leaf.select("rect")
+                        .attr("width", d => d.x1 - d.x0)
+                        .attr("height", d => d.y1 - d.y0)
+                        .attr("opacity", d => props.logSigThreshold < d.value ? 1 : 0))
+                ;
+                stripe.data(layout(index).leaves()).transition()
+                    .duration(props.visStore.animationDuration)
+                    .ease(d3.easeLinear)
+                    .attr("transform", d => `translate(${d.x0},${d.y0})`)
+                    .on("end", () => {
+                        helperVis.attr('opacity', 1)
+                        setIndex(index);
+                    })
+                    .call(stripe => stripe.select("rect")
+                        .attr("width", d => d.x1 - d.x0)
+                        .attr("height", d => d.y1 - d.y0));
+            });
+    }, [leafRef, layout, props.visStore.animationDuration, props.logSigThreshold, stripedRef, propRef]);
     React.useEffect(() => {
         if (props.visStore.conditionIndex !== index) {
             startAnimation(props.visStore.conditionIndex);
@@ -150,12 +157,12 @@ const AnimatedTreemap = inject("dataStore", "visStore")(observer((props) => {
                     let sigWidth = propWidth / size * total;
                     let rotate = "";
                     if (propWidth > rectWidth) {
-                        rotate = "rotate(270, " + (0.5 * propWidth) + ", " + (-0.5 * propHeight) + ")scale(-1,1)translate(" + (-propWidth) + ",0)"
+                        rotate = "rotate(270, " + (0.5 * propWidth) + ", " + (-0.5 * propHeight) + ")"
                     }
                     proportions.push(<g key={child.data.id} transform={'translate(' + child.x0 + ',' + child.y0 + ')'}>
-                        <g transform={'translate(' + (rectWidth - 2) + ',' + (rectHeight - 2 * propHeight) + ')' + rotate}>
+                        {/*<g transform={'translate(' + (rectWidth - 2) + ',' + (rectHeight - 2 * propHeight) + ')' + rotate}>
                             <text textAnchor={"end"} fontSize={fontSize}>{visText}</text>
-                        </g>
+                        </g>*/}
                         <g transform={'translate(' + (rectWidth - propWidth) + ',' + (rectHeight - propHeight) + ')' + rotate}>
                             <rect width={propWidth} height={propHeight}
                                   fill={setSizeScale(size)}/>
@@ -188,7 +195,7 @@ const AnimatedTreemap = inject("dataStore", "visStore")(observer((props) => {
                     </g>)
                 }
             }
-            const clipID=uuidv4();
+            const clipID = uuidv4();
             rects.push(<g key={child.data.id} transform={'translate(' + child.x0 + ',' + child.y0 + ')'}
                           onMouseEnter={() => props.visStore.setChildHighlight(child.data.id)}
                           onMouseLeave={() => props.visStore.setChildHighlight(null)}>
@@ -204,7 +211,7 @@ const AnimatedTreemap = inject("dataStore", "visStore")(observer((props) => {
                             <use xlinkHref={"#rect" + clipID}/>
                         </clipPath>
                     </defs>
-                    <text clipPath={'url(#clip' +  clipID + ')'} x={2} y={10} fontSize={fontSize}>
+                    <text clipPath={'url(#clip' + clipID + ')'} x={2} y={10} fontSize={fontSize}>
                         {rectWidth > 0 && rectHeight > 0 ? child.data.name : null}
                     </text>
                 </g>
@@ -212,7 +219,7 @@ const AnimatedTreemap = inject("dataStore", "visStore")(observer((props) => {
                     {child.data.name}
                 </title>
             </g>)
-            const stripeID=uuidv4();
+            const stripeID = uuidv4();
             stripedRects.push(
                 <g key={child.data.id} transform={'translate(' + child.x0 + ',' + child.y0 + ')'}>
                     <defs>
