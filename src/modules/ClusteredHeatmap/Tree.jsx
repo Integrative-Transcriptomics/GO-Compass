@@ -5,8 +5,7 @@ import Axis from "./../SimpleCharts/Axis";
 import PropTypes from "prop-types";
 import DraggableLine from "./DraggableLine";
 import {getTextWidth, increase_brightness} from "../../UtilityFunctions";
-import { v4 as uuidv4 } from 'uuid'
-
+import {v4 as uuidv4} from 'uuid'
 
 
 const Tree = inject("dataStore", "visStore")(observer((props) => {
@@ -56,14 +55,13 @@ const Tree = inject("dataStore", "visStore")(observer((props) => {
             <line
                 x1={dispScale(node.x) + getTextWidth(props.dataStore.dataTable[node.data.name].description, 10, fontWeight)}
                 x2={props.width} y1={node.y} y2={node.y} strokeWidth={1} strokeDasharray="4 1"
-                stroke={"lightgray"}/>
+                stroke={props.visStore.childHighlights.includes(node.data.name) ? "black" : "lightgray"}/>
             <line
                 x1={dispScale(node.x) + getTextWidth(props.dataStore.dataTable[node.data.name].description, 10, fontWeight)}
                 x2={props.width} y1={node.y} y2={node.y} strokeWidth={4} strokeDasharray="4 1"
                 stroke="none"/>
-            {/*<circle cx={dispScale(node.x)} cy={node.y} r={2} fill={"lightgray"}/>*/}
             <text x={dispScale(node.x) + 3} y={node.y + 3} fill={"black"} fontSize={9}
-                  fontWeight={fontWeight}>{props.dataStore.dataTable[node.data.name].description}</text>
+                  fontWeight={props.visStore.childHighlights.includes(node.data.name) ? "bold" : fontWeight}>{props.dataStore.dataTable[node.data.name].description}</text>
 
         </g>)
     });
@@ -84,7 +82,7 @@ const Tree = inject("dataStore", "visStore")(observer((props) => {
 
     const xAxis = d3.axisBottom()
         .scale(dispScale);
-    const clipID=uuidv4();
+    const clipID = uuidv4();
     return (
         <g>
             <defs>
@@ -92,7 +90,7 @@ const Tree = inject("dataStore", "visStore")(observer((props) => {
                     <rect x={-6} y={-10} width={props.width + 6} height={props.height + 10}/>
                 </clipPath>
             </defs>
-            <g clipPath={"url(#"+clipID+")"}>
+            <g clipPath={"url(#" + clipID + ")"}>
                 <g>
                     {clusterRects}
                     {links}
@@ -108,8 +106,13 @@ const Tree = inject("dataStore", "visStore")(observer((props) => {
 }));
 Tree.propTypes = {
     width: PropTypes.number.isRequired,
+    treeWidth: PropTypes.number.isRequired,
+    stepSize: PropTypes.number.isRequired,
+    heatmapWidth: PropTypes.number.isRequired,
     height: PropTypes.number.isRequired,
+    xPos: PropTypes.number.isRequired,
     descendants: PropTypes.arrayOf(PropTypes.object).isRequired,
+    mouseDown: PropTypes.func.isRequired,
 };
 
 export default Tree;
