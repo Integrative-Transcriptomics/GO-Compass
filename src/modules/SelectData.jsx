@@ -18,7 +18,7 @@ import ListSubheader from "@material-ui/core/ListSubheader";
 import Grid from "@material-ui/core/Grid";
 import KeyboardArrowDownIcon from '@material-ui/icons/KeyboardArrowDown';
 import KeyboardArrowUpIcon from '@material-ui/icons/KeyboardArrowUp';
-import {exampleData, exampleDataWithFC, multiRevigoGoLists, multiSpeciesRevigo} from "../parseDataFlask";
+import {exampleDataWithFC, multiRevigoGoLists, multiSpeciesRevigo} from "../parseDataFlask";
 import IconButton from "@material-ui/core/IconButton";
 import PropTypes from "prop-types";
 import {RootStore} from "./stores/RootStore";
