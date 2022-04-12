@@ -258,8 +258,8 @@ const SelectData = (props) => {
                                 )}</div> : null}
                         <FormControl component="fieldset">
                             <RadioGroup value={direction} onChange={(e)=>setDirection(e.target.value)}>
-                                <FormControlLabel value="+" control={<Radio/>} label="Find overrepresented GO Terms"/>
-                                <FormControlLabel value="-" control={<Radio/>} label="Find underrepresented GO terms"/>
+                                <FormControlLabel value="+" control={<Radio/>} label="Find overrepresented GO Terms" disabled={isLoading}/>
+                                <FormControlLabel value="-" control={<Radio/>} label="Find underrepresented GO terms" disabled={isLoading}/>
                             </RadioGroup>
                         </FormControl>
                     </div>
