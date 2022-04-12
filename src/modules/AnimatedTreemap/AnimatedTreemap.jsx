@@ -40,7 +40,7 @@ const AnimatedTreemap = inject("dataStore", "visStore")(observer((props) => {
         let stripe = d3.selectAll([...stripedRef.current.childNodes]);
         let helperVis = d3.selectAll([...propRef.current.childNodes]);
         helperVis.transition()
-            .duration(props.visStore.animationDuration / 5)
+            .duration(0)
             .attr('opacity', 0)
             .on('end', () => {
                 leaf.data(layout(index).leaves()).transition()
