@@ -40,6 +40,9 @@ const Tree = inject("dataStore", "visStore")(observer((props) => {
             fill = props.visStore.termColorScale(props.dataStore.getFilterParent(node.data.name));
             linkColor = fill;
         }
+        if (props.visStore.childHighlights.includes(node.data.name)) {
+            fontWeight = "bold";
+        }
         if (node.parent != null) {
             links.push(<line key={node.data.name + "1"} x1={dispScale(node.x)} y1={node.y}
                              x2={dispScale(node.parent.x)} y2={node.y}
@@ -61,7 +64,7 @@ const Tree = inject("dataStore", "visStore")(observer((props) => {
                 x2={props.width} y1={node.y} y2={node.y} strokeWidth={4} strokeDasharray="4 1"
                 stroke="none"/>
             <text x={dispScale(node.x) + 3} y={node.y + 3} fill={"black"} fontSize={9}
-                  fontWeight={props.visStore.childHighlights.includes(node.data.name) ? "bold" : fontWeight}>{props.dataStore.dataTable[node.data.name].description}</text>
+                  fontWeight={fontWeight}>{props.dataStore.dataTable[node.data.name].description}</text>
 
         </g>)
     });

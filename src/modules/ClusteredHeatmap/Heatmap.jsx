@@ -39,18 +39,6 @@ const Heatmap = inject("dataStore", "visStore")(observer((props) => {
                   width={props.rectWidth}
                   height={rectHeight}
                   fill={props.visStore.termColorScale(props.dataStore.getFilterParent(descendant.data.name))}/>);
-        /*if (descendant.data.value <= props.dataStore.clusterCutoff) {
-            const x1 = props.rectWidth;
-            const x2 = x1;
-            const x3 = x1 + 0.5 * props.rectWidth;
-            const y1 = descendant.y - 0.5 * rectHeight;
-            const y2 = y1 + 0.5 * rectHeight;
-            clusterCells.push(
-                <polygon key={descendant.data.name + "polygon"}
-                         points={x1 + "," + y1 + " " + x2 + "," + y2 + " " + x3 + "," + y1}
-                         fill={props.visStore.termColorScale(props.dataStore.getFilterParent(descendant.data.name))}/>
-            );
-        }*/
 
     });
     const conditionLabels = props.dataStore.conditions.map(condition =>
