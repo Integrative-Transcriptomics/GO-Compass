@@ -37,4 +37,6 @@ jobs:
         config: ${{ secrets.SSH_CONFIG }}
         known_hosts: ${{ secrets.KNOWN_HOSTS }}
     - name: Deploy with rsync
-      run: rsync -azv -O --no-perms --exclude='node_modules' --exclude='src' --exclude='.gitignore' --exclude='README.md' --exclude='.git' --exclude='.github' --exclude='package.json' --exclude='package-lock.json' . ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:${{ secrets.REMOTE_TARGET }}
+      run: rsync -azv -O --no-perms --exclude='node_modules' --exclude='public' --exclude='src' --exclude='.gitignore' --exclude='README.md' --exclude='.git' --exclude='.github' --exclude='package.json' --exclude='package-lock.json' . ${{ secrets.SSH_HOST }}:${{ secrets.REMOTE_TARGET }}
+    - name: Restart service
+      run: ssh ${{ secrets.SSH_HOST }} ${{ secrets.UPDATE_COMMAND }}
