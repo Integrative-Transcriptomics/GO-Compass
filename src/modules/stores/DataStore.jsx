@@ -104,15 +104,14 @@ export class DataStore {
                 const upDown = {}
                 Object.keys(this.rootStore.go2genes)
                     .forEach(go => {
-                        if(rootStore.hasFCs) {
+                        if (rootStore.hasFCs) {
                             upDown[go] = Array.from({length: conditions.length},
                                 () => ({
                                     up: 0,
                                     total: 0,
                                     setSize: this.rootStore.goSetSize[go]
                                 }))
-                        }
-                        else{
+                        } else {
                             upDown[go] = Array.from({length: conditions.length},
                                 () => ({
                                     total: 0,
@@ -122,12 +121,12 @@ export class DataStore {
                         this.rootStore.go2genes[go]
                             .forEach(gene => {
                                 this.rootStore.geneValues[gene].forEach((fc, i) => {
-                                    if(this.rootStore.hasFCs) {
+                                    if (this.rootStore.hasFCs) {
                                         if (fc > 0) {
                                             upDown[go][i].up += 1
                                         }
                                     }
-                                    upDown[go][i].total +=1;
+                                    upDown[go][i].total += 1;
                                 })
                             })
                     })
@@ -159,6 +158,10 @@ export class DataStore {
             setClusterCutoff: action((cutoff) => {
                 this.clusterCutoff = cutoff;
             }),
+            recalculateFiltering: action((cutoff) => {
+                this.filteredTree = this.filterTree(this.tree, cutoff);
+                this.filterHierarchy = this.extractHierarchy(this.tree, cutoff, false, false);
+            })
 
         });
         // when the filter slider is moved, recalculate pca and correlation
@@ -179,12 +182,10 @@ export class DataStore {
         // recalculate filtered tree and filterHierarchy
         reaction(() => this.filterCutoff, (cutoff => {
             if (cutoff < this.maxDisp || cutoff >= this.minFilteredDisp) {
-                this.filteredTree = this.filterTree(this.tree, this.filterCutoff);
-                this.filterHierarchy = this.extractHierarchy(this.tree, cutoff, false, false);
+                this.recalculateFiltering(cutoff);
             }
         }));
-        this.filteredTree = this.filterTree(this.tree, this.filterCutoff);
-        this.filterHierarchy = this.extractHierarchy(this.tree, this.filterCutoff, false, false);
+        this.recalculateFiltering(this.filterCutoff)
         /**
          * performs PCA
          */

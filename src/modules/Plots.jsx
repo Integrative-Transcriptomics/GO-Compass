@@ -56,7 +56,10 @@ const Plots = inject("dataStore", "visStore")(observer((props) => {
                     <Typography>
                         Cutoff Selection in GO Dispensability Tree
                     </Typography>
-                    <ClusteredHeatmap width={props.visStore.screenWidth / 12 * 5} height={props.visStore.plotHeight / 2}
+                    <ClusteredHeatmap
+                        logSigThreshold={props.logSigThreshold}
+                        width={props.visStore.screenWidth / 12 * 5}
+                        height={props.visStore.plotHeight / 2}
                     />
                 </Paper>
             </Grid>

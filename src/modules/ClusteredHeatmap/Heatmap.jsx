@@ -29,6 +29,10 @@ const Heatmap = inject("dataStore", "visStore")(observer((props) => {
                               width={props.rectWidth}
                               height={rectHeight}
                               fill={heatmapColor(props.dataStore.dataTable[descendant.data.name]["pvalues"][i])}/>
+                        {props.dataStore.dataTable[descendant.data.name]["pvalues"][i] >= props.logSigThreshold ?
+                            <rect width={2} height={2} y={descendant.y - 1}
+                                  x={heatmapX(condition) + 0.5 * props.rectWidth - 1} fill={"black"}/>
+                            : null}
                         <title>{props.dataStore.dataTable[descendant.data.name]["pvalues"][i]}</title>
                     </g>)
             })}
@@ -51,7 +55,7 @@ const Heatmap = inject("dataStore", "visStore")(observer((props) => {
             <g>
                 {clusterCells}
             </g>
-            <g transform={"translate(" + 1.5*props.rectWidth + ",0)"}>
+            <g transform={"translate(" + 1.5 * props.rectWidth + ",0)"}>
                 {heatmapCells}
                 {conditionLabels}
             </g>
@@ -66,6 +70,7 @@ Heatmap.propTypes = {
     gapWidth: PropTypes.number.isRequired,
     height: PropTypes.number.isRequired,
     descendants: PropTypes.arrayOf(PropTypes.object).isRequired,
+    logSigThreshold: PropTypes.number.isRequired,
 };
 
 export default Heatmap;

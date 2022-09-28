@@ -50,7 +50,6 @@ function multiRevigoGeneLists(dataFiles, backgroundFile, conditions, method, pva
     if (dataFiles.length > 0) {
         axios.post("/GeneListsMultiREVIGO", formData)
             .then(response => {
-                console.log(response.data);
                 callback(response.data);
             })
             .catch(function (error) {
@@ -88,7 +87,6 @@ function multiSpeciesRevigo(dataFiles, backgroundFiles, conditions, backgroundMa
     if (dataFiles.length > 0 && backgroundFiles.length > 0) {
         axios.post("/MultiSpeciesREVIGO", formData)
             .then(response => {
-                console.log(response.data)
                 callback(response.data)
             })
             .catch(function (error) {

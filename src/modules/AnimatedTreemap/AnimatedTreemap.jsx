@@ -6,6 +6,9 @@ import MobileStepper from "@material-ui/core/MobileStepper";
 import Button from "@material-ui/core/Button";
 import {KeyboardArrowLeft, KeyboardArrowRight} from "@material-ui/icons";
 import {v4 as uuidv4} from 'uuid'
+import FormGroup from "@material-ui/core/FormGroup";
+import FormControlLabel from "@material-ui/core/FormControlLabel";
+import Checkbox from "@material-ui/core/Checkbox";
 
 
 /**
@@ -13,6 +16,8 @@ import {v4 as uuidv4} from 'uuid'
  */
 const AnimatedTreemap = inject("dataStore", "visStore")(observer((props) => {
     const [index, setIndex] = useState(0);
+    const [showGenes, setShowGenes] = useState(props.dataStore.rootStore.hasGeneInfo)
+    const [showNumbers, setShowNumbers] = useState(false);
     const margins = {
         top: 0,
         right: 0,
@@ -112,34 +117,11 @@ const AnimatedTreemap = inject("dataStore", "visStore")(observer((props) => {
             }
             const fill = props.visStore.termColorScale(parent.data.id);
             if (rectWidth > 0 && rectHeight > 0 && props.dataStore.rootStore.hasGeneInfo) {
-                /*
-                const up = props.dataStore.geneInformation[child.data.id][index].up;
-                const down = props.dataStore.geneInformation[child.data.id][index].down;
-                const size = props.dataStore.geneInformation[child.data.id][index].setSize;
-                const total = up + down;
-                const propHeight = 5;
-                const propWidth = 30;
-                proportions.push(<g key={child.data.id} transform={'translate(' + child.x0 + ',' + child.y0 + ')'}>
-                    <g transform={'translate(' + (rectWidth - 2.5 * propWidth-1) + ',' + (rectHeight - 2.5 * propHeight-1) + ')'}>
-                        <g transform={'translate(' + (1.5 * propWidth) + ',0)'}>
-                            <rect x={-1} y={-1} width={propWidth+1} height={propHeight*2.5+1} fill={"white"}/>
-                            <rect width={propWidth} height={propHeight} fill={setSizeScale(size)}/>
-                            <line x1={propWidth / size * total} x2={propWidth / size * total} y1={0}
-                                  y2={propHeight} stroke={"white"} strokeWidth={2}/>
-                            <g transform={'translate(0,' + (1.5 * propHeight) + ')'}>
-                                <rect width={propWidth / total * up} height={propHeight} fill={"red"}/>
-                                <rect x={propWidth / total * up} width={propWidth / total * down} height={propHeight}
-                                      fill={"blue"}/>
-                            </g>
-                        </g>
-                    </g>
-                </g>)
-                */
                 let proportionFill = "black"
                 const size = props.dataStore.geneInformation[child.data.id][index].setSize;
                 const total = props.dataStore.geneInformation[child.data.id][index].total;
                 let tooltipText = "Size: " + size + ", Expressed: " + total;
-                //let visText = size + "/" + total;
+                let visText = size + "/" + total;
                 if (props.dataStore.rootStore.hasFCs) {
                     const up = props.dataStore.geneInformation[child.data.id][index].up;
                     let proportion = up / total;
@@ -148,7 +130,7 @@ const AnimatedTreemap = inject("dataStore", "visStore")(observer((props) => {
                     }
                     proportionFill = upDownScale(proportion)
                     tooltipText = "Set: " + size + ", up: " + up + ", down: " + (total - up);
-                    //visText = size + ", " + up + ":" + (total - up);
+                    visText = size + ", " + up + ":" + (total - up);
                 }
                 const propHeight = 10;
                 const propWidth = 30;
@@ -158,39 +140,37 @@ const AnimatedTreemap = inject("dataStore", "visStore")(observer((props) => {
                     if (propWidth > rectWidth) {
                         rotate = "rotate(270, " + (0.5 * propWidth) + ", " + (-0.5 * propHeight) + ")"
                     }
+                    let transformNumbers, transformGlyph;
+                    if (showGenes) {
+                        transformGlyph = 'translate(' + (rectWidth - propWidth) + ',' + (rectHeight - propHeight) + ')' + rotate
+                        transformNumbers = 'translate(' + (rectWidth - 2) + ',' + (rectHeight - 1.75 * propHeight) + ')' + rotate;
+                    } else {
+                        if (showNumbers) {
+                            transformNumbers = 'translate(' + (rectWidth - 2) + ',' + (rectHeight-2) + ')' + rotate
+                        }
+                    }
                     proportions.push(<g key={child.data.id} transform={'translate(' + child.x0 + ',' + child.y0 + ')'}>
-                        {/*<g transform={'translate(' + (rectWidth - 2) + ',' + (rectHeight - 2 * propHeight) + ')' + rotate}>
-                            <text textAnchor={"end"} fontSize={fontSize}>{visText}</text>
-                        </g>*/}
-                        <g transform={'translate(' + (rectWidth - propWidth) + ',' + (rectHeight - propHeight) + ')' + rotate}>
-                            <rect width={propWidth} height={propHeight}
-                                  fill={setSizeScale(size)}/>
-                            <rect y={propHeight / 4} width={sigWidth} height={propHeight * 0.5}
-                                  fill={proportionFill}/>
-                            <line x2={propWidth} stroke={"white"}/>
-                            {props.dataStore.rootStore.hasFCs ? <polygon
-                                points={sigWidth + ",0 " + sigWidth + "," + (-propHeight / 2) + " " + (sigWidth - propHeight) + "," + (-propHeight / 4)}
-                                fill={proportionFill}/> : null}
-                            {props.dataStore.rootStore.hasFCs ?
-                                <rect x={sigWidth > 2 ? sigWidth - 2 : 0} y={-0.25 * propHeight}
-                                      width={sigWidth > 2 ? 2 : sigWidth} height={propHeight}
-                                      fill={proportionFill}/> : null}
-                            <line y1={-0.5} y2={propHeight} stroke={"white"}/>
-                            {/*sigWidth< propHeight/3?<polygon
-                            points={"1,"+(propHeight/4)+" "+sigWidth+","+(propHeight/4)+" "+(sigWidth+5)+","+(-propHeight/4)+" "+(-4)+","+(-propHeight/4)}
-                            fill={upDownScale(proportion)}/>:null*/}
-                            {/*<polygon
-                            points={(propWidth / size * total) + "," + ((1 / 4) * propHeight - 1) + " " + (propWidth / size * total + 4) + "," + (-7) + " " + (propWidth / size * total - 4) + "," + (-7)}
-                            stroke={"white"}
-                            fill={upDownScale(proportion)}/>
-                            <polygon
-                                points={(sigWidth) + "," + ((1 / 2) * propHeight - 1) + " " + (sigWidth) + "," + (-7) + " " + (sigWidth - 8) + "," + (-7)}
-                                stroke={"white"}
-                                fill={upDownScale(proportion)}/>
-                            <line x1={sigWidth} x2={sigWidth} y1={0} y2={propHeight}
-                                  stroke={"white"}/>*/}
-                            <title>{tooltipText}</title>
-                        </g>
+                        {showNumbers ?
+                            <g transform={transformNumbers}>
+                                <text textAnchor={"end"} fontSize={fontSize}>{visText}</text>
+                            </g> : null}
+                        {showGenes ?
+                            <g transform={transformGlyph}>
+                                <rect width={propWidth} height={propHeight}
+                                      fill={setSizeScale(size)}/>
+                                <rect y={propHeight / 4} width={sigWidth} height={propHeight * 0.5}
+                                      fill={proportionFill}/>
+                                <line x2={propWidth} stroke={"white"}/>
+                                {props.dataStore.rootStore.hasFCs ? <polygon
+                                    points={sigWidth + ",0 " + sigWidth + "," + (-propHeight / 2) + " " + (sigWidth - propHeight) + "," + (-propHeight / 4)}
+                                    fill={proportionFill}/> : null}
+                                {props.dataStore.rootStore.hasFCs ?
+                                    <rect x={sigWidth > 2 ? sigWidth - 2 : 0} y={-0.25 * propHeight}
+                                          width={sigWidth > 2 ? 2 : sigWidth} height={propHeight}
+                                          fill={proportionFill}/> : null}
+                                <line y1={-0.5} y2={propHeight} stroke={"white"}/>
+                                <title>{tooltipText}</title>
+                            </g> : null}
                     </g>)
                 }
             }
@@ -266,6 +246,17 @@ const AnimatedTreemap = inject("dataStore", "visStore")(observer((props) => {
                     </Button>
                 }
             />
+            {props.dataStore.rootStore.hasGeneInfo ? <FormGroup row>
+                <FormControlLabel
+                    control={<Checkbox checked={showGenes} onChange={() => setShowGenes(!showGenes)} name="checkedA"/>}
+                    label="Show gene visualization"
+                />
+                <FormControlLabel
+                    control={<Checkbox checked={showNumbers} onChange={() => setShowNumbers(!showNumbers)}
+                                       name="checkedA"/>}
+                    label="Show gene set numbers"
+                />
+            </FormGroup> : null}
             <svg width={props.width} height={props.visStore.treemapHeight}>
                 <g transform={"translate(" + margins.left + "," + margins.top + ")scale(" + width / props.width + ")"}>
                     <g ref={stripedRef}>{stripedRects}</g>

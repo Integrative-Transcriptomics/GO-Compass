@@ -51,7 +51,7 @@ const Tree = inject("dataStore", "visStore")(observer((props) => {
                              x2={dispScale(node.parent.x)} y2={node.parent.y}
                              strokeWidth={1} stroke={linkColor}/>);
         }
-
+        let numchild = props.dataStore.filterHierarchy[node.data.name].length;
         return (<g key={node.data.name} onMouseEnter={() => props.visStore.setChildHighlight(node.data.name)}
                    onMouseLeave={() => props.visStore.setChildHighlight(null)}>
             <title>{props.dataStore.dataTable[node.data.name].description}</title>
@@ -64,8 +64,7 @@ const Tree = inject("dataStore", "visStore")(observer((props) => {
                 x2={props.width} y1={node.y} y2={node.y} strokeWidth={4} strokeDasharray="4 1"
                 stroke="none"/>
             <text x={dispScale(node.x) + 3} y={node.y + 3} fill={"black"} fontSize={9}
-                  fontWeight={fontWeight}>{props.dataStore.dataTable[node.data.name].description}</text>
-
+                  fontWeight={fontWeight}>{props.dataStore.dataTable[node.data.name].description+" ("+numchild+")"}</text>
         </g>)
     });
     const cutoffLine = <DraggableLine width={props.treeWidth} height={props.height} xPos={props.xPos}

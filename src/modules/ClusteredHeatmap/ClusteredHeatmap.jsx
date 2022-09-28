@@ -9,7 +9,6 @@ import calculateTreeLayout from "./RFLayout";
 const ClusteredHeatmap = inject("dataStore", "visStore")(observer((props) => {
     const [xPos, setXPos] = useState(0);
     const [mouseDown, setMouseDown] = useState(false);
-    const [descendants, setDescendants] = useState([]);
 
     const margins = {
         top: props.visStore.maxConditionTextSize > 40 ? props.visStore.maxConditionTextSize : 40,
@@ -25,16 +24,16 @@ const ClusteredHeatmap = inject("dataStore", "visStore")(observer((props) => {
     const heatmapWidth = (props.dataStore.conditions.length + 1) * rectWidth + 1.5 * rectWidth;
     const treeWidth = width - heatmapWidth;
     const stepsize = height / props.dataStore.currentGOterms.length;
-    useEffect(() => {
-        setDescendants(calculateTreeLayout(props.dataStore.filteredTree, stepsize));
-    }, [props.dataStore.filteredTree, height, stepsize]);
+    const descendants=calculateTreeLayout(props.dataStore.filteredTree, stepsize)
     if (descendants.length > 0) {
         return (
             <svg width={props.width} height={props.height} onMouseMove={(e) => setXPos(e.pageX)}
                  onMouseDown={() => setMouseDown(true)} onMouseUp={() => setMouseDown(false)}>
                 <g transform={"translate(" + margins.left + "," + margins.top + ")"}>
                     <g transform={"translate(" + treeWidth + ",0)"}>
-                        <Heatmap width={heatmapWidth} gapWidth={gapWidth} rectWidth={rectWidth} height={height}
+                        <Heatmap logSigThreshold={props.logSigThreshold}
+                                 width={heatmapWidth} gapWidth={gapWidth}
+                                 rectWidth={rectWidth} height={height}
                                  descendants={descendants}/>
                     </g>
                     <Tree width={treeWidth} treeWidth={treeWidth - gapWidth} stepsize={stepsize}
@@ -49,6 +48,7 @@ const ClusteredHeatmap = inject("dataStore", "visStore")(observer((props) => {
 ClusteredHeatmap.propTypes = {
     width: PropTypes.number.isRequired,
     height: PropTypes.number.isRequired,
+    logSigThreshold: PropTypes.number.isRequired,
 };
 
 export default ClusteredHeatmap;

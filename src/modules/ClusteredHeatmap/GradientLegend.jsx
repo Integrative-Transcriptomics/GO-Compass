@@ -44,10 +44,9 @@ const GradientLegend = (props) => {
             <defs>
                 {gradient}
             </defs>
+            <text x={-getTextWidth(props.label,12,"bold")-5} y={(height + fontSize) / 2} fontSize={fontSize}>{props.label}</text>
             <rect x={0} y={0} width={width} height={height} fill={"url(#" + id + ")"}/>
             {labels}
-            <text x={width + 5} y={(height + fontSize) / 2}
-                  fontSize={fontSize}>{props.label}</text>
         </g>)
 };
 GradientLegend.propTypes = {
