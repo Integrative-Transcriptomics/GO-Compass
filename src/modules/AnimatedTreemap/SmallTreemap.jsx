@@ -11,8 +11,8 @@ import {v4 as uuidv4} from 'uuid';
 const SmallTreemap = inject("dataStore", "visStore")(observer((props) => {
     const [highlighted, setIsHighlighted] = useState(false);
     const highlightRect = createRef();
-    const width=props.visStore.treemapWidth*props.scalingFactor;
-    const height=props.visStore.treemapHeight*props.scalingFactor;
+    const width = props.visStore.treemapWidth * props.scalingFactor;
+    const height = props.visStore.treemapHeight * props.scalingFactor;
     const currentLayout = props.visStore.treemapLayout(props.index);
     const children = [];
     const mapId = uuidv4();
@@ -57,10 +57,12 @@ const SmallTreemap = inject("dataStore", "visStore")(observer((props) => {
     }, [props.index, startAnimation]);
     return (
         <svg width={width} height={height}>
-                <g transform={"scale(" + props.scalingFactor + ")"}>
-                    {children}
-                </g>
-                            <rect ref={highlightRect} width={width} height={height} fill={"none"} strokeWidth={2} stroke={"black"} opacity={highlighted ? 1 : 0.2}/>
+            <rect width={width} height={height} fill="white"/>
+            <g transform={"scale(" + props.scalingFactor + ")"}>
+                {children}
+            </g>
+            <rect ref={highlightRect} width={width} height={height} fill={"none"} strokeWidth={2} stroke={"black"}
+                  opacity={highlighted ? 1 : 0.2}/>
 
         </svg>
     );
