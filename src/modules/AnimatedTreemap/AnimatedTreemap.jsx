@@ -1,14 +1,9 @@
-import React, {useCallback, useEffect, useMemo, useState} from "react";
+import React, {useCallback, useMemo, useState} from "react";
 import PropTypes from 'prop-types';
 import * as d3 from "d3";
 import {inject, observer} from "mobx-react";
-import MobileStepper from "@material-ui/core/MobileStepper";
-import Button from "@material-ui/core/Button";
-import {KeyboardArrowLeft, KeyboardArrowRight} from "@material-ui/icons";
 import {v4 as uuidv4} from 'uuid'
-import FormGroup from "@material-ui/core/FormGroup";
-import FormControlLabel from "@material-ui/core/FormControlLabel";
-import Checkbox from "@material-ui/core/Checkbox";
+
 
 
 /**
@@ -16,28 +11,11 @@ import Checkbox from "@material-ui/core/Checkbox";
  */
 const AnimatedTreemap = inject("dataStore", "visStore")(observer((props) => {
     const [index, setIndex] = useState(0);
-    const [showGenes, setShowGenes] = useState(props.dataStore.rootStore.hasGeneInfo)
-    const [showNumbers, setShowNumbers] = useState(false);
-    const margins = {
-        top: 0,
-        right: 0,
-        bottom: 0,
-        left: 0,
-    };
-    const width = props.width - margins.left - margins.right;
-
     const leafRef = React.createRef();
     const stripedRef = React.createRef();
     const propRef = React.createRef();
-    const stepperRef = React.createRef();
 
     const fontSize = 10;
-
-    useEffect(() => {
-        if (stepperRef.current != null) {
-            props.visStore.setTreemapHeight(props.height - stepperRef.current.getBoundingClientRect().height)
-        }
-    }, [stepperRef, props.height, props.visStore]);
     const layout = props.visStore.treemapLayout;
 
     const startAnimation = useCallback((index) => {
@@ -141,20 +119,20 @@ const AnimatedTreemap = inject("dataStore", "visStore")(observer((props) => {
                         rotate = "rotate(270, " + (0.5 * propWidth) + ", " + (-0.5 * propHeight) + ")"
                     }
                     let transformNumbers, transformGlyph;
-                    if (showGenes) {
+                    if (props.showGenes) {
                         transformGlyph = 'translate(' + (rectWidth - propWidth) + ',' + (rectHeight - propHeight) + ')' + rotate
                         transformNumbers = 'translate(' + (rectWidth - 2) + ',' + (rectHeight - 1.75 * propHeight) + ')' + rotate;
                     } else {
-                        if (showNumbers) {
+                        if (props.showNumbers) {
                             transformNumbers = 'translate(' + (rectWidth - 2) + ',' + (rectHeight-2) + ')' + rotate
                         }
                     }
                     proportions.push(<g key={child.data.id} transform={'translate(' + child.x0 + ',' + child.y0 + ')'}>
-                        {showNumbers ?
+                        {props.showNumbers ?
                             <g transform={transformNumbers}>
                                 <text textAnchor={"end"} fontSize={fontSize}>{visText}</text>
                             </g> : null}
-                        {showGenes ?
+                        {props.showGenes ?
                             <g transform={transformGlyph}>
                                 <rect width={propWidth} height={propHeight}
                                       fill={setSizeScale(size)}/>
@@ -222,59 +200,18 @@ const AnimatedTreemap = inject("dataStore", "visStore")(observer((props) => {
     );
     return (
         <div>
-            {/* eslint-disable-next-line react/jsx-no-undef */}
-            <MobileStepper
-                ref={stepperRef}
-                steps={props.dataStore.conditions.length}
-                position="static"
-                variant="text"
-                activeStep={props.visStore.conditionIndex}
-                nextButton={
-                    <Button size="small"
-                            onClick={() => props.visStore.setConditionIndex(props.visStore.conditionIndex + 1)}
-                            disabled={props.visStore.conditionIndex === props.dataStore.conditions.length - 1}>
-                        Next
-                        <KeyboardArrowRight/>
-                    </Button>
-                }
-                backButton={
-                    <Button size="small"
-                            onClick={() => props.visStore.setConditionIndex(props.visStore.conditionIndex - 1)}
-                            disabled={props.visStore.conditionIndex === 0}>
-                        <KeyboardArrowLeft/>
-                        Back
-                    </Button>
-                }
-            />
-            {props.dataStore.rootStore.hasGeneInfo ? <FormGroup row>
-                <FormControlLabel
-                    control={<Checkbox checked={showGenes} onChange={() => setShowGenes(!showGenes)} name="checkedA"/>}
-                    label="Show gene visualization"
-                />
-                <FormControlLabel
-                    control={<Checkbox checked={showNumbers} onChange={() => setShowNumbers(!showNumbers)}
-                                       name="checkedA"/>}
-                    label="Show gene set numbers"
-                />
-            </FormGroup> : null}
-            <svg width={props.width} height={props.visStore.treemapHeight}>
-                <g transform={"translate(" + margins.left + "," + margins.top + ")scale(" + width / props.width + ")"}>
+            <svg width={props.visStore.treemapWidth} height={props.visStore.treemapHeight}>
+                <rect width={props.visStore.treemapWidth} height={props.visStore.treemapHeight} fill={"none"} stroke={"lightgray"} strokeWidth={"1px"}/>
                     <g ref={stripedRef}>{stripedRects}</g>
                     <g ref={leafRef}>{rects}</g>
                     <g ref={propRef}>{proportions}</g>
-                </g>
             </svg>
         </div>
     );
 }));
 
 AnimatedTreemap.propTypes = {
-    width: PropTypes.number,
-    height: PropTypes.number,
     logSigThreshold: PropTypes.number.isRequired,
 };
-AnimatedTreemap.defaultProps = {
-    width: 900,
-    height: 600,
-};
+
 export default AnimatedTreemap;

@@ -10,16 +10,9 @@ import {v4 as uuidv4} from 'uuid';
  */
 const SmallTreemap = inject("dataStore", "visStore")(observer((props) => {
     const [highlighted, setIsHighlighted] = useState(false);
-    const margins = {
-        top: 20,
-        right: 20,
-        bottom: 20,
-        left: 20,
-    };
-    const width = props.width - margins.left - margins.right;
     const highlightRect = createRef();
-    const scale = width / props.parentWidth;
-
+    const width=props.visStore.treemapWidth*props.scalingFactor;
+    const height=props.visStore.treemapHeight*props.scalingFactor;
     const currentLayout = props.visStore.treemapLayout(props.index);
     const children = [];
     const mapId = uuidv4();
@@ -56,30 +49,25 @@ const SmallTreemap = inject("dataStore", "visStore")(observer((props) => {
         const willBeHighlighted = props.visStore.conditionIndex === props.index;
         d3.select(highlightRect.current).transition()
             .duration(props.visStore.animationDuration)
-            .attr('opacity', willBeHighlighted ? 1 : 0)
+            .attr('opacity', willBeHighlighted ? 1 : 0.2)
             .on('end', () => setIsHighlighted(willBeHighlighted))
     }, [highlightRect, props.visStore.animationDuration, props.index, props.visStore.conditionIndex]);
     React.useEffect(() => {
         startAnimation(props.index);
     }, [props.index, startAnimation]);
     return (
-        <g transform={"translate(" + margins.left + "," + margins.top + ")"}>
-            <text>{props.dataStore.conditions[props.index]}</text>
+        <svg width={width} height={height}>
+                <g transform={"scale(" + props.scalingFactor + ")"}>
+                    {children}
+                </g>
+                            <rect ref={highlightRect} width={width} height={height} fill={"none"} strokeWidth={2} stroke={"black"} opacity={highlighted ? 1 : 0.2}/>
 
-            <g transform={"scale(" + scale + ")"}>
-                {children}
-                <rect ref={highlightRect} x={currentLayout.x0} y={currentLayout.y0}
-                      width={currentLayout.x1 - currentLayout.x0}
-                      height={currentLayout.y1 - currentLayout.y0} stroke="black" strokeWidth={2 / scale} fill="none"
-                      opacity={highlighted ? 1 : 0}/>
-            </g>
-        </g>
+        </svg>
     );
 }));
 
 SmallTreemap.propTypes = {
-    width: PropTypes.number.isRequired,
-    parentWidth: PropTypes.number.isRequired,
+    scalingFactor: PropTypes.number.isRequired,
     index: PropTypes.number.isRequired,
     logSigThreshold: PropTypes.number.isRequired,
 };

@@ -13,6 +13,7 @@ export class VisStore {
             screenWidth: 1000,
             plotHeight: 900,
             treemapHeight: 100,
+            treemapWidth: 100,
             tsPlotType: "lineChart",
             showOverview: false,
             childHighlight: null,
@@ -36,7 +37,7 @@ export class VisStore {
              * @returns {function(*): *}
              */
             get treemapLayout() {
-                const width = this.screenWidth / 3;
+                const width = this.treemapWidth;
                 const height = this.treemapHeight;
                 const treemap = d3.treemap()
                     .tile(d3.treemapResquarify)
@@ -66,13 +67,16 @@ export class VisStore {
                 return (layout)
             },
             setScreenWidth: action((width) => {
-                this.screenWidth = width-36;
+                this.screenWidth = width - 36;
             }),
             setPlotHeight: action((height) => {
-                this.plotHeight = height - 100;
+                this.plotHeight = height - 80;
             }),
             setTreemapHeight: action((height) => {
                 this.treemapHeight = height
+            }),
+            setTreemapWidth: action((width) => {
+                this.treemapWidth = width
             }),
             setTsPlotType: action((type) => {
                 this.tsPlotType = type;
