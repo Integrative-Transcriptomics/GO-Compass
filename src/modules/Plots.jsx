@@ -1,8 +1,8 @@
-import React, {useCallback, useEffect} from "react";
+import React, {createRef, useCallback, useEffect, useState} from "react";
 import Grid from "@material-ui/core/Grid";
 import SimpleChart from "./SimpleCharts/SimpleChart";
 import {makeStyles} from "@material-ui/core/styles";
-import {createStyles} from "@material-ui/core";
+import {createStyles, Tab, Tabs} from "@material-ui/core";
 import Paper from "@material-ui/core/Paper";
 import DataTable from "./DetailedTable/DataTable";
 import CorrelationHeatmap from "./CorrelationHeatmap";
@@ -11,6 +11,7 @@ import ClusteredHeatmap from "./ClusteredHeatmap/ClusteredHeatmap";
 import Typography from "@material-ui/core/Typography";
 import UpSet from "./UpSet";
 import Treemap from "./AnimatedTreemap/Treemap";
+import TabPanel from "./TabPanel";
 
 /**
  * @return {null}
@@ -44,11 +45,19 @@ const Plots = inject("dataStore", "visStore")(observer((props) => {
     } else {
         detailedHeader = "Subset Overview"
     }
+    const tabRef = createRef();
+    const classes = useStyles();
+    const [selectedTab, setSelectedTab] = useState(0);
+    const [tabHeight, setTabHeight] = useState(10)
     useEffect(() => {
         changeWidth();
         window.addEventListener("resize", changeWidth);
     }, [changeWidth]);
-    const classes = useStyles();
+    useEffect(() => {
+        if (tabRef.current !== null) {
+            setTabHeight(tabRef.current.getBoundingClientRect().height)
+        }
+    }, [tabRef])
     return (
         <Grid className={classes.root} container spacing={1}>
             <Grid item xs={6}>
@@ -71,38 +80,40 @@ const Plots = inject("dataStore", "visStore")(observer((props) => {
                     </Typography>
                 </Paper>
             </Grid>
-            <Grid item xs={4}>
+            <Grid item xs={6}>
                 <Paper className={classes.paper}>
                     <Typography>
-                        Significant enrichment Upset plot
+                        List Comparison
                     </Typography>
-                    <Provider upSetStore={props.dataStore.upSetStore}>
-                        <UpSet width={props.visStore.screenWidth / 3}
-                               height={props.visStore.plotHeight / 2}
-                               logSigThreshold={props.logSigThreshold}/>
-                    </Provider>
+                    <Tabs ref={tabRef} value={selectedTab} onChange={(e, v) => setSelectedTab(v)}>
+                        <Tab label="All GO-Terms"/>
+                        <Tab label="Significant GO-Terms"/>
+                    </Tabs>
+                    <TabPanel value={selectedTab} index={0}>
+                        {props.dataStore.correlationLoaded ?
+                            <CorrelationHeatmap width={props.visStore.screenWidth / 2}
+                                                height={props.visStore.plotHeight / 2 - tabHeight}
+                            /> : null
+                        }
+                    </TabPanel>
+                    <TabPanel value={selectedTab} index={1}>
+                        <Provider upSetStore={props.dataStore.upSetStore}>
+                            <UpSet width={props.visStore.screenWidth / 2}
+                                   height={props.visStore.plotHeight / 2 - tabHeight}
+                                   logSigThreshold={props.logSigThreshold}/>
+                        </Provider>
+                    </TabPanel>
+
                 </Paper>
             </Grid>
-            <Grid item xs={4}>
-                <Paper className={classes.paper}>
-                    <Typography>
-                        Correlation of GO Lists
-                    </Typography>
-                    {props.dataStore.correlationLoaded ?
-                        <CorrelationHeatmap width={props.visStore.screenWidth / 3}
-                                            height={props.visStore.plotHeight / 2}
-                        /> : null
-                    }
-                </Paper>
-            </Grid>
-            <Grid item xs={4}>
+            <Grid item xs={6}>
                 <Paper className={classes.paper}>
                     <Typography>
                         {detailedHeader}
                     </Typography>
                     <SimpleChart sigThreshold={props.sigThreshold} logSigThreshold={props.logSigThreshold}
                                  isTimeSeries={props.isTimeSeries}
-                                 width={props.visStore.screenWidth / 3} height={props.visStore.plotHeight / 2}/>
+                                 width={props.visStore.screenWidth / 2} height={props.visStore.plotHeight / 2}/>
                 </Paper>
             </Grid>
             <Grid item xs={12}>
