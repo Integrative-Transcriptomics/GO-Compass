@@ -199,14 +199,12 @@ const AnimatedTreemap = inject("dataStore", "visStore")(observer((props) => {
         })
     );
     return (
-        <div>
             <svg width={props.visStore.treemapWidth} height={props.visStore.treemapHeight}>
                 <rect width={props.visStore.treemapWidth} height={props.visStore.treemapHeight} fill={"none"} stroke={"lightgray"} strokeWidth={"1px"}/>
                     <g ref={stripedRef}>{stripedRects}</g>
                     <g ref={leafRef}>{rects}</g>
                     <g ref={propRef}>{proportions}</g>
             </svg>
-        </div>
     );
 }));
 

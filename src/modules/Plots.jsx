@@ -74,10 +74,9 @@ const Plots = inject("dataStore", "visStore")(observer((props) => {
             </Grid>
             <Grid item xs={6}>
                 <Paper className={classes.paper}>
-                    <Treemap logSigThreshold={props.logSigThreshold} height={props.visStore.plotHeight / 2}/>
-                    <Typography align={"center"}>
-                        {props.dataStore.conditions[props.visStore.conditionIndex]}
-                    </Typography>
+                    <Treemap logSigThreshold={props.logSigThreshold}
+                             height={props.visStore.plotHeight / 2}
+                            width={props.visStore.screenWidth/2}/>
                 </Paper>
             </Grid>
             <Grid item xs={6}>
