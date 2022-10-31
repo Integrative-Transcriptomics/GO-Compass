@@ -4,7 +4,7 @@ import * as d3 from "d3";
 import {inject, observer} from "mobx-react";
 
 
-const LineHighlighter = inject("visStore")(observer((props) => {
+const LineHighlighter = inject("visStore","dataStore")(observer((props) => {
     const [dragging, setDragging] = useState(false);
     const [x, setX] = useState(0);
     const [x0, setX0] = useState(0);
@@ -28,12 +28,12 @@ const LineHighlighter = inject("visStore")(observer((props) => {
     </g>;
     const highlighters = xScale.domain().map((d, i) => {
         return <g key={d}>
-            <line x1={xScale(i)} x2={xScale(i)} y1={0}
+            <line x1={xScale(d)} x2={xScale(d)} y1={0}
                   y2={props.height}
                   fill='none'
                   stroke='black' opacity={hoverIndex === i ? 0.5 : 0} strokeWidth={1}/>
             <line onClick={() => props.visStore.setConditionIndex(i)} onMouseEnter={() => setHoverIndex(i)}
-                  onMouseLeave={() => setHoverIndex(-1)} x1={xScale(i)} x2={xScale(i)} y1={0}
+                  onMouseLeave={() => setHoverIndex(-1)} x1={xScale(d)} x2={xScale(d)} y1={0}
                   y2={props.height}
                   fill='none'
                   stroke="black"
@@ -47,13 +47,13 @@ const LineHighlighter = inject("visStore")(observer((props) => {
             els.transition()
                 .duration(props.visStore.animationDuration)
                 .ease(d3.easeLinear)
-                .attr("x1", xScale(props.visStore.conditionIndex))
-                .attr("x2", xScale(props.visStore.conditionIndex))
+                .attr("x1", xScale(props.dataStore.conditions[props.visStore.conditionIndex]))
+                .attr("x2", xScale(props.dataStore.conditions[props.visStore.conditionIndex]))
                 .on('end', () => {
-                    setX(xScale(props.visStore.conditionIndex))
+                    setX(xScale(props.dataStore.conditions[props.visStore.conditionIndex]))
                 });
         }
-    }, [highlightRef, props.visStore.conditionIndex, props.visStore.animationDuration, dragging, xScale]);
+    }, [highlightRef, props.visStore.conditionIndex, props.visStore.animationDuration, dragging, xScale, props.dataStore.conditions]);
     useEffect(() => {
         if (dragging) {
             const xDiff = x0 - props.xPos;
@@ -63,8 +63,8 @@ const LineHighlighter = inject("visStore")(observer((props) => {
     }, [x0, x, dragging, props.xPos]);
     const mouseUp = useCallback(() => {
         setDragging(false);
-        props.visStore.setConditionIndex(inverseX(x))
-    }, [x, inverseX, props.visStore]);
+        props.visStore.setConditionIndex(props.dataStore.conditions.indexOf(inverseX(x)))
+    }, [inverseX, x, props.visStore, props.dataStore.conditions]);
     return (
         <g onMouseUp={() => mouseUp()}>
             {highlighters}

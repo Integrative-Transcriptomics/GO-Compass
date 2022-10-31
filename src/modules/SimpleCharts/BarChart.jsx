@@ -53,7 +53,8 @@ const BarChart = inject("dataStore", "visStore")(observer((props) => {
     }, [highlightRef, props.visStore.animationDuration]);
     React.useEffect(() => {
         startAnimation(props.visStore.conditionIndex);
-    }, [props.visStore.conditionIndex, startAnimation]);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [props.visStore.conditionIndex]);
     const xAxis = d3.axisBottom()
         .scale(props.xScale)
         .tickFormat(props.fullAxis ? (d) => d : "");
