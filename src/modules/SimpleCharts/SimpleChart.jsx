@@ -6,7 +6,7 @@ import Box from "@material-ui/core/Box";
 import {inject, observer, useLocalStore} from "mobx-react";
 import PlayButton from "../PlayButton";
 import {action} from "mobx";
-import MultiBarChart from "./MultiBarChart";
+import MultiBarChart from "./ComparisonMultiBarChart";
 import {Lock, LockOpen} from "@material-ui/icons";
 import Button from "@material-ui/core/Button";
 
@@ -14,7 +14,7 @@ import Button from "@material-ui/core/Button";
 const SimpleChart = inject("dataStore", "visStore")(observer((props) => {
     const store = useLocalStore(() => ({
         anchorEl: null,
-        chartHeight: 100,
+        chartHeight: 150,
         scaleLocked: true,
         setAnchorEl: action((el) => {
             store.anchorEl = el;

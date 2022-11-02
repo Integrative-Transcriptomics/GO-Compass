@@ -1,6 +1,7 @@
 import {action, extendObservable} from "mobx";
 import * as d3 from "d3";
 import {getTextWidth} from "../../UtilityFunctions";
+import traverseTree from "../ClusteredHeatmap/RFLayout";
 
 /**
  * store for visualization operations
@@ -18,7 +19,9 @@ export class VisStore {
             showOverview: false,
             childHighlight: null,
             childHighlights: [],
+            selectedConditions: [],
             conditionIndex: 0,
+            stepsize:10,
 
             /**
              * color Scale for terms
@@ -66,6 +69,15 @@ export class VisStore {
                 });
                 return (layout)
             },
+            get treeLayout() {
+                return (traverseTree(dataStore.filteredTree, null, this.stepsize, 0));
+            },
+            get treeOrder(){
+                return this.treeLayout.map(d=>d.data.name);
+            },
+            setTreeStepSize: action((stepsize)=>{
+                this.stepsize=stepsize
+            }),
             setScreenWidth: action((width) => {
                 this.screenWidth = width - 36;
             }),
@@ -109,6 +121,9 @@ export class VisStore {
             }),
             setSigThreshold: action((threshold) => {
                 this.sigThreshold = threshold;
+            }),
+            selectConditions: action((indices) => {
+                this.selectedConditions = [...new Set(indices)];
             }),
 
         })

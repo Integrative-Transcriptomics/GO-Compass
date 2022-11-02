@@ -29,4 +29,4 @@ function getDescendants(node) {
 }
 
 
-export default calculateTreeLayout;
+export default traverseTree;
