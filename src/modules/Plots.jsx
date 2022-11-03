@@ -37,14 +37,6 @@ const Plots = inject("dataStore", "visStore")(observer((props) => {
     const changeWidth = useCallback(() => {
         props.visStore.setScreenWidth(window.innerWidth)
     }, [props.visStore]);
-    let detailedHeader;
-    if (props.visStore.childHighlights.length === 0) {
-        detailedHeader = "Category Overview"
-    } else if (props.visStore.childHighlights.length === 1) {
-        detailedHeader = "Highlighted Term: " + props.dataStore.dataTable[props.visStore.childHighlights[0]].description;
-    } else {
-        detailedHeader = "Subset Overview"
-    }
     const tabRef = createRef();
     const classes = useStyles();
     const [selectedTab, setSelectedTab] = useState(0);
@@ -107,9 +99,7 @@ const Plots = inject("dataStore", "visStore")(observer((props) => {
             </Grid>
             <Grid item xs={6}>
                 <Paper className={classes.paper}>
-                    <Typography>
-                        {detailedHeader}
-                    </Typography>
+                    <Typography>Detailed Comparison</Typography>
                     <SimpleChart sigThreshold={props.sigThreshold} logSigThreshold={props.logSigThreshold}
                                  isTimeSeries={props.isTimeSeries}
                                  width={props.visStore.screenWidth / 2} height={props.visStore.plotHeight / 2}/>

@@ -13,6 +13,7 @@ const MultiBarChart = inject("dataStore", "visStore")(observer((props) => {
         left: 60,
     };
     let max = 0;
+    console.log(props.dataStore.nestedData);
     const filteredData = props.dataStore.nestedData.map(parent => {
         const containedChildren = parent.children.filter(child => {
             const maxChild = Math.max(...child.values)

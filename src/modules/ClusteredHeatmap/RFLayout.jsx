@@ -1,7 +1,3 @@
-function calculateTreeLayout(tree, stepsize) {
-    return (traverseTree(tree, null, stepsize, 0));
-}
-
 function traverseTree(node, parent, stepSize, currY) {
     const nodes = [];
     const parentNode = ({x: node.value, y: currY, data: node, parent: parent});
@@ -29,4 +25,4 @@ function getDescendants(node) {
 }
 
 
-export default calculateTreeLayout;
+export default traverseTree;

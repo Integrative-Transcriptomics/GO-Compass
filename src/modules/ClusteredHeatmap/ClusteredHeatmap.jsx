@@ -1,9 +1,8 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {inject, observer} from "mobx-react";
 import PropTypes from "prop-types";
 import Tree from "./Tree";
 import Heatmap from "./Heatmap";
-import calculateTreeLayout from "./RFLayout";
 
 
 const ClusteredHeatmap = inject("dataStore", "visStore")(observer((props) => {
@@ -23,8 +22,11 @@ const ClusteredHeatmap = inject("dataStore", "visStore")(observer((props) => {
     const rectWidth = 10;
     const heatmapWidth = (props.dataStore.conditions.length + 1) * rectWidth + 1.5 * rectWidth;
     const treeWidth = width - heatmapWidth;
-    const stepsize = height / props.dataStore.currentGOterms.length;
-    const descendants=calculateTreeLayout(props.dataStore.filteredTree, stepsize)
+    //const stepsize = height / props.dataStore.currentGOterms.length;
+    useEffect(()=>{
+        props.visStore.setTreeStepSize(height / props.dataStore.currentGOterms.length);
+    },[height, props.dataStore.currentGOterms.length, props.visStore])
+    const descendants=props.visStore.treeLayout;
     if (descendants.length > 0) {
         return (
             <svg width={props.width} height={props.height} onMouseMove={(e) => setXPos(e.pageX)}
@@ -36,7 +38,7 @@ const ClusteredHeatmap = inject("dataStore", "visStore")(observer((props) => {
                                  rectWidth={rectWidth} height={height}
                                  descendants={descendants}/>
                     </g>
-                    <Tree width={treeWidth} treeWidth={treeWidth - gapWidth} stepsize={stepsize}
+                    <Tree width={treeWidth} treeWidth={treeWidth - gapWidth} stepsize={props.visStore.stepsize}
                           heatmapWidth={heatmapWidth} height={height}
                           descendants={descendants} xPos={xPos}
                           mouseDown={mouseDown}/>
