@@ -4,13 +4,14 @@ import * as d3 from "d3";
 import Axis from "./Axis";
 import {inject, observer} from "mobx-react";
 import SignificanceLine from "./SignificanceLine";
+import {getTextWidth} from "../../UtilityFunctions";
 
 
 const BarChart = inject("dataStore", "visStore")(observer((props) => {
     const margins = {
         top: 0,
         right: 0,
-        bottom: 5,
+        bottom: 0,
         left: 60,
     };
 
@@ -38,7 +39,7 @@ const BarChart = inject("dataStore", "visStore")(observer((props) => {
             <rect onClick={() => props.visStore.setConditionIndex(i)} x={props.xScale(elem.id)}
                   y={yScale(elem.value)} width={props.xScale.bandwidth()}
                   height={height - yScale(elem.value)}
-                  opacity={isHighlighted?1:0.4}
+                  opacity={isHighlighted ? 1 : 0.4}
                   fill={props.visStore.termColorScale(elem.parent)}/>
         </g>)
     })
@@ -57,7 +58,8 @@ const BarChart = inject("dataStore", "visStore")(observer((props) => {
     }, [props.visStore.conditionIndex]);*/
     const xAxis = d3.axisBottom()
         .scale(props.xScale)
-        .tickFormat(props.fullAxis ? (d) => props.dataStore.dataTable[d].description : "");
+        .tickFormat(props.fullAxis ? (d) => props.dataStore.dataTable[d].description : "")
+        .tickSize(props.fullAxis ? 4 : 0);
     const yAxis = d3.axisLeft()
         .scale(yScale);
     return (
@@ -67,6 +69,11 @@ const BarChart = inject("dataStore", "visStore")(observer((props) => {
             {rects}
             {/*<g ref={highlightRef}>{highlighters}</g>*/}
             {sigLine}
+            <g transform={'translate(' + (width
+                - getTextWidth(props.dataStore.conditions[props.id], 17, "normal"))
+                + ",15)"}>
+                <text>{props.dataStore.conditions[props.id]}</text>
+            </g>
         </g>
     );
 }));

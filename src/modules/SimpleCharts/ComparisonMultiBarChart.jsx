@@ -30,10 +30,12 @@ const MultiBarChart = inject("dataStore", "visStore")(observer((props) => {
         ).flat()
     })
     const width = props.width - margins.left - margins.right;
-    const height = (props.height - margins.top - margins.bottom) / filteredData.length;
+    const gap=10;
+    const height = ((props.height - margins.top - margins.bottom)-(filteredData.length-1)*gap) / filteredData.length;
     const xScale = d3.scaleBand().domain(props.visStore.treeOrder).range([0, width]).padding(0.25);
     const barCharts = conditions.map((condIndex,i)=>{
-        return(<g key={props.dataStore.conditions[condIndex]} transform={'translate(0,' + i * height + ')'}>
+        const translateY=i===0? 0:i*(height+gap)
+        return(<g key={props.dataStore.conditions[condIndex]} transform={'translate(0,' + translateY + ')'}>
             <BarChart width={props.width} height={height}
                       sigThreshold={props.sigThreshold}
                       logSigThreshold={props.logSigThreshold}

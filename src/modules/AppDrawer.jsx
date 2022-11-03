@@ -1,8 +1,6 @@
 import List from "@material-ui/core/List";
 import ListItem from "@material-ui/core/ListItem";
 import TextField from "@material-ui/core/TextField";
-import FormControlLabel from "@material-ui/core/FormControlLabel";
-import Switch from "@material-ui/core/Switch";
 import Drawer from "@material-ui/core/Drawer";
 import React from "react";
 import {inject, observer} from "mobx-react";
@@ -41,15 +39,14 @@ const AppDrawer = inject("rootStore")(observer((props) => {
                     </Select>
                 </FormControl>
             </ListItem>
-            <ListItem>
+            {/*<ListItem>
                 <FormControlLabel
                     control={<Switch checked={props.rootStore.isTimeSeries}
                                      onChange={() => props.rootStore.toggleIsTimeSeries()}
                                      name="checkedA"/>}
                     label="Time Series Data"
                 />
-            </ListItem>
-
+            </ListItem>*/}
         </List>
     </Drawer>)
 }));

@@ -3,7 +3,6 @@ import {inject, observer} from "mobx-react";
 import PropTypes from "prop-types";
 import Tree from "./Tree";
 import Heatmap from "./Heatmap";
-import calculateTreeLayout from "./RFLayout";
 
 
 const ClusteredHeatmap = inject("dataStore", "visStore")(observer((props) => {
