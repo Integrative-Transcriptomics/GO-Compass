@@ -35,6 +35,6 @@ GO-Compass supports the following file formats:
 
 * Go term input: Tab seperated value (.tsv) file. First column needs to contain GO Terms (name of column "GoTerm") other columns contain p-values at conditions
 * Gene list input: Simple line-break separated gene lists
-* Backgound file: Two column tsv. First column contains gene ids, second column contains comma separated GO Terms
+* Backgound file: Two column tsv. First column contains gene ids, second column contains semicolon separated GO Terms
 
 Background lists can be downloaded (for example) at [http://genome2d.molgenrug.nl/](http://genome2d.molgenrug.nl/) 
