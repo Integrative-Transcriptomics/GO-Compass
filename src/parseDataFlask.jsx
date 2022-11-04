@@ -68,7 +68,9 @@ function multiRevigoGoLists(dataFile, backgroundFile, method, pvalueFilter, call
         formData.append("pvalueFilter", pvalueFilter);
         formData.append("method", method);
         axios.post("/GoListsMultiREVIGO", formData)
-            .then(response => callback(response.data))
+            .then(response => {
+                callback(response.data)
+            })
             .catch(function (error) {
                 console.log(error);
             });
@@ -83,7 +85,7 @@ function multiSpeciesRevigo(dataFiles, backgroundFiles, conditions, backgroundMa
     conditions.forEach(condition => formData.append("conditions[]", condition));
     backgroundMap.forEach(condition => formData.append("backgroundMap[]", condition));
     formData.append("method", method);
-    formData.append("direction",direction);
+    formData.append("direction", direction);
     if (dataFiles.length > 0 && backgroundFiles.length > 0) {
         axios.post("/MultiSpeciesREVIGO", formData)
             .then(response => {
@@ -119,6 +121,7 @@ function exampleData(callback) {
         ))
 
 }
+
 function exampleDataWithFC(callback) {
     const requestBackground = axios.get("/exampleBackground")
     const requestTP1 = axios.get("/exampleCondition?name=timepoint_with_fc_1.txt")

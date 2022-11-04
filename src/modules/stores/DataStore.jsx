@@ -102,26 +102,31 @@ export class DataStore {
             },
             get geneInformation() {
                 const upDown = {}
-                Object.keys(this.rootStore.go2genes)
-                    .forEach(go => {
-                        if (rootStore.hasFCs) {
-                            upDown[go] = Array.from({length: conditions.length},
-                                () => ({
-                                    up: 0,
-                                    total: 0,
-                                    setSize: this.rootStore.goSetSize[go]
-                                }))
-                        } else {
-                            upDown[go] = Array.from({length: conditions.length},
-                                () => ({
-                                    total: 0,
-                                    setSize: this.rootStore.goSetSize[go]
-                                }))
-                        }
+                this.visStore.treeOrder.forEach(go => {
+                    if (rootStore.hasFCs) {
+                        upDown[go] = Array.from({length: conditions.length},
+                            () => ({
+                                up: 0,
+                                total: 0,
+                                setSize: this.rootStore.goSetSize[go]
+                            }))
+                    } else if (rootStore.hasGeneInfo) {
+                        upDown[go] = Array.from({length: conditions.length},
+                            () => ({
+                                total: 0,
+                                setSize: this.rootStore.goSetSize[go]
+                            }))
+                    } else {
+                        upDown[go] = Array.from({length: conditions.length},
+                            () => ({
+                                setSize: this.rootStore.goSetSize[go]
+                            }))
+                    }
+                    if (this.rootStore.hasGeneInfo) {
                         this.rootStore.go2genes[go]
                             .forEach(gene => {
                                 this.rootStore.geneValues[gene].forEach((fc, i) => {
-                                    if (this.rootStore.hasFCs) {
+                                    if(this.rootStore.hasFCs) {
                                         if (fc > 0) {
                                             upDown[go][i].up += 1
                                         }
@@ -129,7 +134,8 @@ export class DataStore {
                                     upDown[go][i].total += 1;
                                 })
                             })
-                    })
+                    }
+                })
                 return upDown;
             },
             /**

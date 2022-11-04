@@ -10,7 +10,7 @@ import FormControlLabel from "@material-ui/core/FormControlLabel";
 import Checkbox from "@material-ui/core/Checkbox";
 
 const Treemap = inject("dataStore", "visStore")(observer((props) => {
-    const [showGenes, setShowGenes] = useState(props.dataStore.rootStore.hasGeneInfo)
+    const [showGenes, setShowGenes] = useState(true)
     const [showNumbers, setShowNumbers] = useState(false);
     const [adaptedScalingFactor, setAdaptedScalingFactor] = useState(0.25)
     const scalingFactor = 0.25;
@@ -54,7 +54,7 @@ const Treemap = inject("dataStore", "visStore")(observer((props) => {
                         </Button>
                     }
                 />
-                {props.dataStore.rootStore.hasGeneInfo ? <FormGroup row>
+                <FormGroup row>
                     <FormControlLabel
                         control={<Checkbox checked={showGenes} onChange={() => setShowGenes(!showGenes)}
                                            name="checkedA"/>}
@@ -65,7 +65,7 @@ const Treemap = inject("dataStore", "visStore")(observer((props) => {
                                            name="checkedA"/>}
                         label="Show gene set numbers"
                     />
-                </FormGroup> : null}
+                </FormGroup>
             </div>
             <AnimatedTreemap logSigThreshold={props.logSigThreshold}
                              showGenes={showGenes}

@@ -81,7 +81,8 @@ const App = () => {
                 {rootStore !== null ? <Provider rootStore={rootStore}>
                     <AppDrawer open={open} toggleDrawer={toggleDrawer}/>
                 </Provider> : null}
-                {rootStore !== null ? views : <SelectData setRootStore={setRootStore}/>}
+                {rootStore !== null && views.length>0 ? views : <SelectData setRootStore={setRootStore}/>}
+                {rootStore !== null && views.length === 0?<Typography>No significant results</Typography>:null}
             </React.Fragment>
         </div>
     );

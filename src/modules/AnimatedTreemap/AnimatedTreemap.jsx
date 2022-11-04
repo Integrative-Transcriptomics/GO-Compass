@@ -60,15 +60,10 @@ const AnimatedTreemap = inject("dataStore", "visStore")(observer((props) => {
     const rects = [];
     const proportions = []
     const stripedRects = [];
-    const currentGOterms = useMemo(() => {
-        return (layout(index).children
-            .map(parent => parent.children
-                .map(child => child.data.id)).flat())
-    }, [index, layout])
     const setSizeScale = useMemo(() => {
-        const setSizes = currentGOterms.map(d => props.dataStore.geneInformation[d][index].setSize);
+        const setSizes = props.visStore.treeOrder.map(d => props.dataStore.geneInformation[d][index].setSize);
         return (d3.scaleLinear().domain([d3.min(setSizes), d3.max(setSizes)]).range(["grey", "white"]))
-    }, [currentGOterms, index, props.dataStore.geneInformation])
+    }, [index, props.dataStore.geneInformation, props.visStore.treeOrder])
     const upDownScale = d3.scaleLinear().domain([0, 0.5, 1]).range(["blue", "white", "red"])
     layout(index).children.forEach((parent) =>
         parent.children.forEach((child) => {
@@ -94,21 +89,26 @@ const AnimatedTreemap = inject("dataStore", "visStore")(observer((props) => {
                 }
             }
             const fill = props.visStore.termColorScale(parent.data.id);
-            if (rectWidth > 0 && rectHeight > 0 && props.dataStore.rootStore.hasGeneInfo) {
-                let proportionFill = "black"
+            if (rectWidth > 0 && rectHeight > 0) {
                 const size = props.dataStore.geneInformation[child.data.id][index].setSize;
-                const total = props.dataStore.geneInformation[child.data.id][index].total;
-                let tooltipText = "Size: " + size + ", Expressed: " + total;
-                let visText = size + "/" + total;
-                if (props.dataStore.rootStore.hasFCs) {
-                    const up = props.dataStore.geneInformation[child.data.id][index].up;
-                    let proportion = up / total;
-                    if (total === 0) {
-                        proportion = 0.5
+                let proportionFill = "black"
+                let visText = size;
+                let tooltipText = "Size: " + size
+                let total=0;
+                if(props.dataStore.rootStore.hasGeneInfo) {
+                    total = props.dataStore.geneInformation[child.data.id][index].total;
+                    tooltipText = tooltipText + ", Expressed: " + total;
+                    visText = visText + "/" + total;
+                    if (props.dataStore.rootStore.hasFCs) {
+                        const up = props.dataStore.geneInformation[child.data.id][index].up;
+                        let proportion = up / total;
+                        if (total === 0) {
+                            proportion = 0.5
+                        }
+                        proportionFill = upDownScale(proportion)
+                        tooltipText = "Set: " + size + ", up: " + up + ", down: " + (total - up);
+                        visText = size + ", " + up + ":" + (total - up);
                     }
-                    proportionFill = upDownScale(proportion)
-                    tooltipText = "Set: " + size + ", up: " + up + ", down: " + (total - up);
-                    visText = size + ", " + up + ":" + (total - up);
                 }
                 const propHeight = 10;
                 const propWidth = 30;
@@ -136,8 +136,8 @@ const AnimatedTreemap = inject("dataStore", "visStore")(observer((props) => {
                             <g transform={transformGlyph}>
                                 <rect width={propWidth} height={propHeight}
                                       fill={setSizeScale(size)}/>
-                                <rect y={propHeight / 4} width={sigWidth} height={propHeight * 0.5}
-                                      fill={proportionFill}/>
+                                {props.dataStore.rootStore.hasGeneInfo?<rect y={propHeight / 4} width={sigWidth} height={propHeight * 0.5}
+                                      fill={proportionFill}/>:null}
                                 <line x2={propWidth} stroke={"white"}/>
                                 {props.dataStore.rootStore.hasFCs ? <polygon
                                     points={sigWidth + ",0 " + sigWidth + "," + (-propHeight / 2) + " " + (sigWidth - propHeight) + "," + (-propHeight / 4)}

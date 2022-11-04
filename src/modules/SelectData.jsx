@@ -61,7 +61,7 @@ const SelectData = (props) => {
         setIsLoading(true);
         if (selectedTab === 1) {
             multiRevigoGoLists(goFile, backgroundFile, selectedMeasure, pvalueFilter, response => {
-                props.setRootStore(new RootStore(response.results, response.conditions, response.tableColumns, false, {},{},{},selectedMeasure, pvalueFilter));
+                props.setRootStore(new RootStore(response.results, response.conditions, response.tableColumns, false, {},{},response.goSetSize,selectedMeasure, pvalueFilter));
             });
         } else {
             if (selectedTab === 0) {

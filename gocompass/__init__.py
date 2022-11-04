@@ -4,6 +4,7 @@ import tempfile
 from collections import Counter
 from io import StringIO
 
+import simplejson
 import numpy as np
 import pandas as pd
 from flask import Flask, send_file
@@ -354,8 +355,8 @@ def GOEA(genes, objanno):
         direction = "+"
         if r.enrichment == "p":
             direction = "-"
-        goea_results[r.NS].append([r.GO, r.p_fdr_bh, direction,r.pop_count,r.study_items])
-        if r.p_fdr_bh<0.05:
+        goea_results[r.NS].append([r.GO, r.p_fdr_bh, direction, r.pop_count, r.study_items])
+        if r.p_fdr_bh < 0.05:
             print(r)
     for ont in goea_results:
         goea_results[ont] = np.array(goea_results[ont])
@@ -410,23 +411,23 @@ def MultiSpeciesREVIGO():
     enrichmentResults = dict((el, dict()) for el in ontologies)
     # for each file perform GOEA
     genesDFs = []
-    go2genes=dict()
-    goSetSize=dict()
-    hasFC=False
+    go2genes = dict()
+    goSetSize = dict()
+    hasFC = False
     for index, file in enumerate(geneListFiles):
         genesDF = pd.read_csv(StringIO(file.stream.read().decode("utf-8"), newline=None), sep='\t', index_col=0,
                               header=None)
         if len(genesDF.columns) > 0:
             genesDF.columns = [index]
             genesDFs.append(genesDF)
-            hasFC=True
+            hasFC = True
         else:
-            genesDF[index]=True
+            genesDF[index] = True
             genesDFs.append(genesDF)
 
-        #print("------",str(index),"------")
+        # print("------",str(index),"------")
         result = GOEA(genesDF.index.tolist(), backgroundAnno[backgroundMap[index]])
-        #print(result)
+        # print(result)
 
         for ont in ontologies:
             if index == 0:
@@ -460,7 +461,7 @@ def MultiSpeciesREVIGO():
                         if term not in enrichmentResults[ont]:
                             enrichmentResults[ont][term] = np.full(shape=index, fill_value=1, dtype=np.float64).tolist()
                             enrichmentResults[ont][term].append(result[ont][:, 1][i])
-    #print(enrichmentResults)
+    # print(enrichmentResults)
     multiGOresults = dict()
     if hasFC:
         genes = pd.concat(genesDFs, axis=1)
@@ -479,9 +480,11 @@ def MultiSpeciesREVIGO():
                 background.update(backgroundAnno[key].get_id2gos(ont))
             multiGOresults[ont] = MultiGO(enrichmentDF, background, request.form["method"])
     go2genes = {key: list(value) for key, value in go2genes.items()}
-    return {"results": multiGOresults, "geneValues": genes, "hasFC":hasFC, "go2genes": go2genes, "goSetSize":goSetSize,"conditions": conditions,
-            "tableColumns": ["termID", "description", "frequency", "uniqueness",
-                             "dispensability"] + conditions}
+    return simplejson.dumps(
+        {"results": multiGOresults, "geneValues": genes, "hasFC": hasFC, "go2genes": go2genes, "goSetSize": goSetSize,
+         "conditions": conditions,
+         "tableColumns": ["termID", "description", "frequency", "uniqueness",
+                          "dispensability"] + conditions}, ignore_nan=True)
 
 
 @app.route("/GoListsMultiREVIGO", methods=["POST"])
@@ -496,14 +499,20 @@ def GoListsMultiREVIGO():
                                index_col=0)
     multiGOresults = dict()
     conditions = []
+    goSetSize = {}
     for ont in ontologies:
         filteredDAG = [d for d in godag if NAMESPACE2NS[godag[d].namespace] == ont]
         enrichmentDF = goEnrichment[goEnrichment.index.isin(filteredDAG)]
         if len(enrichmentDF) > 0:
             background = objanno.get_id2gos(namespace=ont)
+            for key in background:
+                for gene in background[key]:
+                    if gene not in goSetSize:
+                        goSetSize[gene] = 0
+                    goSetSize[gene] += 1
             multiGOresults[ont] = MultiGO(enrichmentDF, background, request.form["method"])
         conditions = enrichmentDF.columns.values.tolist()
-    return {"results": multiGOresults, "conditions": conditions,
+    return {"results": multiGOresults, "conditions": conditions, "goSetSize": goSetSize,
             "tableColumns": ["termID", "description", "frequency", "uniqueness",
                              "dispensability"] + conditions}
 
