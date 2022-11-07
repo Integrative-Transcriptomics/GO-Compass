@@ -1,5 +1,5 @@
 import {action, extendObservable, reaction} from "mobx"
-import {performCorrelation, performPCA} from "../../parseDataFlask";
+import {performCorrelation} from "../../parseDataFlask";
 import * as d3 from "d3";
 import {TableStore} from "./TableStore";
 import {VisStore} from "./VisStore";
@@ -195,10 +195,10 @@ export class DataStore {
         /**
          * performs PCA
          */
-        performPCA(this.filteredPvalues, response => {
+        /*performPCA(this.filteredPvalues, response => {
             this.pca = response;
             this.pcaLoaded = true;
-        });
+        });*/
         /**
          * Calculates p-value correlation
          */

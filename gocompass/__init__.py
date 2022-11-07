@@ -123,6 +123,8 @@ def iterateMatrix(matrix, goTerms, goEnrichment, background):
     tree = dict()
     # stores additional data for each GO term
     goList = dict()
+    if len(goTerms) == 1:
+        tree[goTerms[0]] = {}
     while len(goTerms) > 0:
         maxValue = np.amax(np.ravel(matrix))
 
@@ -134,7 +136,6 @@ def iterateMatrix(matrix, goTerms, goEnrichment, background):
 
         # calculate which GO term is rejected
         delete = testGoTerms(termA, termB, goEnrichment, background, frequencies, maxDiff)
-
         toDelete = delete["term"]
         if toDelete == termA:
             deleteIndex = indices[0]
@@ -356,8 +357,6 @@ def GOEA(genes, objanno):
         if r.enrichment == "p":
             direction = "-"
         goea_results[r.NS].append([r.GO, r.p_fdr_bh, direction, r.pop_count, r.study_items])
-        if r.p_fdr_bh < 0.05:
-            print(r)
     for ont in goea_results:
         goea_results[ont] = np.array(goea_results[ont])
         goea_results[ont] = goea_results[ont][goea_results[ont][:, 0].argsort()]
@@ -469,7 +468,6 @@ def MultiSpeciesREVIGO():
     else:
         genes = pd.concat(genesDFs, axis=1)
         genes = genes.fillna(False).T.to_dict(orient="list")
-        print(genes)
     for ont in ontologies:
         enrichmentDF = pd.DataFrame(enrichmentResults[ont]).T.astype("float64")
         enrichmentDF.columns = conditions
