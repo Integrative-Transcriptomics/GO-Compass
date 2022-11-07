@@ -169,11 +169,14 @@ def iterateMatrix(matrix, goTerms, goEnrichment, background):
             tree.pop(toDelete, None)
         else:
             maxValue = 0
+        uniqueness = 1
+        if len(avgs) > 0:
+            uniqueness = 1 - avgs[toDelete]
         goList[toDelete] = {
             "termID": toDelete,
             "description": godag[toDelete].name,
             "frequency": calculateFrequency(toDelete, frequencies),
-            "uniqueness": 1 - avgs[toDelete],
+            "uniqueness": uniqueness,
             "dispensability": maxValue,
             "pvalues": np.negative(np.log10(goEnrichment.loc[toDelete, :].values)).tolist()
         }

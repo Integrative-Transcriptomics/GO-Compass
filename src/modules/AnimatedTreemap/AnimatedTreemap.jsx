@@ -5,7 +5,6 @@ import {inject, observer} from "mobx-react";
 import {v4 as uuidv4} from 'uuid'
 
 
-
 /**
  * @return {null}
  */
@@ -18,40 +17,46 @@ const AnimatedTreemap = inject("dataStore", "visStore")(observer((props) => {
     const fontSize = 10;
     const layout = props.visStore.treemapLayout;
 
-    const startAnimation = useCallback((index) => {
+    const animateRects = useCallback((helperVis,index) => {
         let leaf = d3.selectAll([...leafRef.current.childNodes]);
         let stripe = d3.selectAll([...stripedRef.current.childNodes]);
+        leaf.data(layout(index).leaves()).transition()
+            .duration(props.visStore.animationDuration)
+            .ease(d3.easeLinear)
+            .attr("transform", d => `translate(${d.x0},${d.y0})`)
+            .on("end", () => {
+                helperVis.attr('opacity', 1)
+                setIndex(index);
+            })
+            .call(leaf => leaf.select("rect")
+                .attr("width", d => d.x1 - d.x0)
+                .attr("height", d => d.y1 - d.y0)
+                .attr("opacity", d => props.logSigThreshold < d.value ? 1 : 0));
+        stripe.data(layout(index).leaves()).transition()
+            .duration(props.visStore.animationDuration)
+            .ease(d3.easeLinear)
+            .attr("transform", d => `translate(${d.x0},${d.y0})`)
+            .on("end", () => {
+                helperVis.attr('opacity', 1)
+                setIndex(index);
+            })
+            .call(stripe => stripe.select("rect")
+                .attr("width", d => d.x1 - d.x0)
+                .attr("height", d => d.y1 - d.y0));
+    }, [layout, leafRef, props.logSigThreshold, props.visStore.animationDuration, stripedRef])
+    const startAnimation = useCallback((index) => {
         let helperVis = d3.selectAll([...propRef.current.childNodes]);
-        helperVis.transition()
-            .duration(0)
-            .attr('opacity', 0)
-            .on('end', () => {
-                leaf.data(layout(index).leaves()).transition()
-                    .duration(props.visStore.animationDuration)
-                    .ease(d3.easeLinear)
-                    .attr("transform", d => `translate(${d.x0},${d.y0})`)
-                    .on("end", () => {
-                        helperVis.attr('opacity', 1)
-                        setIndex(index);
-                    })
-                    .call(leaf => leaf.select("rect")
-                        .attr("width", d => d.x1 - d.x0)
-                        .attr("height", d => d.y1 - d.y0)
-                        .attr("opacity", d => props.logSigThreshold < d.value ? 1 : 0))
-                ;
-                stripe.data(layout(index).leaves()).transition()
-                    .duration(props.visStore.animationDuration)
-                    .ease(d3.easeLinear)
-                    .attr("transform", d => `translate(${d.x0},${d.y0})`)
-                    .on("end", () => {
-                        helperVis.attr('opacity', 1)
-                        setIndex(index);
-                    })
-                    .call(stripe => stripe.select("rect")
-                        .attr("width", d => d.x1 - d.x0)
-                        .attr("height", d => d.y1 - d.y0));
-            });
-    }, [leafRef, layout, props.visStore.animationDuration, props.logSigThreshold, stripedRef, propRef]);
+        if(helperVis.empty()){
+            animateRects(helperVis,index)
+        } else {
+            helperVis.transition()
+                .duration(0)
+                .attr('opacity', 0)
+                .on('end', () => {
+                    animateRects(helperVis,index);
+                });
+        }
+    }, [propRef, animateRects]);
     React.useEffect(() => {
         if (props.visStore.conditionIndex !== index) {
             startAnimation(props.visStore.conditionIndex);
@@ -94,8 +99,8 @@ const AnimatedTreemap = inject("dataStore", "visStore")(observer((props) => {
                 let proportionFill = "black"
                 let visText = size;
                 let tooltipText = "Size: " + size
-                let total=0;
-                if(props.dataStore.rootStore.hasGeneInfo) {
+                let total = 0;
+                if (props.dataStore.rootStore.hasGeneInfo) {
                     total = props.dataStore.geneInformation[child.data.id][index].total;
                     tooltipText = tooltipText + ", Expressed: " + total;
                     visText = visText + "/" + total;
@@ -124,7 +129,7 @@ const AnimatedTreemap = inject("dataStore", "visStore")(observer((props) => {
                         transformNumbers = 'translate(' + (rectWidth - 2) + ',' + (rectHeight - 1.75 * propHeight) + ')' + rotate;
                     } else {
                         if (props.showNumbers) {
-                            transformNumbers = 'translate(' + (rectWidth - 2) + ',' + (rectHeight-2) + ')' + rotate
+                            transformNumbers = 'translate(' + (rectWidth - 2) + ',' + (rectHeight - 2) + ')' + rotate
                         }
                     }
                     proportions.push(<g key={child.data.id} transform={'translate(' + child.x0 + ',' + child.y0 + ')'}>
@@ -136,8 +141,9 @@ const AnimatedTreemap = inject("dataStore", "visStore")(observer((props) => {
                             <g transform={transformGlyph}>
                                 <rect width={propWidth} height={propHeight}
                                       fill={setSizeScale(size)}/>
-                                {props.dataStore.rootStore.hasGeneInfo?<rect y={propHeight / 4} width={sigWidth} height={propHeight * 0.5}
-                                      fill={proportionFill}/>:null}
+                                {props.dataStore.rootStore.hasGeneInfo ?
+                                    <rect y={propHeight / 4} width={sigWidth} height={propHeight * 0.5}
+                                          fill={proportionFill}/> : null}
                                 <line x2={propWidth} stroke={"white"}/>
                                 {props.dataStore.rootStore.hasFCs ? <polygon
                                     points={sigWidth + ",0 " + sigWidth + "," + (-propHeight / 2) + " " + (sigWidth - propHeight) + "," + (-propHeight / 4)}
@@ -199,12 +205,13 @@ const AnimatedTreemap = inject("dataStore", "visStore")(observer((props) => {
         })
     );
     return (
-            <svg width={props.visStore.treemapWidth} height={props.visStore.treemapHeight}>
-                <rect width={props.visStore.treemapWidth} height={props.visStore.treemapHeight} fill={"none"} stroke={"lightgray"} strokeWidth={"1px"}/>
-                    <g ref={stripedRef}>{stripedRects}</g>
-                    <g ref={leafRef}>{rects}</g>
-                    <g ref={propRef}>{proportions}</g>
-            </svg>
+        <svg width={props.visStore.treemapWidth} height={props.visStore.treemapHeight}>
+            <rect width={props.visStore.treemapWidth} height={props.visStore.treemapHeight} fill={"none"}
+                  stroke={"lightgray"} strokeWidth={"1px"}/>
+            <g ref={stripedRef}>{stripedRects}</g>
+            <g ref={leafRef}>{rects}</g>
+            <g ref={propRef}>{proportions}</g>
+        </svg>
     );
 }));
 

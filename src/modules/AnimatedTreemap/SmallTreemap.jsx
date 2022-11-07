@@ -47,12 +47,12 @@ const SmallTreemap = inject("dataStore", "visStore")(observer((props) => {
     );
     const startAnimation = useCallback((highlightIndex) => {
         const willBeHighlighted = highlightIndex === props.index;
-            d3.select(highlightRect.current).transition()
-                .duration(props.visStore.animationDuration)
-                .attr('opacity', willBeHighlighted ? 1 : 0.2)
-                .on('end', () => {
-                    setIsHighlighted(willBeHighlighted)
-                })
+        d3.select(highlightRect.current).transition()
+            .duration(props.visStore.animationDuration)
+            .attr('opacity', willBeHighlighted ? 1 : 0.2)
+            .on('end', () => {
+                setIsHighlighted(willBeHighlighted)
+            })
     }, [highlightRect, props.index, props.visStore.animationDuration]);
     React.useLayoutEffect(() => {
         startAnimation(props.visStore.conditionIndex);
@@ -60,7 +60,8 @@ const SmallTreemap = inject("dataStore", "visStore")(observer((props) => {
     }, [props.visStore.conditionIndex]);
     return (
         <svg width={width} height={height}>
-            <rect width={width} height={height} fill="white"/>
+            <rect width={width} height={height} fill="white"
+                  onClick={() => props.visStore.setConditionIndex(props.index)}/>
             <g transform={"scale(" + props.scalingFactor + ")"}>
                 {children}
             </g>
