@@ -125,6 +125,7 @@ const SelectData = (props) => {
                     <ListItem>
                         <Button className={classes.menuButton}
                                 variant="contained"
+                                component="label"
                                 size="small"
                                 onClick={loadExampleData}>Load Example Data</Button>
                     </ListItem>
@@ -133,6 +134,7 @@ const SelectData = (props) => {
                         <Typography>
                             <Button className={classes.menuButton}
                                     variant="contained"
+                                    component="label"
                                     size="small"
                                     disabled={isLoading}
                             >
@@ -340,6 +342,7 @@ const SelectData = (props) => {
             <ListItem>
                 <Button className={classes.menuButton}
                         variant="contained"
+                        component="label"
                         disabled={isLoading || !launchable}
                         onClick={launch}
                 >
