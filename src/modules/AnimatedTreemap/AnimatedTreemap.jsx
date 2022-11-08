@@ -17,51 +17,52 @@ const AnimatedTreemap = inject("dataStore", "visStore")(observer((props) => {
     const fontSize = 10;
     const layout = props.visStore.treemapLayout;
 
-    const animateRects = useCallback((helperVis,index) => {
-        let leaf = d3.selectAll([...leafRef.current.childNodes]);
-        let stripe = d3.selectAll([...stripedRef.current.childNodes]);
-        leaf.data(layout(index).leaves()).transition()
-            .duration(props.visStore.animationDuration)
-            .ease(d3.easeLinear)
-            .attr("transform", d => `translate(${d.x0},${d.y0})`)
-            .on("end", () => {
-                helperVis.attr('opacity', 1)
-                setIndex(index);
-            })
-            .call(leaf => leaf.select("rect")
-                .attr("width", d => d.x1 - d.x0)
-                .attr("height", d => d.y1 - d.y0)
-                .attr("opacity", d => props.logSigThreshold < d.value ? 1 : 0));
-        stripe.data(layout(index).leaves()).transition()
-            .duration(props.visStore.animationDuration)
-            .ease(d3.easeLinear)
-            .attr("transform", d => `translate(${d.x0},${d.y0})`)
-            .on("end", () => {
-                helperVis.attr('opacity', 1)
-                setIndex(index);
-            })
-            .call(stripe => stripe.select("rect")
-                .attr("width", d => d.x1 - d.x0)
-                .attr("height", d => d.y1 - d.y0));
-    }, [layout, leafRef, props.logSigThreshold, props.visStore.animationDuration, stripedRef])
     const startAnimation = useCallback((index) => {
         let helperVis = d3.selectAll([...propRef.current.childNodes]);
-        if(helperVis.empty()){
-            animateRects(helperVis,index)
+        let leaf = d3.selectAll([...leafRef.current.childNodes]);
+        let stripe = d3.selectAll([...stripedRef.current.childNodes]);
+        const animateRects = () => {
+            leaf.data(layout(index).leaves()).transition()
+                .duration(props.visStore.animationDuration)
+                .ease(d3.easeLinear)
+                .attr("transform", d => `translate(${d.x0},${d.y0})`)
+                .on("end", () => {
+                    helperVis.attr('opacity', 1)
+                    setIndex(index);
+                })
+                .call(leaf => leaf.select("rect")
+                    .attr("width", d => d.x1 - d.x0)
+                    .attr("height", d => d.y1 - d.y0)
+                    .attr("opacity", d => props.logSigThreshold < d.value ? 1 : 0));
+            stripe.data(layout(index).leaves()).transition()
+                .duration(props.visStore.animationDuration)
+                .ease(d3.easeLinear)
+                .attr("transform", d => `translate(${d.x0},${d.y0})`)
+                .on("end", () => {
+                    helperVis.attr('opacity', 1)
+                    setIndex(index);
+                })
+                .call(stripe => stripe.select("rect")
+                    .attr("width", d => d.x1 - d.x0)
+                    .attr("height", d => d.y1 - d.y0));
+        }
+        if (helperVis.empty()) {
+            animateRects(helperVis, index)
         } else {
             helperVis.transition()
                 .duration(0)
                 .attr('opacity', 0)
                 .on('end', () => {
-                    animateRects(helperVis,index);
+                    animateRects(helperVis, index);
                 });
         }
-    }, [propRef, animateRects]);
+    }, [layout, leafRef, propRef, props.logSigThreshold, props.visStore.animationDuration, stripedRef]);
     React.useEffect(() => {
         if (props.visStore.conditionIndex !== index) {
             startAnimation(props.visStore.conditionIndex);
         }
-    }, [props.visStore.conditionIndex, index, startAnimation]);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [props.visStore.conditionIndex, index]);
     const rects = [];
     const proportions = []
     const stripedRects = [];

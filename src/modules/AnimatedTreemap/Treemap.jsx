@@ -1,6 +1,6 @@
 import {inject, observer} from "mobx-react";
 import AnimatedTreemap from "./AnimatedTreemap";
-import React, {createRef, useEffect, useState} from "react";
+import React, {createRef, useEffect, useMemo, useState} from "react";
 import SmallMultiples from "./SmallMultiples";
 import MobileStepper from "@material-ui/core/MobileStepper";
 import Button from "@material-ui/core/Button";
@@ -15,6 +15,17 @@ const Treemap = inject("dataStore", "visStore")(observer((props) => {
     const [adaptedScalingFactor, setAdaptedScalingFactor] = useState(0.25)
     const scalingFactor = 0.25;
     const controlsRef = createRef();
+    let geneSetText = useMemo(() => {
+        let text = "Show gene set numbers"
+        if (props.dataStore.rootStore.hasFCs) {
+            text = text + " (Set size, #upregulated:#downregulated)"
+        } else if (props.dataStore.rootStore.hasGeneInfo) {
+            text = text + " (Set size, #expressed)"
+        } else {
+            text = text + (" (Set size)")
+        }
+        return(text);
+    },[props.dataStore.rootStore.hasFCs, props.dataStore.rootStore.hasGeneInfo])
 
     useEffect(() => {
         const mainWidth = 0.75 * props.width;
@@ -63,7 +74,7 @@ const Treemap = inject("dataStore", "visStore")(observer((props) => {
                     <FormControlLabel
                         control={<Checkbox checked={showNumbers} onChange={() => setShowNumbers(!showNumbers)}
                                            name="checkedA"/>}
-                        label="Show gene set numbers"
+                        label={geneSetText}
                     />
                 </FormGroup>
             </div>
