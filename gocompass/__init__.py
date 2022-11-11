@@ -10,6 +10,7 @@ import pandas as pd
 from flask import Flask, send_file
 from flask import request
 from goatools.anno.factory import get_objanno
+from goatools.anno.update_association import update_association
 from goatools.godag.consts import NAMESPACE2NS
 from goatools.godag.go_tasks import get_go2parents
 from goatools.goea.go_enrichment_ns import GOEnrichmentStudyNS
@@ -496,6 +497,11 @@ def GoListsMultiREVIGO():
     backgroundFile = request.files["background"]
     goEnrichmentFile = request.files["goEnrichment"]
     objanno = readBackground(backgroundFile)
+    background_all = {}
+    for ont in ontologies:
+        background_ont = objanno.get_id2gos(ont)
+        update_association(background_ont, godag, None)
+        background_all[ont] = background_ont
     goEnrichment = pd.read_csv(StringIO(goEnrichmentFile.stream.read().decode("UTF8"), newline=None), sep='\t',
                                index_col=0)
     multiGOresults = dict()
@@ -505,7 +511,7 @@ def GoListsMultiREVIGO():
         filteredDAG = [d for d in godag if NAMESPACE2NS[godag[d].namespace] == ont]
         enrichmentDF = goEnrichment[goEnrichment.index.isin(filteredDAG)]
         if len(enrichmentDF) > 0:
-            background = objanno.get_id2gos(namespace=ont)
+            background = background_all[ont]
             for key in background:
                 for gene in background[key]:
                     if gene not in goSetSize:
