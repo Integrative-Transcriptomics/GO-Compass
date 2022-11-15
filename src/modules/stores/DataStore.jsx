@@ -187,7 +187,7 @@ export class DataStore {
         // when the filter slider is moved and the displayed GO terms change
         // recalculate filtered tree and filterHierarchy
         reaction(() => this.filterCutoff, (cutoff => {
-            if (cutoff < this.maxDisp || cutoff >= this.minFilteredDisp) {
+            if (cutoff <= this.maxDisp || cutoff >= this.minFilteredDisp) {
                 this.recalculateFiltering(cutoff);
             }
         }));
