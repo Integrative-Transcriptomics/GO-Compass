@@ -6,7 +6,7 @@ const SignificanceLine = observer((props) => {
     return (<g transform={"translate(0," + props.height + ")"}>
         <line x1={0} x2={props.width} y1={0}
               y2={0} fill="none" stroke="black" strokeDasharray="4"/>
-        <text x={2} y={-3}>{"p=" + props.sigThreshold}</text>
+        <text x={props.offset} y={-3}>{"p=" + props.sigThreshold}</text>
     </g>)
 
 });
