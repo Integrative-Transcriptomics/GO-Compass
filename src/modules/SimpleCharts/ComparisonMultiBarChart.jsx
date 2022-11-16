@@ -38,7 +38,7 @@ const MultiBarChart = inject("dataStore", "visStore")(observer((props) => {
     const gap = 10;
     const height = ((props.height - margins.top - margins.bottom) - (filteredData.length - 1) * gap) / filteredData.length;
     let xScale = d3.scaleBand().domain(props.visStore.treeOrder).range([0, width]).padding(0.25);
-    if (xScale.bandwidth() < 10) {
+    if (width/props.visStore.treeOrder.length<10) {
         width = 10 * props.visStore.treeOrder.length;
         xScale = d3.scaleBand().domain(props.visStore.treeOrder).range([0, width]).padding(0.25);
     }
