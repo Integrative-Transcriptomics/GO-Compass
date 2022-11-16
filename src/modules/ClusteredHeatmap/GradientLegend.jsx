@@ -7,7 +7,7 @@ const GradientLegend = (props) => {
     const width = 100;
     const height = 20;
     const fontSize = 12;
-    let gradient = null;
+    let gradient;
     const labels = []
     const id = uuidv4()
     if (props.range.length === 2) {
@@ -44,7 +44,7 @@ const GradientLegend = (props) => {
             <defs>
                 {gradient}
             </defs>
-            <text x={-getTextWidth(props.label,12,"bold")-5} y={(height + fontSize) / 2} fontSize={fontSize}>{props.label}</text>
+            <text x={0} y={(height + fontSize)} fontSize={fontSize}>{props.label}</text>
             <rect x={0} y={0} width={width} height={height} fill={"url(#" + id + ")"}/>
             {labels}
         </g>)

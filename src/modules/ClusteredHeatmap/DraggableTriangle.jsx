@@ -4,7 +4,7 @@ import * as d3 from "d3";
 import {inject, observer} from "mobx-react";
 
 
-const DraggableLine = inject("visStore")(observer((props) => {
+const DraggableTriangle = inject("visStore")(observer((props) => {
     const [dragging, setDragging] = useState(false);
     const [x0, setX0] = useState(0);
     const [x, setX] = useState(0);
@@ -18,24 +18,19 @@ const DraggableLine = inject("visStore")(observer((props) => {
         setX0(event.pageX);
     }, []);
 
-    const inverseX = d3.scaleLinear().domain([0, props.width]).range(xScale.domain());
+    const inverseX = d3.scaleLinear().domain([0, props.xScale.range()[1]]).range(xScale.domain());
 
     const sliderX0 = x - 5;
-    const sliderY0 = -10;
+    const sliderY0 = props.height-10;
     const sliderX1 = x + 5;
-    const sliderY1 = -10;
+    const sliderY1 = props.height-10;
     const sliderX2 = x;
-    const sliderY2 = 0;
+    const sliderY2 = props.height;
     const highlighter = <g onMouseDown={(e) => mouseDown(e)} ref={ref} cursor={dragging ? "grabbing" : "grab"}>
-        <line x1={x} x2={x} y1={0} y2={props.height}
-              fill='none'
-              stroke='black' strokeWidth={1}/>
-        <line x1={x} x2={x} y1={0} y2={props.height}
-              fill='none' stroke='black' opacity={0} strokeWidth={5}/>
         <polygon points={sliderX0 + "," + sliderY0 + " " +
         sliderX1 + "," + sliderY1 + " " +
         sliderX2 + "," + sliderY2}/>
-        <text x={x - 5} y={-15}>{props.text}</text>
+        <text x={x - 5} y={props.height-15}>{props.text}</text>
     </g>;
     useEffect(() => {
         if (dragging) {
@@ -77,15 +72,17 @@ const DraggableLine = inject("visStore")(observer((props) => {
     );
 }));
 
-DraggableLine.propTypes = {
-    width: PropTypes.number.isRequired,
+DraggableTriangle.propTypes = {
     height: PropTypes.number.isRequired,
     xPos: PropTypes.number.isRequired,
     xScale: PropTypes.func.isRequired,
     mouseUp: PropTypes.func.isRequired,
+    mouseDown: PropTypes.bool.isRequired,
     duration: PropTypes.number.isRequired,
     x: PropTypes.number.isRequired,
     text: PropTypes.string.isRequired,
+    min: PropTypes.number.isRequired,
+    max: PropTypes.number.isRequired,
 };
-export default DraggableLine;
+export default DraggableTriangle;
 

@@ -70,7 +70,7 @@ export class VisStore {
                 return (layout)
             },
             get treeLayout() {
-                return (traverseTree(dataStore.filteredTree, null, this.stepsize, 0));
+                return (traverseTree(dataStore.filteredTree, null, this.stepsize, 0.5*this.stepsize));
             },
             get treeOrder(){
                 return this.treeLayout.map(d=>d.data.name);

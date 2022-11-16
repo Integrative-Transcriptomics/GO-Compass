@@ -507,6 +507,7 @@ def GoListsMultiREVIGO():
     multiGOresults = dict()
     conditions = []
     goSetSize = {}
+    #print(goEnrichment[goEnrichment.index.isin(godag) == False])
     for ont in ontologies:
         filteredDAG = [d for d in godag if NAMESPACE2NS[godag[d].namespace] == ont]
         enrichmentDF = goEnrichment[goEnrichment.index.isin(filteredDAG)]
