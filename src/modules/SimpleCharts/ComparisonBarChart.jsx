@@ -29,7 +29,7 @@ const BarChart = inject("dataStore", "visStore")(observer((props) => {
                    onMouseEnter={() => {
                        props.visStore.setChildHighlight(elem.id)
                    }}>
-            <rect onClick={() => props.visStore.setConditionIndex(i)} x={props.xScale(elem.id)}
+            <rect x={props.xScale(elem.id)}
                   y={yScale(elem.value)} width={props.xScale.bandwidth()}
                   height={height - yScale(elem.value)}
                   opacity={isHighlighted ? 1 : 0.4}
