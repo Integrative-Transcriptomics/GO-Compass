@@ -21,7 +21,7 @@ export class VisStore {
             childHighlights: [],
             selectedConditions: [],
             conditionIndex: 0,
-            stepsize:10,
+            stepsize: 10,
 
             /**
              * color Scale for terms
@@ -70,13 +70,28 @@ export class VisStore {
                 return (layout)
             },
             get treeLayout() {
-                return (traverseTree(dataStore.filteredTree, null, this.stepsize, 0.5*this.stepsize));
+                return (traverseTree(dataStore.filteredTree, null, this.stepsize, 0.5 * this.stepsize));
             },
-            get treeOrder(){
-                return this.treeLayout.map(d=>d.data.name);
+            get treeOrder() {
+                return this.treeLayout.map(d => d.data.name);
             },
-            setTreeStepSize: action((stepsize)=>{
-                this.stepsize=stepsize
+            get parentSizes() {
+                const parents = [];
+                const parentCounts = {};
+                this.treeLayout.forEach(descendant => {
+                    let parent = this.dataStore.getFilterParent(descendant.data.name);
+                    if (!parents.includes(parent)) {
+                        parents.push(parent);
+                        parentCounts[parent] = 0
+                    }
+                    parentCounts[parent] += 1
+                })
+                return parents.map(parent => {
+                    return ({id: parent, count: parentCounts[parent]})
+                })
+            },
+            setTreeStepSize: action((stepsize) => {
+                this.stepsize = stepsize
             }),
             setScreenWidth: action((width) => {
                 this.screenWidth = width - 36;

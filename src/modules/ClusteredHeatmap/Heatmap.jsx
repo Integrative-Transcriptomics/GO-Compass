@@ -10,8 +10,6 @@ const Heatmap = inject("dataStore", "visStore")(observer((props) => {
     const heatmapColor = d3.scaleLinear().domain(props.domain).range(props.range);
     // cells shwówing p values
     let heatmapCells = [];
-    // cells showing cluster association
-    let clusterCells = [];
     descendants.forEach(descendant => {
         heatmapCells.push(
             <g key={descendant.data.name}
@@ -31,22 +29,27 @@ const Heatmap = inject("dataStore", "visStore")(observer((props) => {
                     </g>)
             })}
             </g>);
-        clusterCells.push(
-            <rect key={descendant.data.name} onMouseEnter={() => props.visStore.setChildHighlight(descendant.data.name)}
-                  onMouseLeave={() => props.visStore.setChildHighlight(null)} y={descendant.y - 0.5 * rectHeight}
-                  width={props.rectWidth}
-                  height={rectHeight}
-                  fill={props.visStore.termColorScale(props.dataStore.getFilterParent(descendant.data.name))}/>);
-
     });
+    let total = 0
+    // lines highlighting cluster borderd
+    const clusterLines = []
+    // rects showing ckuster association
+    const clusterRects = []
+    props.visStore.parentSizes.forEach(parent => {
+        clusterRects.push(<rect key={parent.id} y={rectHeight * total} width={props.rectWidth} height={rectHeight * parent.count}
+                                fill={props.visStore.termColorScale(parent.id)}/>)
+        total += parent.count;
+        clusterLines.push(<line key={parent.id} x1={0} x2={props.width}
+                                y1={rectHeight * total} y2={rectHeight * total}
+                                stroke={"white"} strokeWidth={2}/>)
+    })
     return (
         <g>
-            <g>
-                {clusterCells}
-            </g>
             <g transform={"translate(" + 1.5 * props.rectWidth + ",0)"}>
                 {heatmapCells}
             </g>
+            {clusterRects}
+            {clusterLines}
         </g>
     );
 }));
