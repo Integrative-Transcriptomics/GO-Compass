@@ -3,6 +3,8 @@ import PropTypes from 'prop-types';
 import * as d3 from "d3";
 import {inject, observer} from "mobx-react";
 import {v4 as uuidv4} from 'uuid'
+import {Tooltip} from "@material-ui/core";
+import TermTooltip from "../TermToolstip";
 
 
 /**
@@ -163,12 +165,15 @@ const AnimatedTreemap = inject("dataStore", "visStore")(observer((props) => {
             rects.push(<g key={child.data.id} transform={'translate(' + child.x0 + ',' + child.y0 + ')'}
                           onMouseEnter={() => props.visStore.setChildHighlight(child.data.id)}
                           onMouseLeave={() => props.visStore.setChildHighlight(null)}>
-                <rect id={"rect" + clipID}
-                      width={rectWidth} height={rectHeight}
-                      fill={fill}
-                      stroke={props.visStore.childHighlights.includes(child.data.id) ? "black" : "white"}
-                      strokeWidth={1}
-                      opacity={filledOpacity}/>
+                <Tooltip arrow title={<TermTooltip color={props.visStore.termColorScale(parent.data.id)}
+                                       id={child.data.id} logSigThreshold={props.logSigThreshold}/>}>
+                    <rect id={"rect" + clipID}
+                          width={rectWidth} height={rectHeight}
+                          fill={fill}
+                          stroke={props.visStore.childHighlights.includes(child.data.id) ? "black" : "white"}
+                          strokeWidth={1}
+                          opacity={filledOpacity}/>
+                </Tooltip>
                 <g>
                     <defs>
                         <clipPath id={"clip" + clipID}>
@@ -179,9 +184,6 @@ const AnimatedTreemap = inject("dataStore", "visStore")(observer((props) => {
                         {rectWidth > 0 && rectHeight > 0 ? child.data.name : null}
                     </text>
                 </g>
-                <title>
-                    {child.data.name}
-                </title>
             </g>)
             const stripeID = uuidv4();
             stripedRects.push(

@@ -33,19 +33,11 @@ class Axis extends React.Component {
         } else {
             d3.select(node).call(this.props.axis)
         }
-
-        /*
-        .selectAll("text")
-        .attr("y", 0)
-        .attr("x", 9)
-        .attr("dy", ".35em")
-        .attr("transform", "rotate(90)")
-        .style("text-anchor", "start");*/
     }
 
     render() {
         const translatex = `translate(0,${this.props.h})`;
-        const translatey = 'translate(-10, 0)';
+        const translatey = 'translate(-5, 0)';
         const textTranslateX = `translate(${this.props.w / 2},${30})`;
         const textTranslateY = `translate(-30, ${this.props.h / 2})rotate(270)`;
         return (
