@@ -77,7 +77,7 @@ const MultiBarChart = inject("dataStore", "visStore")(observer((props) => {
                     {yAxes}
                 </g>
             </svg>
-            <div style={{overflowX: "scroll", maxWidth: props.width - margins.left, float: "left"}}
+            <div style={{overflowX: "scroll", maxWidth: props.width - margins.left - props.visStore.scrollBarWidth, float: "left"}}
                  ref={scrollContainer}
                  onScroll={() => setOffset(scrollContainer.current.getBoundingClientRect().left
                      - scrollableSVG.current.getBoundingClientRect().left)}>
