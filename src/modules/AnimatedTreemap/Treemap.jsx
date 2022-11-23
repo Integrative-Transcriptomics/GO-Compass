@@ -31,7 +31,7 @@ const Treemap = inject("dataStore", "visStore")(observer((props) => {
         const mainWidth = 0.75 * props.width;
         props.visStore.setTreemapWidth(mainWidth)
         const ts = scalingFactor / (1 - scalingFactor);
-        const sideWidth = mainWidth * ts - 10
+        const sideWidth = mainWidth * ts - 10 -props.visStore.scrollBarWidth
         setAdaptedScalingFactor(sideWidth / mainWidth)
     }, [props.visStore, props.width]);
     useEffect(() => {

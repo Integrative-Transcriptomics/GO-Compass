@@ -35,12 +35,13 @@ const MultiBarChart = inject("dataStore", "visStore")(observer((props) => {
     })
 
     let width = props.width - margins.left - margins.right;
+    let innerWidth= width-props.visStore.scrollBarWidth;
     const gap = 10;
     const height = ((props.height - margins.top - margins.bottom) - (filteredData.length - 1) * gap) / filteredData.length;
-    let xScale = d3.scaleBand().domain(props.visStore.treeOrder).range([0, width]).padding(0.25);
-    if (width/props.visStore.treeOrder.length<10) {
-        width = 10 * props.visStore.treeOrder.length;
-        xScale = d3.scaleBand().domain(props.visStore.treeOrder).range([0, width]).padding(0.25);
+    let xScale = d3.scaleBand().domain(props.visStore.treeOrder).range([0, innerWidth]).padding(0.25);
+    if (innerWidth/props.visStore.treeOrder.length<10) {
+        innerWidth = 10 * props.visStore.treeOrder.length;
+        xScale = d3.scaleBand().domain(props.visStore.treeOrder).range([0, innerWidth]).padding(0.25);
     }
     let yScales = filteredData.map(cond => {
         return d3.scaleLinear().domain([0, props.scaleLocked ? max : d3.max(cond.map(d => d.value))]).range([height, 0]);
@@ -55,7 +56,7 @@ const MultiBarChart = inject("dataStore", "visStore")(observer((props) => {
             <Axis h={height} w={0} axis={yAxis} axisType={'y'} label={''}/>
         </g>)
         barCharts.push(<g key={props.dataStore.conditions[condIndex]} transform={'translate(0,' + translateY + ')'}>
-            <BarChart width={width + margins.right} height={height}
+            <BarChart width={innerWidth + margins.right} height={height}
                       offset={offset}
                       sigThreshold={props.sigThreshold}
                       logSigThreshold={props.logSigThreshold}
@@ -80,7 +81,7 @@ const MultiBarChart = inject("dataStore", "visStore")(observer((props) => {
                  ref={scrollContainer}
                  onScroll={() => setOffset(scrollContainer.current.getBoundingClientRect().left
                      - scrollableSVG.current.getBoundingClientRect().left)}>
-                <svg width={width + margins.right}
+                <svg width={innerWidth + margins.right}
                      height={props.height} ref={scrollableSVG}>
                     <g transform={'translate(0,' + margins.top + ')'}>
                         {barCharts}

@@ -15,6 +15,7 @@ export class VisStore {
             plotHeight: 900,
             treemapHeight: 100,
             treemapWidth: 100,
+            scrollBarWidth: 17,
             tsPlotType: "lineChart",
             showOverview: false,
             childHighlight: null,

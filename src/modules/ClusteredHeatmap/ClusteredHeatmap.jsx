@@ -8,12 +8,27 @@ import Axis from "../SimpleCharts/Axis";
 import * as d3 from "d3";
 import DraggableTriangle from "./DraggableTriangle";
 import ScrollOverview from "./TreeOverview";
+import {makeStyles} from "@material-ui/core";
 
+const useStyles = makeStyles({
+    scroll: {
+        /* Hide scrollbar for Chrome, Safari and Opera */
+        '&::-webkit-scrollbar': {
+            display: "none",
+        },
+        /* Hide scrollbar for IE, Edge and Firefox */
+        '-ms-overflow-style': "none", /* IE and Edge */
+        'scrollbar-width': "none",  /* Firefox */
+        paddingRight: 0,
 
+    }
+})
 const ClusteredHeatmap = inject("dataStore", "visStore")(observer((props) => {
+    const classes = useStyles();
     const [xPos, setXPos] = useState(0);
     const [mouseDown, setMouseDown] = useState(false);
     const [offset, setOffset] = useState(0);
+    //const [innerWidth, setInnerWidth] = useState(props.width);
 
     const margins = {
         top: props.visStore.maxConditionTextSize > 40 ? props.visStore.maxConditionTextSize : 40,
@@ -23,8 +38,9 @@ const ClusteredHeatmap = inject("dataStore", "visStore")(observer((props) => {
     };
     const scrollableSVG = createRef();
     const scrollContainer = createRef();
+    const innerWidth = props.width - props.visStore.scrollBarWidth;
     const height = props.height - margins.top - margins.bottom;
-    let width = props.width - margins.left - margins.right;
+    let width = innerWidth - margins.left - margins.right;
 
 
     const overviewWidth = 40;
@@ -61,8 +77,8 @@ const ClusteredHeatmap = inject("dataStore", "visStore")(observer((props) => {
             <div onMouseMove={(e) => setXPos(e.pageX)}
                  onMouseDown={() => setMouseDown(true)}
                  onMouseUp={() => setMouseDown(false)}>
-                <svg width={props.width} height={margins.top}>
-                    <g transform={"translate(" + (margins.left+overviewWidth) + ",0)"}>
+                <svg width={innerWidth} height={margins.top}>
+                    <g transform={"translate(" + (margins.left + overviewWidth) + ",0)"}>
                         <DraggableTriangle xPos={xPos}
                                            xScale={dispScale}
                                            mouseUp={props.dataStore.setClusterCutoff} duration={0}
@@ -71,7 +87,7 @@ const ClusteredHeatmap = inject("dataStore", "visStore")(observer((props) => {
                                            max={dispScale(props.dataStore.filterCutoff)}
                                            x={dispScale(props.dataStore.clusterCutoff)}
                                            mouseDown={mouseDown}
-                                           text={"Cluster ("+Object.keys(props.dataStore.clusterHierarchy).length+")"}/>
+                                           text={"Cluster (" + Object.keys(props.dataStore.clusterHierarchy).length + ")"}/>
                         <DraggableTriangle xPos={xPos}
                                            xScale={dispScale}
                                            mouseUp={props.dataStore.setFilterCutoff} duration={0}
@@ -80,24 +96,29 @@ const ClusteredHeatmap = inject("dataStore", "visStore")(observer((props) => {
                                            max={treeWidth - gapWidth}
                                            x={dispScale(props.dataStore.filterCutoff)}
                                            mouseDown={mouseDown}
-                                           text={"Filter ("+props.dataStore.currentGOterms.length+")"}/>
+                                           text={"Filter (" + props.dataStore.currentGOterms.length + ")"}/>
                         <g transform={"translate(" + treeWidth + ",0)"}>
                             {conditionLabels}
                         </g>
                     </g>
                 </svg>
                 <div>
-                    <div style={{float:"left"}}>
-                    <ScrollOverview length={height}
-                                    breadth={overviewWidth}
-                                    outerLength={height} innerLength={totalHeight}
-                                    currentPosition={offset}
-                                    orientation={"y"}
-                                    pattern={props.visStore.parentSizes} colorScale={props.visStore.termColorScale}/>
+                    <div style={{float: "left"}}>
+                        <ScrollOverview length={height}
+                                        breadth={overviewWidth}
+                                        outerLength={height} innerLength={totalHeight}
+                                        currentPosition={offset}
+                                        orientation={"y"}
+                                        pattern={props.visStore.parentSizes}
+                                        colorScale={props.visStore.termColorScale}/>
                     </div>
-                    <div style={{overflowY: "scroll", maxHeight: height, float:"left"}} ref={scrollContainer}
-                         onScroll={() => setOffset(scrollContainer.current.getBoundingClientRect().top - scrollableSVG.current.getBoundingClientRect().top)}>
-                        <svg width={props.width-overviewWidth} height={totalHeight} ref={scrollableSVG}>
+                    <div className={classes.scroll} style={{
+                        overflowY: "scroll",
+                        maxHeight: height, float: "left"
+                    }} ref={scrollContainer}
+                         onScroll={() => setOffset(scrollContainer.current.getBoundingClientRect().top
+                             - scrollableSVG.current.getBoundingClientRect().top)}>
+                        <svg width={innerWidth - overviewWidth} height={totalHeight} ref={scrollableSVG}>
                             <g transform={"translate(" + margins.left + ",0)"}>
                                 <g transform={"translate(" + treeWidth + ",0)"}>
                                     <Heatmap logSigThreshold={props.logSigThreshold}
@@ -122,8 +143,8 @@ const ClusteredHeatmap = inject("dataStore", "visStore")(observer((props) => {
                         </svg>
                     </div>
                 </div>
-                <svg width={props.width} height={margins.bottom}>
-                    <g transform={"translate(" + (margins.left+overviewWidth) + ",0)"}>
+                <svg width={innerWidth} height={margins.bottom}>
+                    <g transform={"translate(" + (margins.left + overviewWidth) + ",0)"}>
                         <Axis h={0} w={treeWidth} axis={xAxis} axisType={'x'} label={'Dispensability'}/>
                         <g transform={"translate(" + treeWidth + ",0)"}>
                             <GradientLegend range={heatmapRange} domain={heatmapDomain} label={"-log10(pVal)"}/>
