@@ -162,7 +162,7 @@ const AnimatedTreemap = inject("dataStore", "visStore")(observer((props) => {
                 }
             }
             const clipID = uuidv4();
-            rects.push(<Tooltip key={child.data.id} arrow title={<TermTooltip color={props.visStore.termColorScale(parent.data.id)}
+            rects.push(<Tooltip key={child.data.id} title={<TermTooltip color={props.visStore.termColorScale(parent.data.id)}
                                                           id={child.data.id} logSigThreshold={props.logSigThreshold}
                                                           setSize={size} up={up} total={total}/>}>
                     <g transform={'translate(' + child.x0 + ',' + child.y0 + ')'}
