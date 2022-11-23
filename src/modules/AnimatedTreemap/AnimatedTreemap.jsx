@@ -97,24 +97,25 @@ const AnimatedTreemap = inject("dataStore", "visStore")(observer((props) => {
                 }
             }
             const fill = props.visStore.termColorScale(parent.data.id);
+            let size = props.dataStore.geneInformation[child.data.id][index].setSize;
+            let up, total;
+            if (props.dataStore.rootStore.hasGeneInfo) {
+                total = props.dataStore.geneInformation[child.data.id][index].total;
+                if (props.dataStore.rootStore.hasFCs) {
+                    up = props.dataStore.geneInformation[child.data.id][index].up;
+                }
+            }
             if (rectWidth > 0 && rectHeight > 0) {
-                const size = props.dataStore.geneInformation[child.data.id][index].setSize;
                 let proportionFill = "black"
                 let visText = size;
-                let tooltipText = "Size: " + size
-                let total = 0;
                 if (props.dataStore.rootStore.hasGeneInfo) {
-                    total = props.dataStore.geneInformation[child.data.id][index].total;
-                    tooltipText = tooltipText + ", Expressed: " + total;
                     visText = visText + "/" + total;
                     if (props.dataStore.rootStore.hasFCs) {
-                        const up = props.dataStore.geneInformation[child.data.id][index].up;
                         let proportion = up / total;
                         if (total === 0) {
                             proportion = 0.5
                         }
                         proportionFill = upDownScale(proportion)
-                        tooltipText = "Set: " + size + ", up: " + up + ", down: " + (total - up);
                         visText = size + ", " + up + ":" + (total - up);
                     }
                 }
@@ -156,35 +157,37 @@ const AnimatedTreemap = inject("dataStore", "visStore")(observer((props) => {
                                           width={sigWidth > 2 ? 2 : sigWidth} height={propHeight}
                                           fill={proportionFill}/> : null}
                                 <line y1={-0.5} y2={propHeight} stroke={"white"}/>
-                                <title>{tooltipText}</title>
                             </g> : null}
                     </g>)
                 }
             }
             const clipID = uuidv4();
-            rects.push(<g key={child.data.id} transform={'translate(' + child.x0 + ',' + child.y0 + ')'}
-                          onMouseEnter={() => props.visStore.setChildHighlight(child.data.id)}
-                          onMouseLeave={() => props.visStore.setChildHighlight(null)}>
-                <Tooltip arrow title={<TermTooltip color={props.visStore.termColorScale(parent.data.id)}
-                                       id={child.data.id} logSigThreshold={props.logSigThreshold}/>}>
-                    <rect id={"rect" + clipID}
-                          width={rectWidth} height={rectHeight}
-                          fill={fill}
-                          stroke={props.visStore.childHighlights.includes(child.data.id) ? "black" : "white"}
-                          strokeWidth={1}
-                          opacity={filledOpacity}/>
+            rects.push(<Tooltip key={child.data.id} arrow title={<TermTooltip color={props.visStore.termColorScale(parent.data.id)}
+                                                          id={child.data.id} logSigThreshold={props.logSigThreshold}
+                                                          setSize={size} up={up} total={total}/>}>
+                    <g transform={'translate(' + child.x0 + ',' + child.y0 + ')'}
+                       onMouseEnter={() => props.visStore.setChildHighlight(child.data.id)}
+                       onMouseLeave={() => props.visStore.setChildHighlight(null)}>
+
+                        <rect id={"rect" + clipID}
+                              width={rectWidth} height={rectHeight}
+                              fill={fill}
+                              stroke={props.visStore.childHighlights.includes(child.data.id) ? "black" : "white"}
+                              strokeWidth={1}
+                              opacity={filledOpacity}/>
+                        <g>
+                            <defs>
+                                <clipPath id={"clip" + clipID}>
+                                    <use xlinkHref={"#rect" + clipID}/>
+                                </clipPath>
+                            </defs>
+                            <text clipPath={'url(#clip' + clipID + ')'} x={2} y={10} fontSize={fontSize}>
+                                {rectWidth > 0 && rectHeight > 0 ? child.data.name : null}
+                            </text>
+                        </g>
+                    </g>
                 </Tooltip>
-                <g>
-                    <defs>
-                        <clipPath id={"clip" + clipID}>
-                            <use xlinkHref={"#rect" + clipID}/>
-                        </clipPath>
-                    </defs>
-                    <text clipPath={'url(#clip' + clipID + ')'} x={2} y={10} fontSize={fontSize}>
-                        {rectWidth > 0 && rectHeight > 0 ? child.data.name : null}
-                    </text>
-                </g>
-            </g>)
+            )
             const stripeID = uuidv4();
             stripedRects.push(
                 <g key={child.data.id} transform={'translate(' + child.x0 + ',' + child.y0 + ')'}>

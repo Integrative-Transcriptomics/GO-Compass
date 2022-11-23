@@ -1,14 +1,17 @@
-import List from "@material-ui/core/List";
-import ListItem from "@material-ui/core/ListItem";
-import TextField from "@material-ui/core/TextField";
-import Drawer from "@material-ui/core/Drawer";
 import React from "react";
 import {inject, observer} from "mobx-react";
 import PropTypes from "prop-types";
-import FormControl from "@material-ui/core/FormControl";
-import InputLabel from "@material-ui/core/InputLabel";
-import Select from "@material-ui/core/Select";
-import MenuItem from "@material-ui/core/MenuItem";
+import {
+    Drawer,
+    FormControl,
+    FormControlLabel,
+    InputLabel,
+    List,
+    ListItem, MenuItem,
+    Select,
+    Switch,
+    TextField
+} from "@material-ui/core";
 
 const AppDrawer = inject("rootStore")(observer((props) => {
     return (<Drawer anchor={"left"} open={props.open} onClose={props.toggleDrawer}>
@@ -39,14 +42,14 @@ const AppDrawer = inject("rootStore")(observer((props) => {
                     </Select>
                 </FormControl>
             </ListItem>
-            {/*<ListItem>
+            <ListItem>
                 <FormControlLabel
                     control={<Switch checked={props.rootStore.isTimeSeries}
                                      onChange={() => props.rootStore.toggleIsTimeSeries()}
                                      name="checkedA"/>}
                     label="Time Series Data"
                 />
-            </ListItem>*/}
+            </ListItem>
         </List>
     </Drawer>)
 }));
