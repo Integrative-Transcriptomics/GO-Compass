@@ -12,9 +12,11 @@ import KeyboardArrowDownIcon from '@material-ui/icons/KeyboardArrowDown';
 import KeyboardArrowUpIcon from '@material-ui/icons/KeyboardArrowUp';
 import {makeStyles} from '@material-ui/core/styles';
 import TableSortLabel from "@material-ui/core/TableSortLabel";
+import GetAppIcon from '@material-ui/icons/GetApp';
 
 import {inject, observer} from "mobx-react";
 import PropTypes from "prop-types";
+import {Button} from "@material-ui/core";
 
 
 const useStyles = makeStyles({
@@ -158,6 +160,9 @@ const DataTable = inject("dataStore", "tableStore")(observer((props) => {
                     </TableBody>
                 </Table>
             </TableContainer>
+            <Button startIcon={<GetAppIcon/>} onClick={() =>props.tableStore.downloadCSV()}>
+                Download Table
+            </Button>
         </Paper>
     );
 }));

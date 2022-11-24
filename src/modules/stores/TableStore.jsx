@@ -1,10 +1,11 @@
 import {action, extendObservable} from "mobx";
 
 /**
- * store for reasults table
+ * store for results table
  */
 export class TableStore {
-    constructor(dataTable, conditions) {
+    constructor(dataTable, conditions, tableColumns) {
+        this.tableColumns = tableColumns;
         this.mapper = {};
         Object.keys(dataTable).forEach(goTerm => {
             this.mapper[goTerm] = {};
@@ -82,5 +83,21 @@ export class TableStore {
                 this.setSortKey(key);
             }),
         })
+    }
+
+    downloadCSV() {
+        let rows = this.tableColumns.join(",") + "\n"
+        rows = rows + this.termState.map((state, i) => {
+            return (this.tableColumns.map(col => this.mapper[state.goTerm][col])).join(",")
+        }).join("\n")
+        let blob = new Blob([rows], {type: 'text/csv;charset=utf-8;'})
+        let url = URL.createObjectURL(blob);
+        let link = document.createElement("a");
+        link.setAttribute("href", url);
+        link.setAttribute("download", "go-table.csv");
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
     }
 }

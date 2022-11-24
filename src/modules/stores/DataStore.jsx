@@ -209,27 +209,6 @@ export class DataStore {
         this.tableStore.initTermState(Object.keys(this.filterHierarchy));
     }
 
-    getGoSetSize(GO) {
-        return (this.rootStore.goSetSize[GO])
-    }
-
-    getNumSigGenes(GO, index, direction) {
-        const genes = this.rootStore.go2genes[GO];
-        const values = genes.map(d => this.getGeneValue(d, index)).filter(d => d !== false)
-        if (this.rootStore.hasFCs) {
-            switch (direction) {
-                case "up":
-                    return (values.filter(d => d > 0).length);
-                case "down":
-                    return (values.filter(d => d < 0).length);
-                default:
-                    return (values.length);
-            }
-        } else {
-            return (values.length);
-        }
-
-    }
 
     getGeneValue(gene, index) {
         if (!Object.keys(this.rootStore.geneValues).includes(gene)) {
