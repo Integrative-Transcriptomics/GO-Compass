@@ -36,7 +36,7 @@ const SelectData = (props) => {
     const [isLoading, setIsLoading] = useState(false);
     const [conditions, setConditions] = useState([]);
     // Wang, Lin, Resnik, Edge based
-    const [selectedMeasure, selectMeasure] = useState("Edge based");
+    const [selectedMeasure, selectMeasure] = useState("Wang");
     const [pvalueFilter, setPvalueFilter] = useState(0.05);
     const [selectedTab, selectTab] = useState(0);
     const useStyles = makeStyles((theme: Theme) =>
