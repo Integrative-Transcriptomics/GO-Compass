@@ -1,5 +1,6 @@
 import os
 import random
+import json
 import tempfile
 from collections import Counter
 from io import StringIO
@@ -386,6 +387,14 @@ def pca():
     return {"coords": coords, "percentage": np.round(pca.explained_variance_ratio_ * 100).tolist()}
 
 
+@app.route('/readFileHeader', methods=["POST"])
+def readFileHeader():
+    goEnrichmentFile = request.files["goEnrichment"]
+    columns = pd.read_csv(StringIO(goEnrichmentFile.stream.read().decode("UTF8"), newline=None), sep='\t', index_col=0,
+                       nrows=0).columns.tolist()
+    return json.dumps(columns)
+
+
 @app.route('/correlation', methods=["POST"])
 def correlation():
     """ returns numerical matrix
@@ -411,6 +420,7 @@ def MultiSpeciesREVIGO():
     # read background for each background file
     for index, file in enumerate(backgroundFiles):
         backgroundAnno[file.filename] = readBackground(file)
+    # print(backgroundAnno)
     enrichmentResults = dict((el, dict()) for el in ontologies)
     # for each file perform GOEA
     genesDFs = []
@@ -466,12 +476,8 @@ def MultiSpeciesREVIGO():
                             enrichmentResults[ont][term].append(result[ont][:, 1][i])
     # print(enrichmentResults)
     multiGOresults = dict()
-    if hasFC:
-        genes = pd.concat(genesDFs, axis=1)
-        genes = genes.fillna(False).T.to_dict(orient="list")
-    else:
-        genes = pd.concat(genesDFs, axis=1)
-        genes = genes.fillna(False).T.to_dict(orient="list")
+    genes = pd.concat(genesDFs, axis=1)
+    genes = genes.fillna(False).T.to_dict(orient="list")
     for ont in ontologies:
         enrichmentDF = pd.DataFrame(enrichmentResults[ont]).T.astype("float64")
         enrichmentDF.columns = conditions
@@ -494,33 +500,61 @@ def GoListsMultiREVIGO():
     """ returns dict
     performs clustering for GO terms with associated p-values
     """
-    backgroundFile = request.files["background"]
+    backgroundFiles = request.files.getlist("backgrounds[]")
     goEnrichmentFile = request.files["goEnrichment"]
-    objanno = readBackground(backgroundFile)
-    background_all = {}
-    for ont in ontologies:
-        background_ont = objanno.get_id2gos(ont)
-        update_association(background_ont, godag, None)
-        background_all[ont] = background_ont
+    geneListFiles = request.files.getlist("geneLists[]")
+    genes = {}
+    hasFC = False
+    if len(geneListFiles) > 0:
+        genesDFs = []
+        for index, file in enumerate(geneListFiles):
+            genesDF = pd.read_csv(StringIO(file.stream.read().decode("utf-8")
+                                           , newline=None)
+                                  , sep='\t', index_col=0,
+                                  header=None)
+            if len(genesDF.columns) > 0:
+                genesDF.columns = [index]
+                genesDFs.append(genesDF)
+                hasFC = True
+            else:
+                genesDF[index] = True
+                genesDFs.append(genesDF)
+        genes = pd.concat(genesDFs, axis=1)
+        genes = genes.fillna(False).T.to_dict(orient="list")
+    backgroundAnno = dict()
+    # read background for each background file
+    for index, file in enumerate(backgroundFiles):
+        backgroundAnno[file.filename] = readBackground(file)
     goEnrichment = pd.read_csv(StringIO(goEnrichmentFile.stream.read().decode("UTF8"), newline=None), sep='\t',
                                index_col=0)
     multiGOresults = dict()
     conditions = []
     goSetSize = {}
-    #print(goEnrichment[goEnrichment.index.isin(godag) == False])
+    go2genes = {}
+    for go in goEnrichment.index.tolist():
+        go2genes[go]=set()
+        goSetSize[go]=0
     for ont in ontologies:
         filteredDAG = [d for d in godag if NAMESPACE2NS[godag[d].namespace] == ont]
         enrichmentDF = goEnrichment[goEnrichment.index.isin(filteredDAG)]
         if len(enrichmentDF) > 0:
-            background = background_all[ont]
-            for key in background:
-                for gene in background[key]:
-                    if gene not in goSetSize:
-                        goSetSize[gene] = 0
-                    goSetSize[gene] += 1
+            background = dict()
+            for key in backgroundAnno:
+                background_ont = backgroundAnno[key].get_id2gos(ont)
+                update_association(background_ont, godag, None)
+                background.update(background_ont)
+                # print(background_ont)
+            for gene in background:
+                for term in background[gene]:
+                    if term in goEnrichment.index.tolist():
+                        if gene in genes:
+                            go2genes[term].add(gene)
+                        goSetSize[term] += 1
             multiGOresults[ont] = MultiGO(enrichmentDF, background, request.form["method"])
         conditions = enrichmentDF.columns.values.tolist()
-    return {"results": multiGOresults, "conditions": conditions, "goSetSize": goSetSize,
+    go2genes = {key: list(value) for key, value in go2genes.items()}
+    return {"results": multiGOresults, "conditions": conditions, "geneValues": genes, "hasFC": hasFC,
+            "go2genes": go2genes, "goSetSize": goSetSize,
             "tableColumns": ["termID", "description", "frequency", "uniqueness",
                              "dispensability"] + conditions}
 

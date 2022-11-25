@@ -11,60 +11,12 @@ function performCorrelation(data, callback) {
     })
 }
 
-/**
- * performs api call for PCA
- * @param {Object} data
- * @param {function} callback
- */
-function performPCA(data, callback) {
-    axios.post("/pca", {data: data}).then((response) => {
-        callback(response.data);
-    })
-}
-
-/**
- * performs api call to get supported genomes from PANTHER
- * @param {function} callback
- */
-function getSupportedGenomes(callback) {
-    axios.get("http://pantherdb.org/services/oai/pantherdb/supportedgenomes")
-        .then(response => callback(response.data.search.output.genomes.genome))
-}
-
-/**
- * performs api call for multiple gene lists
- * @param dataFiles
- * @param backgroundFile
- * @param conditions
- * @param method
- * @param pvalueFilter
- * @param callback
- */
-function multiRevigoGeneLists(dataFiles, backgroundFile, conditions, method, pvalueFilter, callback) {
-    const formData = new FormData();
-    formData.append("background", backgroundFile);
-    dataFiles.forEach(file => formData.append("geneLists[]", file));
-    formData.append("pvalueFilter", pvalueFilter);
-    conditions.forEach(condition => formData.append("conditions[]", condition));
-    formData.append("method", method);
-    if (dataFiles.length > 0) {
-        axios.post("/GeneListsMultiREVIGO", formData)
-            .then(response => {
-                callback(response.data);
-            })
-            .catch(function (error) {
-                console.log(error)
-            });
-    }
-
-}
-
-
-function multiRevigoGoLists(dataFile, backgroundFile, method, pvalueFilter, callback) {
-    if (dataFile != null) {
+function multiRevigoGoLists(goFile, dataFiles, backgroundFiles, method, pvalueFilter, callback) {
+    if (goFile != null) {
         const formData = new FormData();
-        formData.append("background", backgroundFile);
-        formData.append("goEnrichment", dataFile);
+        backgroundFiles.forEach(file => formData.append("backgrounds[]", file));
+        dataFiles.forEach(file => formData.append("geneLists[]", file));
+        formData.append("goEnrichment", goFile);
         formData.append("pvalueFilter", pvalueFilter);
         formData.append("method", method);
         axios.post("/GoListsMultiREVIGO", formData)
@@ -121,6 +73,19 @@ function exampleData(callback) {
         ))
 
 }
+function getGOheader(goFile,callback){
+    if (goFile != null) {
+        const formData = new FormData();
+        formData.append("goEnrichment", goFile);
+        axios.post("/readFileHeader", formData)
+            .then(response => {
+                callback(response.data)
+            })
+            .catch(function (error) {
+                console.log(error);
+            });
+    }
+}
 
 function exampleDataWithFC(callback) {
     const requestBackground = axios.get("/exampleBackground")
@@ -149,11 +114,9 @@ function exampleDataWithFC(callback) {
 
 export {
     multiRevigoGoLists,
-    multiRevigoGeneLists,
     multiSpeciesRevigo,
-    getSupportedGenomes,
-    performPCA,
     performCorrelation,
+    getGOheader,
     exampleData,
     exampleDataWithFC
 };
