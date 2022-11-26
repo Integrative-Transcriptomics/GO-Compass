@@ -72,7 +72,30 @@ const AnimatedTreemap = inject("dataStore", "visStore")(observer((props) => {
         const setSizes = props.visStore.treeOrder.map(d => props.dataStore.geneInformation[d][index].setSize);
         return (d3.scaleLinear().domain([d3.min(setSizes), d3.max(setSizes)]).range(["grey", "white"]))
     }, [index, props.dataStore.geneInformation, props.visStore.treeOrder])
-    const upDownScale = d3.scaleLinear().domain([0, 0.5, 1]).range(["blue", "white", "red"])
+    let glyphColorScale;
+    let geneMedians = {}
+    if (props.dataStore.rootStore.hasFCs) {
+        props.visStore.treeOrder.forEach(go => geneMedians[go] = d3.median(props.dataStore.rootStore.go2genes[go]
+            .map(gene => props.dataStore.rootStore.geneValues[gene][index])
+            .filter(val => val !== false)));
+        if (props.glyphEncoding === "updown") {
+            glyphColorScale = d3.scaleLinear().domain([0, 0.5, 1]).range(["blue", "white", "red"])
+        } else {
+            let allValues = props.dataStore.conditions.map((cond,i)=>Object.keys(props.dataStore.rootStore.go2genes)
+                .map(go => d3.median(props.dataStore.rootStore.go2genes[go]
+                    .map(gene => props.dataStore.rootStore.geneValues[gene][i]).filter(val => val !== false)))).flat()
+            let domain;
+            const max = d3.max(allValues);
+            const min = d3.min(allValues);
+            if (Math.abs(max) > Math.abs(min)) {
+                domain = Math.abs(max);
+            } else {
+                domain = Math.abs(min);
+            }
+            glyphColorScale = d3.scaleLinear().domain([-domain, 0, domain]).range(["blue", "white", "red"])
+        }
+    }
+
     layout(index).children.forEach((parent) =>
         parent.children.forEach((child) => {
             const rectWidth = child.x1 - child.x0;
@@ -98,10 +121,11 @@ const AnimatedTreemap = inject("dataStore", "visStore")(observer((props) => {
             }
             const fill = props.visStore.termColorScale(parent.data.id);
             let size = props.dataStore.geneInformation[child.data.id][index].setSize;
-            let up, total;
+            let up, total, median;
             if (props.dataStore.rootStore.hasGeneInfo) {
                 total = props.dataStore.geneInformation[child.data.id][index].total;
                 if (props.dataStore.rootStore.hasFCs) {
+                    median = geneMedians[child.data.id]
                     up = props.dataStore.geneInformation[child.data.id][index].up;
                 }
             }
@@ -111,11 +135,15 @@ const AnimatedTreemap = inject("dataStore", "visStore")(observer((props) => {
                 if (props.dataStore.rootStore.hasGeneInfo) {
                     visText = visText + "/" + total;
                     if (props.dataStore.rootStore.hasFCs) {
-                        let proportion = up / total;
-                        if (total === 0) {
-                            proportion = 0.5
+                        if (props.glyphEncoding === "updown") {
+                            let proportion = up / total;
+                            if (total === 0) {
+                                proportion = 0.5
+                            }
+                            proportionFill = glyphColorScale(proportion)
+                        } else {
+                            proportionFill = glyphColorScale(geneMedians[child.data.id])
                         }
-                        proportionFill = upDownScale(proportion)
                         visText = size + ", " + up + ":" + (total - up);
                     }
                 }
@@ -162,9 +190,11 @@ const AnimatedTreemap = inject("dataStore", "visStore")(observer((props) => {
                 }
             }
             const clipID = uuidv4();
-            rects.push(<Tooltip key={child.data.id} title={<TermTooltip color={props.visStore.termColorScale(parent.data.id)}
-                                                          id={child.data.id} logSigThreshold={props.logSigThreshold}
-                                                          setSize={size} up={up} total={total}/>}>
+            rects.push(<Tooltip key={child.data.id}
+                                title={<TermTooltip color={props.visStore.termColorScale(parent.data.id)}
+                                                    isTimeseries={props.isTimeseries}
+                                                    id={child.data.id} logSigThreshold={props.logSigThreshold}
+                                                    setSize={size} up={up} total={total} median={median}/>}>
                     <g transform={'translate(' + child.x0 + ',' + child.y0 + ')'}
                        onMouseEnter={() => props.visStore.setChildHighlight(child.data.id)}
                        onMouseLeave={() => props.visStore.setChildHighlight(null)}>
@@ -223,6 +253,8 @@ const AnimatedTreemap = inject("dataStore", "visStore")(observer((props) => {
 
 AnimatedTreemap.propTypes = {
     logSigThreshold: PropTypes.number.isRequired,
+    glyphEncoding: PropTypes.string.isRequired,
+    isTimeseries: PropTypes.bool.isRequired,
 };
 
 export default AnimatedTreemap;

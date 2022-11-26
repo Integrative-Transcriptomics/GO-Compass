@@ -43,12 +43,6 @@ const AppDrawer = inject("rootStore")(observer((props) => {
                 </FormControl>
             </ListItem>
             <ListItem>
-                <FormControlLabel
-                    control={<Switch checked={props.rootStore.isTimeSeries}
-                                     onChange={() => props.rootStore.toggleIsTimeSeries()}
-                                     name="checkedA"/>}
-                    label="Time Series Data"
-                />
             </ListItem>
         </List>
     </Drawer>)

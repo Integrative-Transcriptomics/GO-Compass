@@ -16,7 +16,6 @@ export class VisStore {
             treemapHeight: 100,
             treemapWidth: 100,
             scrollBarWidth: 17,
-            tsPlotType: "lineChart",
             showOverview: false,
             childHighlight: null,
             childHighlights: [],
@@ -108,9 +107,6 @@ export class VisStore {
             }),
             setTsPlotType: action((type) => {
                 this.tsPlotType = type;
-            }),
-            toggleIsTimeSeries: action(() => {
-                this.isTimeSeries = !this.isTimeSeries;
             }),
             toggleShowOverview: action(() => {
                 this.showOverview = !this.showOverview

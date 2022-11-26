@@ -8,7 +8,7 @@ const TermTooltip = inject("dataStore", "visStore")(observer((props) => {
     return (<div>
         {props.dataStore.dataTable[props.id].description}
         <div style={{color: "black"}}>
-            {props.dataStore.rootStore.isTimeSeries ? <LineChart width={150} height={60} color={props.color}
+            {props.isTimeseries ? <LineChart width={150} height={60} color={props.color}
                                                                  values={props.dataStore.dataTable[props.id].pvalues}
                                                                  sigThreshold={props.dataStore.rootStore.sigThreshold}
                                                                  logSigThreshold={props.logSigThreshold}/> :
@@ -19,12 +19,15 @@ const TermTooltip = inject("dataStore", "visStore")(observer((props) => {
 
         </div>
         {"Set size: " + props.setSize + (props.total !== undefined ? props.up !== undefined
-            ? ", Up: " + (props.up) + " Down: " + (props.total - props.up) :
+            ? ", Up: " + (props.up) + " Down: " + (props.total - props.up)
+            +  " Median:" + (Math.round(props.median*100)/100) :
             " Expressed: " + props.total : "")}
     </div>)
 }));
 TermTooltip.propTypes = {
     id: PropTypes.string.isRequired,
+    median: PropTypes.number.isRequired,
     logSigThreshold: PropTypes.number.isRequired,
+    isTimeseries: PropTypes.bool.isRequired,
 };
 export default TermTooltip;

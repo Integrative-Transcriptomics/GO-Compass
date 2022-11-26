@@ -25,15 +25,11 @@ export class RootStore {
         extendObservable(this, {
             ontology: "BP",
             sigThreshold: Number(pvalueFilter)<=0.05?Number(pvalueFilter):0.05,
-            isTimeSeries: false,
             get logSigThreshold() {
                 return -Math.log10(this.sigThreshold);
             },
             setOntology: action((ontolgy) => {
                 this.ontology = ontolgy;
-            }),
-            toggleIsTimeSeries: action(() => {
-                this.isTimeSeries = !this.isTimeSeries;
             }),
             setSigThreshold: action((threshold) => {
                 this.sigThreshold = threshold;
