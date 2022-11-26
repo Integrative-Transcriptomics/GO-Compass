@@ -5,11 +5,7 @@ import SmallMultiples from "./SmallMultiples";
 import MobileStepper from "@material-ui/core/MobileStepper";
 import Button from "@material-ui/core/Button";
 import {KeyboardArrowLeft, KeyboardArrowRight} from "@material-ui/icons";
-import FormGroup from "@material-ui/core/FormGroup";
-import FormControlLabel from "@material-ui/core/FormControlLabel";
-import Checkbox from "@material-ui/core/Checkbox";
-import {ButtonGroup, FormControl, IconButton, Radio, RadioGroup} from "@material-ui/core";
-import {set} from "mobx";
+import {ButtonGroup, IconButton} from "@material-ui/core";
 import SettingsIcon from '@material-ui/icons/Settings';
 import SettingsModal from "./SettingsModal";
 
