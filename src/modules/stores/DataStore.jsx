@@ -123,7 +123,7 @@ export class DataStore {
                             }))
                     }
                     if (this.rootStore.hasGeneInfo) {
-                        this.rootStore.go2genes[go]
+                        this.dataTable[go]["Genes"]
                             .forEach(gene => {
                                 this.rootStore.geneValues[gene].forEach((fc, i) => {
                                     if(this.rootStore.hasFCs) {

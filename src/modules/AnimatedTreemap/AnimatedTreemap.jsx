@@ -75,14 +75,14 @@ const AnimatedTreemap = inject("dataStore", "visStore")(observer((props) => {
     let glyphColorScale;
     let geneMedians = {}
     if (props.dataStore.rootStore.hasFCs) {
-        props.visStore.treeOrder.forEach(go => geneMedians[go] = d3.median(props.dataStore.rootStore.go2genes[go]
+        props.visStore.treeOrder.forEach(go => geneMedians[go] = d3.median(props.dataStore.dataTable[go]["Genes"]
             .map(gene => props.dataStore.rootStore.geneValues[gene][index])
             .filter(val => val !== false)));
         if (props.glyphEncoding === "updown") {
             glyphColorScale = d3.scaleLinear().domain([0, 0.5, 1]).range(["blue", "white", "red"])
         } else {
-            let allValues = props.dataStore.conditions.map((cond,i)=>Object.keys(props.dataStore.rootStore.go2genes)
-                .map(go => d3.median(props.dataStore.rootStore.go2genes[go]
+            let allValues = props.dataStore.conditions.map((cond,i)=>Object.keys(props.dataStore.dataTable)
+                .map(go => d3.median(props.dataStore.dataTable[go]["Genes"]
                     .map(gene => props.dataStore.rootStore.geneValues[gene][i]).filter(val => val !== false)))).flat()
             let domain;
             const max = d3.max(allValues);

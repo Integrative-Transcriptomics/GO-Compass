@@ -60,7 +60,7 @@ Cell.propTypes = {
 const Row = inject("visStore", "dataStore", "tableStore")(observer((props) => {
     const mainRow = props.keys.map(key => {
         let align = "right";
-        if (key === "termID") {
+        if (key === "termID" || key === "Genes") {
             align = "left";
         }
         let value = props.tableStore.mapper[props.goTerm][key];
@@ -72,7 +72,7 @@ const Row = inject("visStore", "dataStore", "tableStore")(observer((props) => {
         return <Cell key={key} color="black" align={align} value={value}
                      isTerm={key === "termID"}
                      significant={props.dataStore.conditions.includes(key)
-                     && props.tableStore.mapper[props.goTerm][key] > props.logSigThreshold}/>;
+                         && props.tableStore.mapper[props.goTerm][key] > props.logSigThreshold}/>;
     });
     let subRows = null;
     if ((props.open) && props.subTerms.length > 0) {
@@ -89,7 +89,7 @@ const Row = inject("visStore", "dataStore", "tableStore")(observer((props) => {
                     return <Cell key={key} color="gray" align="right" value={value}
                                  isTerm={key === "termID"}
                                  significant={props.dataStore.conditions.includes(key)
-                                 && props.tableStore.mapper[props.goTerm][key] > props.logSigThreshold}/>
+                                     && props.tableStore.mapper[props.goTerm][key] > props.logSigThreshold}/>
                 })}
             </TableRow>
         ))
@@ -127,7 +127,7 @@ const DataTable = inject("dataStore", "tableStore")(observer((props) => {
         if (header.length === 0) {
             keys = props.dataStore.tableColumns;
             header = keys.map(d => <TableCell key={d} onClick={() => props.tableStore.sort(d.slice())}
-                                              align="right">
+                                              align={d !== "Genes" ? "right" : "left"}>
                 <TableSortLabel
                     active={props.tableStore.sortKey === d}
                     direction={props.tableStore.sortKey === d ? props.tableStore.sortDir : 'asc'}
@@ -160,7 +160,7 @@ const DataTable = inject("dataStore", "tableStore")(observer((props) => {
                     </TableBody>
                 </Table>
             </TableContainer>
-            <Button startIcon={<GetAppIcon/>} onClick={() =>props.tableStore.downloadCSV()}>
+            <Button startIcon={<GetAppIcon/>} onClick={() => props.tableStore.downloadCSV()}>
                 Download Table
             </Button>
         </Paper>

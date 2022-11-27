@@ -36,7 +36,7 @@ const BarChart = inject("dataStore", "visStore")(observer((props) => {
                 {bars}
                 <Axis h={height} w={width} axis={xAxis} axisType={'x'} label={''}/>
                 <Axis h={height} w={width} axis={yAxis} axisType={'y'} label={''}/>
-                <SignificanceLine width={width} height={yScale(props.logSigThreshold)}
+                <SignificanceLine width={width} height={height-yScale(props.logSigThreshold)}
                                   sigThreshold={props.sigThreshold}/>
             </g>
         </svg>

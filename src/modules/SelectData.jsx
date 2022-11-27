@@ -59,7 +59,7 @@ const SelectData = (props) => {
                 return geneFiles[d.index];
             });
             multiRevigoGoLists(goFile, reorderedFiles, [...multiBackground], selectedMeasure, pvalueFilter, response => {
-                props.setRootStore(new RootStore(response.results, response.conditions, response.tableColumns, response.hasFC, response.geneValues, response.go2genes, response.goSetSize, selectedMeasure, pvalueFilter));
+                props.setRootStore(new RootStore(response.results, response.conditions, response.tableColumns, response.hasFC, response.geneValues, response.goSetSize, selectedMeasure, pvalueFilter));
             });
 
         } else {
@@ -67,7 +67,7 @@ const SelectData = (props) => {
                 return geneFiles[d.index];
             });
             multiSpeciesRevigo(reorderedFiles, [...multiBackground], conditions.map(d => d.condition), conditions.map(d => d.background), selectedMeasure, pvalueFilter, direction, response => {
-                props.setRootStore(new RootStore(response.results, response.conditions, response.tableColumns, response.hasFC, response.geneValues, response.go2genes, response.goSetSize, selectedMeasure, pvalueFilter));
+                props.setRootStore(new RootStore(response.results, response.conditions, response.tableColumns, response.hasFC, response.geneValues, response.goSetSize, selectedMeasure, pvalueFilter));
             });
         }
     }, [goFile, selectedMeasure, pvalueFilter, props, conditions, multiBackground, direction, geneFiles]);

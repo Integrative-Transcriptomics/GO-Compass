@@ -391,7 +391,7 @@ def pca():
 def readFileHeader():
     goEnrichmentFile = request.files["goEnrichment"]
     columns = pd.read_csv(StringIO(goEnrichmentFile.stream.read().decode("UTF8"), newline=None), sep='\t', index_col=0,
-                       nrows=0).columns.tolist()
+                          nrows=0).columns.tolist()
     return json.dumps(columns)
 
 
@@ -487,12 +487,12 @@ def MultiSpeciesREVIGO():
             for key in backgroundAnno:
                 background.update(backgroundAnno[key].get_id2gos(ont))
             multiGOresults[ont] = MultiGO(enrichmentDF, background, request.form["method"])
-    go2genes = {key: list(value) for key, value in go2genes.items()}
+            for go in multiGOresults[ont]["data"]:
+                multiGOresults[ont]["data"][go]["Genes"] = list(go2genes[go])
+    tableColumns = ["termID", "description", "frequency", "uniqueness", "dispensability"] + conditions + ["Genes"]
     return simplejson.dumps(
-        {"results": multiGOresults, "geneValues": genes, "hasFC": hasFC, "go2genes": go2genes, "goSetSize": goSetSize,
-         "conditions": conditions,
-         "tableColumns": ["termID", "description", "frequency", "uniqueness",
-                          "dispensability"] + conditions}, ignore_nan=True)
+        {"results": multiGOresults, "geneValues": genes, "hasFC": hasFC, "goSetSize": goSetSize,
+         "conditions": conditions, "tableColumns": tableColumns}, ignore_nan=True)
 
 
 @app.route("/GoListsMultiREVIGO", methods=["POST"])
@@ -503,9 +503,10 @@ def GoListsMultiREVIGO():
     backgroundFiles = request.files.getlist("backgrounds[]")
     goEnrichmentFile = request.files["goEnrichment"]
     geneListFiles = request.files.getlist("geneLists[]")
+    hasGenes = len(geneListFiles) > 0
     genes = {}
     hasFC = False
-    if len(geneListFiles) > 0:
+    if hasGenes:
         genesDFs = []
         for index, file in enumerate(geneListFiles):
             genesDF = pd.read_csv(StringIO(file.stream.read().decode("utf-8")
@@ -530,14 +531,15 @@ def GoListsMultiREVIGO():
     multiGOresults = dict()
     conditions = []
     goSetSize = {}
-    go2genes = {}
     for go in goEnrichment.index.tolist():
-        go2genes[go]=set()
-        goSetSize[go]=0
+        goSetSize[go] = 0
     for ont in ontologies:
         filteredDAG = [d for d in godag if NAMESPACE2NS[godag[d].namespace] == ont]
         enrichmentDF = goEnrichment[goEnrichment.index.isin(filteredDAG)]
         if len(enrichmentDF) > 0:
+            go2genes = {}
+            for go in goEnrichment.index.tolist():
+                go2genes[go] = set()
             background = dict()
             for key in backgroundAnno:
                 background_ont = backgroundAnno[key].get_id2gos(ont)
@@ -551,12 +553,14 @@ def GoListsMultiREVIGO():
                             go2genes[term].add(gene)
                         goSetSize[term] += 1
             multiGOresults[ont] = MultiGO(enrichmentDF, background, request.form["method"])
+            for go in multiGOresults[ont]["data"]:
+                multiGOresults[ont]["data"][go]["Genes"] = list(go2genes[go])
         conditions = enrichmentDF.columns.values.tolist()
-    go2genes = {key: list(value) for key, value in go2genes.items()}
-    return {"results": multiGOresults, "conditions": conditions, "geneValues": genes, "hasFC": hasFC,
-            "go2genes": go2genes, "goSetSize": goSetSize,
-            "tableColumns": ["termID", "description", "frequency", "uniqueness",
-                             "dispensability"] + conditions}
+    tableColumns = ["termID", "description", "frequency", "uniqueness", "dispensability"] + conditions
+    if hasGenes:
+        tableColumns.append("Genes")
+    return {"results": multiGOresults, "conditions": conditions, "geneValues": genes, "hasFC": hasFC
+        , "goSetSize": goSetSize, "tableColumns": tableColumns}
 
 
 @app.route("/exampleBackground", methods=["GET"])

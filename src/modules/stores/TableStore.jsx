@@ -10,12 +10,15 @@ export class TableStore {
         Object.keys(dataTable).forEach(goTerm => {
             this.mapper[goTerm] = {};
             Object.keys(dataTable[goTerm]).forEach(key => {
-                if (key !== "pvalues") {
-                    this.mapper[goTerm][key] = dataTable[goTerm][key];
-                } else {
+                if (key === "pvalues") {
                     conditions.forEach((condition, i) => {
                         this.mapper[goTerm][condition] = dataTable[goTerm]['pvalues'][i];
                     })
+                } else if (key === "Genes") {
+                    this.mapper[goTerm][key] = dataTable[goTerm][key].join(",");
+
+                } else {
+                    this.mapper[goTerm][key] = dataTable[goTerm][key];
                 }
             })
         });
@@ -86,15 +89,15 @@ export class TableStore {
     }
 
     downloadCSV() {
-        let rows = this.tableColumns.join(",") + "\n"
+        let rows = this.tableColumns.join("\t") + "\n"
         rows = rows + this.termState.map((state, i) => {
-            return (this.tableColumns.map(col => this.mapper[state.goTerm][col])).join(",")
+            return (this.tableColumns.map(col => this.mapper[state.goTerm][col])).join("\t")
         }).join("\n")
         let blob = new Blob([rows], {type: 'text/csv;charset=utf-8;'})
         let url = URL.createObjectURL(blob);
         let link = document.createElement("a");
         link.setAttribute("href", url);
-        link.setAttribute("download", "go-table.csv");
+        link.setAttribute("download", "go-table.tsv");
         link.style.visibility = 'hidden';
         document.body.appendChild(link);
         link.click();
