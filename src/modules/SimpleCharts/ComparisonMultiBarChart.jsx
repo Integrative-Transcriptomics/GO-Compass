@@ -67,7 +67,7 @@ const MultiBarChart = inject("dataStore", "visStore")(observer((props) => {
     })
 
     return (
-        <div>
+        <div id={props.id} style={{height: props.height}}>
             <svg width={margins.left} height={props.height} style={{float: "left"}}>
                 <text transform={"translate(20," + (props.height / 2) + ")rotate(270)"}
                       textAnchor={"middle"}>-log10
@@ -97,6 +97,7 @@ MultiBarChart.propTypes = {
     height: PropTypes.number.isRequired,
     sigThreshold: PropTypes.number.isRequired,
     logSigThreshold: PropTypes.number.isRequired,
+    id: PropTypes.string.isRequired,
 };
 export default MultiBarChart;
 

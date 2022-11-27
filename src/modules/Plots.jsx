@@ -2,7 +2,7 @@ import React, {createRef, useCallback, useEffect, useState} from "react";
 import Grid from "@material-ui/core/Grid";
 import SimpleChart from "./SimpleCharts/SimpleChart";
 import {makeStyles} from "@material-ui/core/styles";
-import {createStyles, Tab, Tabs} from "@material-ui/core";
+import {createStyles, IconButton, Tab, Tabs} from "@material-ui/core";
 import Paper from "@material-ui/core/Paper";
 import DataTable from "./DetailedTable/DataTable";
 import CorrelationHeatmap from "./CorrelationHeatmap";
@@ -12,6 +12,10 @@ import Typography from "@material-ui/core/Typography";
 import UpSet from "./UpSet";
 import Treemap from "./AnimatedTreemap/Treemap";
 import TabPanel from "./TabPanel";
+import GetAppIcon from '@material-ui/icons/GetApp';
+import {exportPDF} from "../UtilityFunctions";
+import {v4 as uuidv4} from 'uuid'
+
 
 /**
  * @return {null}
@@ -40,7 +44,11 @@ const Plots = inject("dataStore", "visStore")(observer((props) => {
     const tabRef = createRef();
     const classes = useStyles();
     const [selectedTab, setSelectedTab] = useState(0);
-    const [tabHeight, setTabHeight] = useState(10)
+    const [tabHeight, setTabHeight] = useState(10);
+    const treeID = "id" + uuidv4();
+    const treeMapID = "id" + uuidv4();
+    const barChartID = "id" + uuidv4();
+    const summaryID = "id" + uuidv4();
     useEffect(() => {
         changeWidth();
         window.addEventListener("resize", changeWidth);
@@ -56,11 +64,15 @@ const Plots = inject("dataStore", "visStore")(observer((props) => {
                 <Paper className={classes.paper}>
                     <Typography>
                         Cutoff Selection in GO Dispensability Tree
+                        <IconButton onClick={() => exportPDF(treeID, true)}>
+                            <GetAppIcon/>
+                        </IconButton>
                     </Typography>
                     <ClusteredHeatmap
                         logSigThreshold={props.logSigThreshold}
                         width={props.visStore.screenWidth / 2}
                         height={props.visStore.plotHeight / 2}
+                        id={treeID}
                     />
                 </Paper>
             </Grid>
@@ -68,13 +80,16 @@ const Plots = inject("dataStore", "visStore")(observer((props) => {
                 <Paper className={classes.paper}>
                     <Treemap logSigThreshold={props.logSigThreshold}
                              height={props.visStore.plotHeight / 2}
-                            width={props.visStore.screenWidth/2}/>
+                             width={props.visStore.screenWidth / 2} id={treeMapID}/>
                 </Paper>
             </Grid>
             <Grid item xs={6}>
                 <Paper className={classes.paper}>
                     <Typography>
                         List Comparison
+                        <IconButton onClick={() => exportPDF(summaryID, true)}>
+                            <GetAppIcon/>
+                        </IconButton>
                     </Typography>
                     <Tabs ref={tabRef} value={selectedTab} onChange={(e, v) => setSelectedTab(v)}>
                         <Tab label="All GO-Terms"/>
@@ -84,6 +99,7 @@ const Plots = inject("dataStore", "visStore")(observer((props) => {
                         {props.dataStore.correlationLoaded ?
                             <CorrelationHeatmap width={props.visStore.screenWidth / 2}
                                                 height={props.visStore.plotHeight / 2 - tabHeight}
+                                                id={summaryID}
                             /> : null
                         }
                     </TabPanel>
@@ -91,7 +107,8 @@ const Plots = inject("dataStore", "visStore")(observer((props) => {
                         <Provider upSetStore={props.dataStore.upSetStore}>
                             <UpSet width={props.visStore.screenWidth / 2}
                                    height={props.visStore.plotHeight / 2 - tabHeight}
-                                   logSigThreshold={props.logSigThreshold}/>
+                                   logSigThreshold={props.logSigThreshold}
+                                   id={summaryID}/>
                         </Provider>
                     </TabPanel>
 
@@ -99,10 +116,14 @@ const Plots = inject("dataStore", "visStore")(observer((props) => {
             </Grid>
             <Grid item xs={6}>
                 <Paper className={classes.paper}>
-                    <Typography>Detailed Comparison</Typography>
+                    <Typography>Detailed Comparison
+                        <IconButton onClick={() => exportPDF(barChartID, true)}>
+                            <GetAppIcon/>
+                        </IconButton></Typography>
                     <SimpleChart sigThreshold={props.sigThreshold} logSigThreshold={props.logSigThreshold}
                                  isTimeSeries={props.isTimeSeries}
-                                 width={props.visStore.screenWidth / 2} height={props.visStore.plotHeight / 2}/>
+                                 width={props.visStore.screenWidth / 2} height={props.visStore.plotHeight / 2}
+                                 id={barChartID}/>
                 </Paper>
             </Grid>
             <Grid item xs={12}>
@@ -113,7 +134,8 @@ const Plots = inject("dataStore", "visStore")(observer((props) => {
                 </Paper>
             </Grid>
         </Grid>
-    );
+    )
+        ;
 
 }));
 

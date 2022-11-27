@@ -76,7 +76,7 @@ const ClusteredHeatmap = inject("dataStore", "visStore")(observer((props) => {
         return (
             <div onMouseMove={(e) => setXPos(e.pageX)}
                  onMouseDown={() => setMouseDown(true)}
-                 onMouseUp={() => setMouseDown(false)}>
+                 onMouseUp={() => setMouseDown(false)} id={props.id}>
                 <svg width={innerWidth} height={margins.top}>
                     <g transform={"translate(" + (margins.left + overviewWidth) + ",0)"}>
                         <DraggableTriangle xPos={xPos}
@@ -112,7 +112,7 @@ const ClusteredHeatmap = inject("dataStore", "visStore")(observer((props) => {
                                         pattern={props.visStore.parentSizes}
                                         colorScale={props.visStore.termColorScale}/>
                     </div>
-                    <div className={classes.scroll} style={{
+                    <div className={classes.scroll} id={props.id+"_scroll"} style={{
                         overflowY: "scroll",
                         maxHeight: height, float: "left"
                     }} ref={scrollContainer}
@@ -159,6 +159,7 @@ ClusteredHeatmap.propTypes = {
     width: PropTypes.number.isRequired,
     height: PropTypes.number.isRequired,
     logSigThreshold: PropTypes.number.isRequired,
+    treeID: PropTypes.string.isRequired,
 };
 
 export default ClusteredHeatmap;

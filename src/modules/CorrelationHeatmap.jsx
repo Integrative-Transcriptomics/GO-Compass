@@ -40,19 +40,22 @@ const CorrelationHeatmap = inject("dataStore", "visStore")(observer((props) => {
     const yAxis = d3.axisLeft()
         .scale(yScale);
 
-    return (<svg height={props.height} width={props.width}>
-        <g transform={"translate(" + margins.left + "," + margins.top + ")"}>
-            <Axis h={height} w={width} axis={xAxis} axisType={'x'} label={''} rotate={true}/>
-            <Axis h={height} w={width} axis={yAxis} axisType={'y'} label={''}/>
-            {rects}
-        </g>
-        <g transform={"translate(" + (props.width - margins.right - 100) + "," + margins.top + ")"}>
-            <GradientLegend range={color.domain().map(d => color(d))} domain={color.domain()} label={""}/>
-        </g>
-    </svg>);
+    return (<div id={props.id}>
+        <svg height={props.height} width={props.width}>
+            <g transform={"translate(" + margins.left + "," + margins.top + ")"}>
+                <Axis h={height} w={width} axis={xAxis} axisType={'x'} label={''} rotate={true}/>
+                <Axis h={height} w={width} axis={yAxis} axisType={'y'} label={''}/>
+                {rects}
+            </g>
+            <g transform={"translate(" + (props.width - margins.right - 100) + "," + margins.top + ")"}>
+                <GradientLegend range={color.domain().map(d => color(d))} domain={color.domain()} label={""}/>
+            </g>
+        </svg>
+    </div>);
 }));
 
 CorrelationHeatmap.propTypes = {
     width: PropTypes.number.isRequired, height: PropTypes.number.isRequired,
+    id: PropTypes.string.isRequired,
 };
 export default CorrelationHeatmap;

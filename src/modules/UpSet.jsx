@@ -3,7 +3,7 @@ import React, {useCallback, useState} from "react";
 import UpSetJS, {VennDiagram} from '@upsetjs/react';
 
 
-const UpSet = inject("upSetStore","dataStore", "visStore")(observer((props) => {
+const UpSet = inject("upSetStore", "dataStore", "visStore")(observer((props) => {
     const [localSelection, setLocalSelection] = useState(null)
 
     const select = useCallback((selection) => {
@@ -21,15 +21,17 @@ const UpSet = inject("upSetStore","dataStore", "visStore")(observer((props) => {
             props.visStore.setChildHighlights(selection.elems.map(d => d.name));
         }
     }, [props.dataStore, props.visStore]);
+    let plot;
     if (props.upSetStore.upSetSets.length > 3) {
-        return <UpSetJS sets={props.upSetStore.upSetSets} combinations={props.upSetStore.upSetCombinations}
+        plot = <UpSetJS sets={props.upSetStore.upSetSets} combinations={props.upSetStore.upSetCombinations}
                         width={props.width} height={props.height}
                         selection={localSelection}
                         onHover={select}/>;
     } else {
-        return <VennDiagram sets={props.upSetStore.upSetSets} width={props.width} height={props.height}
+        plot = <VennDiagram sets={props.upSetStore.upSetSets} width={props.width} height={props.height}
                             selection={localSelection}
                             onHover={select}/>;
     }
+    return (<div id={props.id}>{plot}</div>)
 }));
 export default UpSet

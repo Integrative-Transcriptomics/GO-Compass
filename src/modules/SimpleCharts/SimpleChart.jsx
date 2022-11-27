@@ -41,7 +41,7 @@ const SimpleChart = inject("dataStore", "visStore")(observer((props) => {
                            height={store.chartHeight}
                            sigThreshold={props.sigThreshold}
                            logSigThreshold={props.logSigThreshold}
-                           scaleLocked={store.scaleLocked}/> </Box>
+                           scaleLocked={store.scaleLocked} id={props.id}/> </Box>
     );
 }));
 
@@ -50,6 +50,7 @@ SimpleChart.propTypes = {
     height: PropTypes.number.isRequired,
     sigThreshold: PropTypes.number.isRequired,
     logSigThreshold: PropTypes.number.isRequired,
+    id: PropTypes.string.isRequired,
 };
 export default SimpleChart;
 

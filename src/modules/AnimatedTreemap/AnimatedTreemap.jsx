@@ -81,7 +81,7 @@ const AnimatedTreemap = inject("dataStore", "visStore")(observer((props) => {
         if (props.glyphEncoding === "updown") {
             glyphColorScale = d3.scaleLinear().domain([0, 0.5, 1]).range(["blue", "white", "red"])
         } else {
-            let allValues = props.dataStore.conditions.map((cond,i)=>Object.keys(props.dataStore.dataTable)
+            let allValues = props.dataStore.conditions.map((cond, i) => Object.keys(props.dataStore.dataTable)
                 .map(go => d3.median(props.dataStore.dataTable[go]["Genes"]
                     .map(gene => props.dataStore.rootStore.geneValues[gene][i]).filter(val => val !== false)))).flat()
             let domain;
@@ -241,13 +241,15 @@ const AnimatedTreemap = inject("dataStore", "visStore")(observer((props) => {
         })
     );
     return (
-        <svg width={props.visStore.treemapWidth} height={props.visStore.treemapHeight}>
-            <rect width={props.visStore.treemapWidth} height={props.visStore.treemapHeight} fill={"none"}
-                  stroke={"lightgray"} strokeWidth={"1px"}/>
-            <g ref={stripedRef}>{stripedRects}</g>
-            <g ref={leafRef}>{rects}</g>
-            <g ref={propRef}>{proportions}</g>
-        </svg>
+        <div id={props.id}>
+            <svg width={props.visStore.treemapWidth} height={props.visStore.treemapHeight}>
+                <rect width={props.visStore.treemapWidth} height={props.visStore.treemapHeight} fill={"none"}
+                      stroke={"lightgray"} strokeWidth={"1px"}/>
+                <g ref={stripedRef}>{stripedRects}</g>
+                <g ref={leafRef}>{rects}</g>
+                <g ref={propRef}>{proportions}</g>
+            </svg>
+        </div>
     );
 }));
 
@@ -255,6 +257,7 @@ AnimatedTreemap.propTypes = {
     logSigThreshold: PropTypes.number.isRequired,
     glyphEncoding: PropTypes.string.isRequired,
     isTimeseries: PropTypes.bool.isRequired,
+    id: PropTypes.string.isRequired,
 };
 
 export default AnimatedTreemap;

@@ -8,6 +8,8 @@ import {KeyboardArrowLeft, KeyboardArrowRight} from "@material-ui/icons";
 import {ButtonGroup, IconButton} from "@material-ui/core";
 import SettingsIcon from '@material-ui/icons/Settings';
 import SettingsModal from "./SettingsModal";
+import {exportPDF} from "../../UtilityFunctions";
+import GetAppIcon from "@material-ui/icons/GetApp";
 
 const Treemap = inject("dataStore", "visStore")(observer((props) => {
     const [showGenes, setShowGenes] = useState(true);
@@ -53,6 +55,9 @@ const Treemap = inject("dataStore", "visStore")(observer((props) => {
                         activeStep={props.visStore.conditionIndex}
                         nextButton={
                             [<ButtonGroup>
+                                <IconButton onClick={() => exportPDF(props.id, true)}>
+                                    <GetAppIcon/>
+                                </IconButton>
                                 <IconButton variant="outlined" color="primary" onClick={() => setOpen(true)}>
                                     <SettingsIcon/>
                                 </IconButton>
@@ -86,7 +91,8 @@ const Treemap = inject("dataStore", "visStore")(observer((props) => {
                                  glyphEncoding={glyphEncoding}
                                  showGenes={showGenes}
                                  showNumbers={showNumbers}
-                                isTimeseries={isTimeseries}/>
+                                 isTimeseries={isTimeseries}
+                                 id={props.id}/>
             </div>
             <div style={{
                 right: "0",
