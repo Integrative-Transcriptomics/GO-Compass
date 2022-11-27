@@ -14,7 +14,7 @@
     "@testing-library/user-event": "^7.2.1",
     "@upsetjs/react": "^1.6.2",
     "axios": "^0.21.2",
-    "d3": "^5.16.0",
+    "d3": "^7.6.1",
     "html2canvas": "^1.4.1",
     "jspdf": "^2.5.1",
     "mobx": "^5.15.4",
