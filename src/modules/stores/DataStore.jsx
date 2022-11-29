@@ -107,6 +107,7 @@ export class DataStore {
                         upDown[go] = Array.from({length: conditions.length},
                             () => ({
                                 up: 0,
+                                down:0,
                                 total: 0,
                                 setSize: this.rootStore.goSetSize[go]
                             }))
@@ -126,9 +127,11 @@ export class DataStore {
                         this.dataTable[go]["Genes"]
                             .forEach(gene => {
                                 this.rootStore.geneValues[gene].forEach((fc, i) => {
-                                    if(this.rootStore.hasFCs) {
+                                    if (this.rootStore.hasFCs) {
                                         if (fc > 0) {
                                             upDown[go][i].up += 1
+                                        } else if (fc < 0) {
+                                            upDown[go][i].down += 1
                                         }
                                     }
                                     upDown[go][i].total += 1;

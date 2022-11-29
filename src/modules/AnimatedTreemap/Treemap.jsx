@@ -11,6 +11,11 @@ import SettingsModal from "./SettingsModal";
 import {exportPDF} from "../../UtilityFunctions";
 import GetAppIcon from "@material-ui/icons/GetApp";
 
+function ButtonGroupIconButton(props) {
+  // intercept props only implemented by `Button`
+  const { disableElevation, fullWidth, variant, ...iconButtonProps } = props;
+  return <IconButton {...iconButtonProps} />;
+}
 const Treemap = inject("dataStore", "visStore")(observer((props) => {
     const [showGenes, setShowGenes] = useState(true);
     const [showNumbers, setShowNumbers] = useState(false);
@@ -53,22 +58,20 @@ const Treemap = inject("dataStore", "visStore")(observer((props) => {
                         position="static"
                         variant="text"
                         activeStep={props.visStore.conditionIndex}
-                        nextButton={
-                            [<ButtonGroup>
-                                <IconButton onClick={() => exportPDF(props.id, true)}>
+                        nextButton={<ButtonGroup>
+                                <ButtonGroupIconButton onClick={() => exportPDF(props.id, true)}>
                                     <GetAppIcon/>
-                                </IconButton>
-                                <IconButton variant="outlined" color="primary" onClick={() => setOpen(true)}>
+                                </ButtonGroupIconButton>
+                                <ButtonGroupIconButton variant="outlined" color="primary" onClick={() => setOpen(true)}>
                                     <SettingsIcon/>
-                                </IconButton>
+                                </ButtonGroupIconButton>
                                 <Button size="small"
                                         onClick={() => props.visStore.setConditionIndex(props.visStore.conditionIndex + 1)}
                                         disabled={props.visStore.conditionIndex === props.dataStore.conditions.length - 1}>
                                     Next
                                     <KeyboardArrowRight/>
-                                </Button></ButtonGroup>
-                            ]
-                        }
+                                </Button>
+                    </ButtonGroup>}
                         backButton={
                             <Button size="small"
                                     onClick={() => props.visStore.setConditionIndex(props.visStore.conditionIndex - 1)}

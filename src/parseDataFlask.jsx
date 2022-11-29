@@ -11,10 +11,11 @@ function performCorrelation(data, callback) {
     })
 }
 
-function multiRevigoGoLists(goFile, dataFiles, backgroundFiles, method, pvalueFilter, callback) {
+function multiRevigoGoLists(goFile, dataFiles, backgroundFiles, propagateBackground, method, pvalueFilter, callback) {
     if (goFile != null) {
         const formData = new FormData();
         backgroundFiles.forEach(file => formData.append("backgrounds[]", file));
+        formData.append("propagateBackground", propagateBackground);
         dataFiles.forEach(file => formData.append("geneLists[]", file));
         formData.append("goEnrichment", goFile);
         formData.append("pvalueFilter", pvalueFilter);
@@ -29,9 +30,10 @@ function multiRevigoGoLists(goFile, dataFiles, backgroundFiles, method, pvalueFi
     }
 }
 
-function multiSpeciesRevigo(dataFiles, backgroundFiles, conditions, backgroundMap, method, pvalueFilter, direction, callback) {
+function multiSpeciesRevigo(dataFiles, backgroundFiles, propagateBackground, conditions, backgroundMap, method, pvalueFilter, direction, callback) {
     const formData = new FormData();
     backgroundFiles.forEach(file => formData.append("backgrounds[]", file));
+    formData.append("propagateBackground", propagateBackground);
     dataFiles.forEach(file => formData.append("geneLists[]", file));
     formData.append("pvalueFilter", pvalueFilter);
     conditions.forEach(condition => formData.append("conditions[]", condition));
@@ -73,7 +75,8 @@ function exampleData(callback) {
         ))
 
 }
-function getGOheader(goFile,callback){
+
+function getGOheader(goFile, callback) {
     if (goFile != null) {
         const formData = new FormData();
         formData.append("goEnrichment", goFile);

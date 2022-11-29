@@ -121,12 +121,13 @@ const AnimatedTreemap = inject("dataStore", "visStore")(observer((props) => {
             }
             const fill = props.visStore.termColorScale(parent.data.id);
             let size = props.dataStore.geneInformation[child.data.id][index].setSize;
-            let up, total, median;
+            let up, down, total, median;
             if (props.dataStore.rootStore.hasGeneInfo) {
                 total = props.dataStore.geneInformation[child.data.id][index].total;
                 if (props.dataStore.rootStore.hasFCs) {
                     median = geneMedians[child.data.id]
                     up = props.dataStore.geneInformation[child.data.id][index].up;
+                    down = props.dataStore.geneInformation[child.data.id][index].down;
                 }
             }
             if (rectWidth > 0 && rectHeight > 0) {
@@ -136,7 +137,7 @@ const AnimatedTreemap = inject("dataStore", "visStore")(observer((props) => {
                     visText = visText + "/" + total;
                     if (props.dataStore.rootStore.hasFCs) {
                         if (props.glyphEncoding === "updown") {
-                            let proportion = up / total;
+                            let proportion = up / (up+down);
                             if (total === 0) {
                                 proportion = 0.5
                             }
@@ -144,7 +145,7 @@ const AnimatedTreemap = inject("dataStore", "visStore")(observer((props) => {
                         } else {
                             proportionFill = glyphColorScale(geneMedians[child.data.id])
                         }
-                        visText = size + ", " + up + ":" + (total - up);
+                        visText = size + ", " + up + ":" + down;
                     }
                 }
                 const propHeight = 10;
@@ -194,7 +195,7 @@ const AnimatedTreemap = inject("dataStore", "visStore")(observer((props) => {
                                 title={<TermTooltip color={props.visStore.termColorScale(parent.data.id)}
                                                     isTimeseries={props.isTimeseries}
                                                     id={child.data.id} logSigThreshold={props.logSigThreshold}
-                                                    setSize={size} up={up} total={total} median={median}/>}>
+                                                    setSize={size} up={up} down={down} total={total} median={median}/>}>
                     <g transform={'translate(' + child.x0 + ',' + child.y0 + ')'}
                        onMouseEnter={() => props.visStore.setChildHighlight(child.data.id)}
                        onMouseLeave={() => props.visStore.setChildHighlight(null)}>

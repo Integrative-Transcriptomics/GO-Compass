@@ -340,19 +340,20 @@ def flattenBackground(background):
     return [genes, terms]
 
 
-def GOEA(genes, objanno):
+def GOEA(genes, objanno, propagateBackground):
     """ returns go term enrichment
 
     Keyword arguments:
     genes -- list of genes
     objanno -- background dict
+    propagateBackground -- should background be propagated
     performs GO term enrichment
     """
     goeaobj = GOEnrichmentStudyNS(
         objanno.get_id2gos().keys(),  # List of  protein-coding genes
         objanno.get_ns2assc(),  # geneid/GO associations
         godag,  # Ontologies
-        propagate_counts=True,
+        propagate_counts=propagateBackground,
         alpha=0.05,  # default significance cut-off
         methods=['fdr_bh'])  # defult multipletest correction method
     goea_quiet_all = goeaobj.run_study(genes, prt=None)
@@ -416,6 +417,7 @@ def MultiSpeciesREVIGO():
     geneListFiles = request.files.getlist("geneLists[]")
     conditions = request.form.getlist("conditions[]")
     backgroundMap = request.form.getlist("backgroundMap[]")
+    propagateBackground = request.form["propagateBackground"]
     backgroundAnno = dict()
     # read background for each background file
     for index, file in enumerate(backgroundFiles):
@@ -439,7 +441,7 @@ def MultiSpeciesREVIGO():
             genesDFs.append(genesDF)
 
         # print("------",str(index),"------")
-        result = GOEA(genesDF.index.tolist(), backgroundAnno[backgroundMap[index]])
+        result = GOEA(genesDF.index.tolist(), backgroundAnno[backgroundMap[index]],propagateBackground=="true")
         # print(result)
 
         for ont in ontologies:
@@ -503,6 +505,7 @@ def GoListsMultiREVIGO():
     backgroundFiles = request.files.getlist("backgrounds[]")
     goEnrichmentFile = request.files["goEnrichment"]
     geneListFiles = request.files.getlist("geneLists[]")
+    propagateBackground = request.form["propagateBackground"]
     hasGenes = len(geneListFiles) > 0
     genes = {}
     hasFC = False
@@ -543,7 +546,8 @@ def GoListsMultiREVIGO():
             background = dict()
             for key in backgroundAnno:
                 background_ont = backgroundAnno[key].get_id2gos(ont)
-                update_association(background_ont, godag, None)
+                if propagateBackground=="true":
+                    update_association(background_ont, godag, None)
                 background.update(background_ont)
                 # print(background_ont)
             for gene in background:

@@ -159,7 +159,7 @@ ClusteredHeatmap.propTypes = {
     width: PropTypes.number.isRequired,
     height: PropTypes.number.isRequired,
     logSigThreshold: PropTypes.number.isRequired,
-    treeID: PropTypes.string.isRequired,
+    id: PropTypes.string.isRequired,
 };
 
 export default ClusteredHeatmap;
