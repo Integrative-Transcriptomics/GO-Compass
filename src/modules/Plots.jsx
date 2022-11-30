@@ -15,7 +15,6 @@ import TabPanel from "./TabPanel";
 import GetAppIcon from '@material-ui/icons/GetApp';
 import {exportPDF} from "../UtilityFunctions";
 import {v4 as uuidv4} from 'uuid'
-import SignificanceLine from "./SimpleCharts/SignificanceLine";
 
 
 /**
@@ -120,8 +119,7 @@ const Plots = inject("dataStore", "visStore")(observer((props) => {
                     <Typography>Detailed Comparison
                         <IconButton onClick={() => exportPDF(barChartID, true)}>
                             <GetAppIcon/>
-                        </IconButton>
-                    </Typography>
+                        </IconButton></Typography>
                     <SimpleChart sigThreshold={props.sigThreshold} logSigThreshold={props.logSigThreshold}
                                  isTimeSeries={props.isTimeSeries}
                                  width={props.visStore.screenWidth / 2} height={props.visStore.plotHeight / 2}
