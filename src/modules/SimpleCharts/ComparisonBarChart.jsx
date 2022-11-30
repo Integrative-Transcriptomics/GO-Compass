@@ -40,7 +40,7 @@ const BarChart = inject("dataStore", "visStore")(observer((props) => {
     let sigLine = null;
     if (props.logSigThreshold < max) {
         sigLine = <SignificanceLine width={width} height={yScale(props.logSigThreshold)}
-                                    sigThreshold={props.sigThreshold} offset={props.offset}/>
+                                    sigThreshold={props.sigThreshold}/>
     }
     const xAxis = d3.axisBottom()
         .scale(props.xScale)
@@ -52,9 +52,7 @@ const BarChart = inject("dataStore", "visStore")(observer((props) => {
             {rects}
             {/*<g ref={highlightRef}>{highlighters}</g>*/}
             {sigLine}
-            <g transform={'translate(' + props.offset + ",15)"}>
-                <text>{props.dataStore.conditions[props.id]}</text>
-            </g>
+
         </g>
     );
 }));

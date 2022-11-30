@@ -13,6 +13,7 @@ const MultiBarChart = inject("dataStore", "visStore")(observer((props) => {
         bottom: 100,
         left: 60,
     };
+    const condtitionsWidth = props.visStore.maxConditionTextSize*1.5;
     const scrollableSVG = createRef();
     const scrollContainer = createRef();
     let max = 0;
@@ -35,11 +36,11 @@ const MultiBarChart = inject("dataStore", "visStore")(observer((props) => {
     })
 
     let width = props.width - margins.left - margins.right;
-    let innerWidth= width-props.visStore.scrollBarWidth;
+    let innerWidth = width - props.visStore.scrollBarWidth - condtitionsWidth;
     const gap = 10;
     const height = ((props.height - margins.top - margins.bottom) - (filteredData.length - 1) * gap) / filteredData.length;
     let xScale = d3.scaleBand().domain(props.visStore.treeOrder).range([0, innerWidth]).padding(0.25);
-    if (innerWidth/props.visStore.treeOrder.length<10) {
+    if (innerWidth / props.visStore.treeOrder.length < 10) {
         innerWidth = 10 * props.visStore.treeOrder.length;
         xScale = d3.scaleBand().domain(props.visStore.treeOrder).range([0, innerWidth]).padding(0.25);
     }
@@ -47,6 +48,7 @@ const MultiBarChart = inject("dataStore", "visStore")(observer((props) => {
         return d3.scaleLinear().domain([0, props.scaleLocked ? max : d3.max(cond.map(d => d.value))]).range([height, 0]);
     })
     let barCharts = [];
+    let labels = []
     let yAxes = []
     conditions.forEach((condIndex, i) => {
         const translateY = i === 0 ? 0 : i * (height + gap)
@@ -64,19 +66,26 @@ const MultiBarChart = inject("dataStore", "visStore")(observer((props) => {
                       fullAxis={i === conditions.length - 1} maxY={max}
                       scaleLocked={props.scaleLocked}/>
         </g>)
+        labels.push(<g key={props.dataStore.conditions[condIndex]} transform={'translate(0,' + (translateY + 15) + ')'}>
+            <text>{props.dataStore.conditions[condIndex]}</text>
+        </g>)
     })
 
     return (
         <div id={props.id} style={{height: props.height}}>
             <svg width={margins.left} height={props.height} style={{float: "left"}}>
-                <text transform={"translate(20," + ((props.height-margins.bottom) / 2) + ")rotate(270)"}
+                <text transform={"translate(20," + ((props.height - margins.bottom) / 2) + ")rotate(270)"}
                       textAnchor={"middle"}>-log(pVal)
                 </text>
                 <g transform={"translate(" + margins.left + "," + margins.top + ")"}>
                     {yAxes}
                 </g>
             </svg>
-            <div style={{overflowX: "scroll", maxWidth: props.width - margins.left - props.visStore.scrollBarWidth, float: "left"}}
+            <div style={{
+                overflowX: "scroll",
+                maxWidth: props.width - margins.left - props.visStore.scrollBarWidth - condtitionsWidth,
+                float: "left"
+            }}
                  ref={scrollContainer}
                  onScroll={() => setOffset(scrollContainer.current.getBoundingClientRect().left
                      - scrollableSVG.current.getBoundingClientRect().left)}>
@@ -87,6 +96,11 @@ const MultiBarChart = inject("dataStore", "visStore")(observer((props) => {
                     </g>
                 </svg>
             </div>
+            <svg width={condtitionsWidth} height={props.height} style={{float: "left"}}>
+                <g transform={"translate(0," + margins.top + ")"}>
+                    {labels}
+                </g>
+            </svg>
         </div>
     );
 }));

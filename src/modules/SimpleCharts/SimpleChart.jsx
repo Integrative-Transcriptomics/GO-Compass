@@ -6,6 +6,7 @@ import {action} from "mobx";
 import MultiBarChart from "./ComparisonMultiBarChart";
 import {Lock, LockOpen} from "@material-ui/icons";
 import Button from "@material-ui/core/Button";
+import SignificanceLine from "./SignificanceLine";
 
 
 const SimpleChart = inject("dataStore", "visStore")(observer((props) => {
@@ -36,6 +37,10 @@ const SimpleChart = inject("dataStore", "visStore")(observer((props) => {
                     startIcon={store.scaleLocked ? <LockOpen/> : <Lock/>}>
                     {store.scaleLocked ? "Unlock y-Scale" : "Lock y-Scale"}
                 </Button>
+                                        <svg width={150} height={20}>
+                            <SignificanceLine width={20} height={10}/>
+                            <text x={22} y={15}>{"p="+props.sigThreshold}</text>
+                        </svg>
             </div>
             <MultiBarChart width={props.width}
                            height={store.chartHeight}
