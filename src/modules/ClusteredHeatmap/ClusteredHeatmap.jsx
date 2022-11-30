@@ -44,7 +44,7 @@ const ClusteredHeatmap = inject("dataStore", "visStore")(observer((props) => {
 
 
     const overviewWidth = 40;
-    const gapWidth = 100;
+    const gapWidth = 220;
     const rectWidth = 10;
     const textHeight = 9;
     const heatmapWidth = (props.dataStore.conditions.length + 1) * rectWidth + 1.5 * rectWidth;
