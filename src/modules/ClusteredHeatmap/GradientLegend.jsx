@@ -7,6 +7,9 @@ const GradientLegend = (props) => {
     const width = 100;
     const height = 20;
     const fontSize = 12;
+    let transform="";
+    if(props.align==="right")
+        transform="translate("+(-width)+",0)"
     let gradient;
     const labels = []
     const id = uuidv4()
@@ -40,7 +43,7 @@ const GradientLegend = (props) => {
     }
 
     return (
-        <g>
+        <g transform={transform}>
             <defs>
                 {gradient}
             </defs>
@@ -53,5 +56,9 @@ GradientLegend.propTypes = {
     range: PropTypes.arrayOf(PropTypes.string).isRequired,
     domain: PropTypes.arrayOf(PropTypes.number).isRequired,
     label: PropTypes.string.isRequired,
+    align: PropTypes.string
 };
+GradientLegend.defaultProps={
+    align: "left"
+}
 export default GradientLegend;

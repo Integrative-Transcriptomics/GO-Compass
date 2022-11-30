@@ -31,8 +31,8 @@ const ClusteredHeatmap = inject("dataStore", "visStore")(observer((props) => {
     //const [innerWidth, setInnerWidth] = useState(props.width);
 
     const margins = {
-        top: props.visStore.maxConditionTextSize > 40 ? props.visStore.maxConditionTextSize : 40,
-        right: 30,
+        top: props.visStore.maxConditionTextSize*0.8 > 40 ? props.visStore.maxConditionTextSize*0.8 : 40,
+        right: props.visStore.maxConditionTextSize*0.25,
         bottom: 40,
         left: 0,
     };
@@ -112,7 +112,7 @@ const ClusteredHeatmap = inject("dataStore", "visStore")(observer((props) => {
                                         pattern={props.visStore.parentSizes}
                                         colorScale={props.visStore.termColorScale}/>
                     </div>
-                    <div className={classes.scroll} id={props.id+"_scroll"} style={{
+                    <div className={classes.scroll} id={props.id + "_scroll"} style={{
                         overflowY: "scroll",
                         maxHeight: height, float: "left"
                     }} ref={scrollContainer}
@@ -146,9 +146,10 @@ const ClusteredHeatmap = inject("dataStore", "visStore")(observer((props) => {
                 <svg width={innerWidth} height={margins.bottom}>
                     <g transform={"translate(" + (margins.left + overviewWidth) + ",0)"}>
                         <Axis h={0} w={treeWidth} axis={xAxis} axisType={'x'} label={'Dispensability'}/>
-                        <g transform={"translate(" + treeWidth + ",0)"}>
-                            <GradientLegend range={heatmapRange} domain={heatmapDomain} label={"-log10(pVal)"}/>
-                        </g>
+                    </g>
+                    <g transform={"translate(" + (innerWidth) + ",0)"}>
+                        <GradientLegend range={heatmapRange} domain={heatmapDomain} label={"-log(pVal)"}
+                                        align={"right"}/>
                     </g>
                 </svg>
             </div>
