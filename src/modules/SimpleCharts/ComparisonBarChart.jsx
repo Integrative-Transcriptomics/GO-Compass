@@ -16,10 +16,11 @@ const BarChart = inject("dataStore", "visStore")(observer((props) => {
 
     const width = props.width - margins.left - margins.right;
     const height = props.height - margins.top - margins.bottom;
-    let yScale = d3.scaleLinear().domain([0, d3.max(props.values.map(d => d.value))]).range([height, 0]);
+    let max = d3.max(props.values.map(d => d.value))
     if (props.scaleLocked) {
-        yScale = d3.scaleLinear().domain([0, props.maxY]).range([height, 0]);
+        max = props.maxY
     }
+    const yScale = d3.scaleLinear().domain([0, max]).range([height, 0]);
     const rects = props.values.map((elem, i) => {
         const isHighlighted = props.visStore.childHighlights.length === 0 || props.visStore.childHighlights.includes(elem.id);
         return (<g key={elem.id}
@@ -36,8 +37,11 @@ const BarChart = inject("dataStore", "visStore")(observer((props) => {
                   fill={props.visStore.termColorScale(elem.parent)}/>
         </g>)
     })
-    const sigLine = <SignificanceLine width={width} height={yScale(props.logSigThreshold)}
-                                      sigThreshold={props.sigThreshold} offset={props.offset}/>
+    let sigLine = null;
+    if (props.logSigThreshold < max) {
+        sigLine = <SignificanceLine width={width} height={yScale(props.logSigThreshold)}
+                                    sigThreshold={props.sigThreshold} offset={props.offset}/>
+    }
     const xAxis = d3.axisBottom()
         .scale(props.xScale)
         .tickFormat(props.fullAxis ? (d) => props.dataStore.dataTable[d].description : "")
