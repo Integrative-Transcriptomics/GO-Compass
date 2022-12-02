@@ -137,15 +137,16 @@ const AnimatedTreemap = inject("dataStore", "visStore")(observer((props) => {
                     visText = visText + "/" + total;
                     if (props.dataStore.rootStore.hasFCs) {
                         if (props.glyphEncoding === "updown") {
-                            let proportion = up / (up+down);
+                            let proportion = up / (up + down);
                             if (total === 0) {
                                 proportion = 0.5
                             }
                             proportionFill = glyphColorScale(proportion)
+                            visText = size + ", " + up + ":" + down;
                         } else {
                             proportionFill = glyphColorScale(geneMedians[child.data.id])
+                            visText = size + ", " + Math.round(geneMedians[child.data.id]*100)/100
                         }
-                        visText = size + ", " + up + ":" + down;
                     }
                 }
                 const propHeight = 10;

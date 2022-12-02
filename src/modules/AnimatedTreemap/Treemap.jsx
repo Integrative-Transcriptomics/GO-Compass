@@ -12,10 +12,11 @@ import {exportPDF} from "../../UtilityFunctions";
 import GetAppIcon from "@material-ui/icons/GetApp";
 
 function ButtonGroupIconButton(props) {
-  // intercept props only implemented by `Button`
-  const { disableElevation, fullWidth, variant, ...iconButtonProps } = props;
-  return <IconButton {...iconButtonProps} />;
+    // intercept props only implemented by `Button`
+    const {disableElevation, fullWidth, variant, ...iconButtonProps} = props;
+    return <IconButton {...iconButtonProps} />;
 }
+
 const Treemap = inject("dataStore", "visStore")(observer((props) => {
     const [showGenes, setShowGenes] = useState(true);
     const [showNumbers, setShowNumbers] = useState(false);
@@ -28,14 +29,18 @@ const Treemap = inject("dataStore", "visStore")(observer((props) => {
     let geneSetText = useMemo(() => {
         let text = "Show gene set numbers"
         if (props.dataStore.rootStore.hasFCs) {
-            text = text + " (Set size, #upregulated:#downregulated)"
+            if (glyphEncoding === "updown") {
+                text = text + " (Set size, #upregulated:#downregulated)"
+            } else{
+                text = text + " (Set size, median)"
+            }
         } else if (props.dataStore.rootStore.hasGeneInfo) {
             text = text + " (Set size, #expressed)"
         } else {
             text = text + (" (Set size)")
         }
         return (text);
-    }, [props.dataStore.rootStore.hasFCs, props.dataStore.rootStore.hasGeneInfo])
+    }, [glyphEncoding, props.dataStore.rootStore.hasFCs, props.dataStore.rootStore.hasGeneInfo])
 
     useEffect(() => {
         const mainWidth = 0.75 * props.width;
@@ -59,19 +64,19 @@ const Treemap = inject("dataStore", "visStore")(observer((props) => {
                         variant="text"
                         activeStep={props.visStore.conditionIndex}
                         nextButton={<ButtonGroup>
-                                <ButtonGroupIconButton onClick={() => exportPDF(props.id, true)}>
-                                    <GetAppIcon/>
-                                </ButtonGroupIconButton>
-                                <ButtonGroupIconButton variant="outlined" color="primary" onClick={() => setOpen(true)}>
-                                    <SettingsIcon/>
-                                </ButtonGroupIconButton>
-                                <Button size="small"
-                                        onClick={() => props.visStore.setConditionIndex(props.visStore.conditionIndex + 1)}
-                                        disabled={props.visStore.conditionIndex === props.dataStore.conditions.length - 1}>
-                                    Next
-                                    <KeyboardArrowRight/>
-                                </Button>
-                    </ButtonGroup>}
+                            <ButtonGroupIconButton onClick={() => exportPDF(props.id, true)}>
+                                <GetAppIcon/>
+                            </ButtonGroupIconButton>
+                            <ButtonGroupIconButton variant="outlined" color="primary" onClick={() => setOpen(true)}>
+                                <SettingsIcon/>
+                            </ButtonGroupIconButton>
+                            <Button size="small"
+                                    onClick={() => props.visStore.setConditionIndex(props.visStore.conditionIndex + 1)}
+                                    disabled={props.visStore.conditionIndex === props.dataStore.conditions.length - 1}>
+                                Next
+                                <KeyboardArrowRight/>
+                            </Button>
+                        </ButtonGroup>}
                         backButton={
                             <Button size="small"
                                     onClick={() => props.visStore.setConditionIndex(props.visStore.conditionIndex - 1)}
