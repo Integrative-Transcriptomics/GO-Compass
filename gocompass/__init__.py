@@ -592,10 +592,10 @@ def load_mus_musculus():
     background_files = [open(os.path.join(folder, "BackgroundMusMusculus.txt"), "rb")]
     go_enrichment_file = open(os.path.join(folder, "GO_enrichment_results.tsv"), "rb")
     gene_list_files = [open(os.path.join(folder, "D8vsD0.txt"), "rb"),
-                       open(os.path.join(folder, "D11vsD0.txt"), "rb"),
                        open(os.path.join(folder, "D11vsD8.txt"), "rb"),
-                       open(os.path.join(folder, "D18vsD0.txt"), "rb"),
-                       open(os.path.join(folder, "D18vsD8.txt"), "rb")]
+                       open(os.path.join(folder, "D11vsD0.txt"), "rb"),
+                       open(os.path.join(folder, "D18vsD8.txt"), "rb"),
+                       open(os.path.join(folder, "D18vsD0.txt"), "rb")]
     pvalue_filter = 0.0005
     background_anno = process_backgrounds(background_files, True, True)
     gene_lists = create_genes_dfs(gene_list_files, True)
