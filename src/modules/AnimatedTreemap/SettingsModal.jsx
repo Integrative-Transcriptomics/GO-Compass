@@ -15,7 +15,7 @@ import React from "react";
 import PropTypes from "prop-types";
 
 const SettingsModal = (props) => {
-    return (<Dialog open={props.open} onClose={props.close}>
+    return (<Dialog fullWidth open={props.open} onClose={props.close}>
         <DialogTitle>Treemap Settings</DialogTitle>
         <DialogContent>
             <FormGroup>

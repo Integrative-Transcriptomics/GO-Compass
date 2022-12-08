@@ -1,10 +1,17 @@
 import React, {useCallback, useEffect, useState} from 'react';
 import 'mobx-react-lite/batchingForReactDom'
-import {exampleDataWithFC, getGOheader, multiRevigoGoLists, multiSpeciesRevigo} from "../parseDataFlask";
+import {
+    exampleMouse,
+    exampleTreponema,
+    getGOheader,
+    multiRevigoGoLists,
+    multiSpeciesRevigo
+} from "../parseDataFlask";
 import PropTypes from "prop-types";
 import {RootStore} from "./stores/RootStore";
 import HelpIcon from '@material-ui/icons/Help';
 import {
+    Backdrop,
     Button,
     CircularProgress,
     createStyles,
@@ -18,13 +25,14 @@ import {
     MenuItem,
     Radio,
     RadioGroup,
-    Select, Switch,
+    Select, Switch, Tab, Tabs,
     TextField,
     Tooltip,
     Typography
 } from "@material-ui/core";
 import SpecifyBackgrounds from "../SpecifyBackgrounds";
 import LinkGOGene from "../LinkGOGene";
+import ExampleDataTable from "./ExampleDataTable";
 
 
 const SelectData = (props) => {
@@ -40,6 +48,8 @@ const SelectData = (props) => {
     // Wang, Lin, Resnik, Edge based
     const [selectedMeasure, selectMeasure] = useState("Wang");
     const [pvalueFilter, setPvalueFilter] = useState(0.05);
+    const [tab, setTab] = React.useState(0);
+
     const useStyles = makeStyles((theme: Theme) => createStyles({
         root: {
             flexGrow: 1,
@@ -47,6 +57,9 @@ const SelectData = (props) => {
             marginRight: theme.spacing(2),
         }, title: {
             flexGrow: 1,
+        }, backdrop: {
+            zIndex: theme.zIndex.drawer + 1,
+            color: '#fff',
         },
     }),);
     /**
@@ -72,31 +85,20 @@ const SelectData = (props) => {
             });
         }
     }, [goFile, conditions, multiBackground, propagateBackground, selectedMeasure, pvalueFilter, geneFiles, props, direction]);
-    /**
-     * Loads example data
-     * @type {function(): void}
-     */
-    const loadExampleData = useCallback(() => {
-        exampleDataWithFC((data) => {
-            let backgroundFile = new File([data.background], "scoelicolor.txt", {
-                type: "text/plain",
-            })
-            let geneFiles = Object.keys(data.lists).map(condition => {
-                return (new File([data.lists[condition]], condition + ".txt", {
-                    type: "text/plain",
-                }))
-            })
-            setGeneFiles(geneFiles)
-            setConditions(geneFiles.map((d, i) => {
-                return ({
-                    index: i, condition: d.name.slice(0, -4), background: backgroundFile.name
-                })
-            }));
-            setMultiBackground([backgroundFile])
-            selectMeasure("Wang")
-            setPvalueFilter(0.05)
+    const loadMouse = useCallback(() => {
+        setIsLoading(true)
+        exampleMouse((response) => {
+            props.setRootStore(new RootStore(response.results, response.conditions, response.tableColumns, response.hasFC, response.geneValues, response.goSetSize, selectedMeasure, pvalueFilter));
+            setIsLoading(false)
         })
-    }, [])
+    }, [props, pvalueFilter, selectedMeasure])
+    const loadTreponema = useCallback(() => {
+        setIsLoading(true)
+        exampleTreponema((response) => {
+            props.setRootStore(new RootStore(response.results, response.conditions, response.tableColumns, response.hasFC, response.geneValues, response.goSetSize, selectedMeasure, pvalueFilter));
+            setIsLoading(false)
+        })
+    }, [props, pvalueFilter, selectedMeasure])
     useEffect(() => {
         if (geneFiles.length > 0) {
             getGOheader(goFile, columns => {
@@ -107,181 +109,193 @@ const SelectData = (props) => {
 
     let launchable = (goFile !== null || geneFiles.length > 0) && multiBackground.length > 0;
     const classes = useStyles();
-    return (<List dense>
-        <ListItem>
-            <List dense>
-                <ListItem>
-                    <Button className={classes.menuButton}
-                            component="label"
-                            size="small"
-                            onClick={loadExampleData}>Load Example Data</Button>
-                </ListItem>
-                <Typography>Upload Gene or GO-term lists (1 required)<Tooltip
-                    title={"When not uploading your own enrichment table, GO-term enrichment will be calculated by GO-Compass using the gene lists"}><HelpIcon/></Tooltip></Typography>
-                <ListSubheader>
-                    <Typography>Select Gene Lists</Typography>
-                </ListSubheader>
-                <ListItem>
-                    <Typography>
-                        <Button className={classes.menuButton}
-                                variant="contained"
-                                component="label"
-                                size="small"
-                                disabled={isLoading}
-                        >
-                            Select Files
-                            <input
-                                type="file"
-                                multiple
-                                style={{display: "none"}}
-                                onChange={(event) => {
-                                    setConditions([...event.target.files].map((d, i) => {
-                                        return ({
-                                            index: i,
-                                            condition: d.name.slice(0, -4),
-                                            background: multiBackground.length > 0 ? multiBackground[0].name : null,
-                                        })
-                                    }));
-                                    setGeneFiles([...event.target.files])
-                                }}
-                            />
-                        </Button>
-                        {geneFiles.length > 0 ? geneFiles.length + " files selected" : "No file selected"}
-                    </Typography>
-                </ListItem>
-                <ListSubheader>
-                    <Typography>Select GO Enrichment table</Typography>
-                </ListSubheader>
-                <ListItem>
-                    <Typography>
-                        <Button className={classes.menuButton}
-                                variant="contained"
-                                size="small"
-                                disabled={isLoading}
-                                component="label"
-                        >
-                            Select File
-                            <input
-                                type="file"
-                                style={{display: "none"}}
-                                onChange={(event) => setGoFile(event.target.files[0])}
-                            />
-                        </Button>
-                        {goFile !== null ? goFile.name : "No file selected"}
-                    </Typography>
-                </ListItem>
-            </List>
-        </ListItem>
-        <ListItem>
-            <List dense>
-                <Typography>Select Background file(s)                    <Tooltip
-                        title={"GO-Compass propagates the gene backgrounds using the is_a relationships of the gene ontology. If a different propagation is desired, disable background propagation and submit an already propagated background."}><HelpIcon/></Tooltip></Typography>
-                <ListItem>
-                    <Typography>
-                        <Button className={classes.menuButton}
-                                variant="contained"
-                                size="small"
-                                disabled={isLoading}
-                                component="label"
-                        >
-                            Select File
-                            <input
-                                type="file"
-                                multiple
-                                style={{display: "none"}}
-                                onChange={(event) => {
-                                    if (conditions.length > 0) {
-                                        setConditions(conditions.map(d => {
-                                            return ({
-                                                index: d.index,
-                                                condition: d.condition,
-                                                background: event.target.files[0].name
-                                            })
-                                        }))
-                                    }
-                                    setMultiBackground(event.target.files)
-                                }}
-                            />
-                        </Button>
-                        {multiBackground.length > 0 ? multiBackground.length + " files selected" : "No file selected"}
-                    </Typography>
-                </ListItem>
-                <ListItem>
-                    <FormControlLabel
-                        control={<Switch checked={propagateBackground}
-                                         onChange={() => setPropagateBackground(!propagateBackground)}
-                                         name="checkedA"/>}
-                        label="Propagate background"
-                    />
-                </ListItem>
-                {conditions.length > 0 ? <ListItem>{multiBackground.length > 0 && goFile === null ?
-                    <SpecifyBackgrounds conditions={conditions} setConditions={setConditions}
-                                        geneFiles={geneFiles} isLoading={isLoading}
-                                        multiBackground={multiBackground}/> : goFile !== null ?
-                        <LinkGOGene conditions={conditions} setConditions={setConditions} isLoading={isLoading}
-                                    goFileColumns={goFileColumns}/> : null}</ListItem> : null}
-            </List>
-        </ListItem>
-        <ListItem>
-            <List dense>
-                <Typography>Settings</Typography>
-                {geneFiles.length > 0 && goFile === null && multiBackground.length > 0 ? <ListItem>
-                    <FormControl component="fieldset">
-                        <RadioGroup value={direction} onChange={(e) => setDirection(e.target.value)}>
-                            <FormControlLabel value="+" control={<Radio/>} label="Find overrepresented GO Terms"
-                                              disabled={isLoading}/>
-                            <FormControlLabel value="-" control={<Radio/>}
-                                              label="Find underrepresented GO terms"
-                                              disabled={isLoading}/>
-                        </RadioGroup>
-                    </FormControl>
-                </ListItem> : null}
-                <ListItem>
-                    <FormControl className={classes.formControl}>
-                        <InputLabel>Similarity measure</InputLabel>
-                        <Select
-                            value={selectedMeasure}
-                            disabled={isLoading}
-                            onChange={(e) => selectMeasure(e.target.value)}
-                        >
-                            <MenuItem value="Edge based">Edge based</MenuItem>
-                            <MenuItem value="Resnik">Resnik</MenuItem>
-                            <MenuItem value="Lin">Lin</MenuItem>
-                            <MenuItem value="Wang">Wang</MenuItem>
-                        </Select>
-                    </FormControl>
-                </ListItem>
-                <ListItem>
-                    <FormControl>
-                        <TextField
-                            id="standard-number"
-                            label="P-value filter"
-                            type="number"
-                            value={pvalueFilter}
-                            disabled={isLoading}
-                            onChange={(e) => setPvalueFilter(e.target.value)}
-                            InputLabelProps={{
-                                shrink: true,
-                            }}
-                            size="small"
-                            margin="dense"
-                        />
-                    </FormControl>
-                </ListItem>
-                <ListItem>
-                    <Button className={classes.menuButton}
-                            variant="contained"
-                            component="label"
-                            disabled={isLoading || !launchable}
-                            onClick={launch}
-                    >
-                        Go!
-                    </Button>
-                </ListItem>
-            </List>
-        </ListItem>
-        {isLoading ? <CircularProgress/> : null}
-    </List>);
+    return (
+        <div>
+            <Tabs value={tab} onChange={(e, val) => setTab(val)} aria-label="simple tabs example">
+                <Tab label="Data Upload" disabled={isLoading}/>
+                <Tab label="Example Data" disabled={isLoading}/>
+            </Tabs>
+            <div
+                role="tabpanel"
+                hidden={tab !== 0}
+            >
+                <List dense>
+                    <ListItem>
+                        <List dense>
+                            <Typography>Upload Gene or GO-term lists (1 required)<Tooltip
+                                title={"When not uploading your own enrichment table, GO-term enrichment will be calculated by GO-Compass using the gene lists"}><HelpIcon/></Tooltip></Typography>
+                            <ListSubheader>
+                                <Typography>Select Gene Lists</Typography>
+                            </ListSubheader>
+                            <ListItem>
+                                <Typography>
+                                    <Button className={classes.menuButton}
+                                            variant="contained"
+                                            component="label"
+                                            size="small"
+                                            disabled={isLoading}
+                                    >
+                                        Select Files
+                                        <input
+                                            type="file"
+                                            multiple
+                                            style={{display: "none"}}
+                                            onChange={(event) => {
+                                                setConditions([...event.target.files].map((d, i) => {
+                                                    return ({
+                                                        index: i,
+                                                        condition: d.name.slice(0, -4),
+                                                        background: multiBackground.length > 0 ? multiBackground[0].name : null,
+                                                    })
+                                                }));
+                                                setGeneFiles([...event.target.files])
+                                            }}
+                                        />
+                                    </Button>
+                                    {geneFiles.length > 0 ? geneFiles.length + " files selected" : "No file selected"}
+                                </Typography>
+                            </ListItem>
+                            <ListSubheader>
+                                <Typography>Select GO Enrichment table</Typography>
+                            </ListSubheader>
+                            <ListItem>
+                                <Typography>
+                                    <Button className={classes.menuButton}
+                                            variant="contained"
+                                            size="small"
+                                            disabled={isLoading}
+                                            component="label"
+                                    >
+                                        Select File
+                                        <input
+                                            type="file"
+                                            style={{display: "none"}}
+                                            onChange={(event) => setGoFile(event.target.files[0])}
+                                        />
+                                    </Button>
+                                    {goFile !== null ? goFile.name : "No file selected"}
+                                </Typography>
+                            </ListItem>
+                        </List>
+                    </ListItem>
+                    <ListItem>
+                        <List dense>
+                            <Typography>Select Background file(s) <Tooltip
+                                title={"GO-Compass propagates the gene backgrounds using the is_a relationships of the gene ontology. If a different propagation is desired, disable background propagation and submit an already propagated background."}><HelpIcon/></Tooltip></Typography>
+                            <ListItem>
+                                <Typography>
+                                    <Button className={classes.menuButton}
+                                            variant="contained"
+                                            size="small"
+                                            disabled={isLoading}
+                                            component="label"
+                                    >
+                                        Select File
+                                        <input
+                                            type="file"
+                                            multiple
+                                            style={{display: "none"}}
+                                            onChange={(event) => {
+                                                if (conditions.length > 0) {
+                                                    setConditions(conditions.map(d => {
+                                                        return ({
+                                                            index: d.index,
+                                                            condition: d.condition,
+                                                            background: event.target.files[0].name
+                                                        })
+                                                    }))
+                                                }
+                                                setMultiBackground(event.target.files)
+                                            }}
+                                        />
+                                    </Button>
+                                    {multiBackground.length > 0 ? multiBackground.length + " files selected" : "No file selected"}
+                                </Typography>
+                            </ListItem>
+                            <ListItem>
+                                <FormControlLabel
+                                    control={<Switch checked={propagateBackground}
+                                                     onChange={() => setPropagateBackground(!propagateBackground)}
+                                                     name="checkedA"/>}
+                                    label="Propagate background"
+                                />
+                            </ListItem>
+                            {conditions.length > 0 ? <ListItem>{multiBackground.length > 0 && goFile === null ?
+                                <SpecifyBackgrounds conditions={conditions} setConditions={setConditions}
+                                                    geneFiles={geneFiles} isLoading={isLoading}
+                                                    multiBackground={multiBackground}/> : goFile !== null ?
+                                    <LinkGOGene conditions={conditions} setConditions={setConditions}
+                                                isLoading={isLoading}
+                                                goFileColumns={goFileColumns}/> : null}</ListItem> : null}
+                        </List>
+                    </ListItem>
+                    <ListItem>
+                        <List dense>
+                            <Typography>Settings</Typography>
+                            {geneFiles.length > 0 && goFile === null && multiBackground.length > 0 ? <ListItem>
+                                <FormControl component="fieldset">
+                                    <RadioGroup value={direction} onChange={(e) => setDirection(e.target.value)}>
+                                        <FormControlLabel value="+" control={<Radio/>}
+                                                          label="Find overrepresented GO Terms"
+                                                          disabled={isLoading}/>
+                                        <FormControlLabel value="-" control={<Radio/>}
+                                                          label="Find underrepresented GO terms"
+                                                          disabled={isLoading}/>
+                                    </RadioGroup>
+                                </FormControl>
+                            </ListItem> : null}
+                            <ListItem>
+                                <FormControl className={classes.formControl}>
+                                    <InputLabel>Similarity measure</InputLabel>
+                                    <Select
+                                        value={selectedMeasure}
+                                        disabled={isLoading}
+                                        onChange={(e) => selectMeasure(e.target.value)}
+                                    >
+                                        <MenuItem value="Edge based">Edge based</MenuItem>
+                                        <MenuItem value="Resnik">Resnik</MenuItem>
+                                        <MenuItem value="Lin">Lin</MenuItem>
+                                        <MenuItem value="Wang">Wang</MenuItem>
+                                    </Select>
+                                </FormControl>
+                            </ListItem>
+                            <ListItem>
+                                <FormControl>
+                                    <TextField
+                                        id="standard-number"
+                                        label="P-value filter"
+                                        type="number"
+                                        value={pvalueFilter}
+                                        disabled={isLoading}
+                                        onChange={(e) => setPvalueFilter(e.target.value)}
+                                        InputLabelProps={{
+                                            shrink: true,
+                                        }}
+                                        size="small"
+                                        margin="dense"
+                                    />
+                                </FormControl>
+                            </ListItem>
+                            <ListItem>
+                                <Button className={classes.menuButton}
+                                        variant="contained"
+                                        component="label"
+                                        disabled={isLoading || !launchable}
+                                        onClick={launch}
+                                >
+                                    Go!
+                                </Button>
+                            </ListItem>
+                        </List>
+                    </ListItem>
+                </List></div>
+            <div hidden={tab !== 1}>
+                <ExampleDataTable loadMouse={loadMouse} loadTreponema={loadTreponema} isLoading={isLoading}/>
+            </div>
+            <Backdrop className={classes.backdrop} open={isLoading}>
+                <CircularProgress color="inherit"/>
+            </Backdrop>
+        </div>);
 };
 SelectData.propTypes = {
     setRootStore: PropTypes.func.isRequired,

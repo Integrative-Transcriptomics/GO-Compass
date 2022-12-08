@@ -41,7 +41,7 @@ function multiSpeciesRevigo(dataFiles, backgroundFiles, propagateBackground, con
     formData.append("method", method);
     formData.append("direction", direction);
     if (dataFiles.length > 0 && backgroundFiles.length > 0) {
-        axios.post("/MultiSpeciesREVIGO", formData)
+        axios.post("/MultiREVIGO", formData)
             .then(response => {
                 callback(response.data)
             })
@@ -90,6 +90,17 @@ function getGOheader(goFile, callback) {
     }
 }
 
+function exampleMouse(callback) {
+    axios.get("/load_mus_musculus").then((response) => {
+        callback(response.data)
+    })
+}
+function exampleTreponema(callback) {
+    axios.get("/load_treponema_pallidum").then((response) => {
+        callback(response.data)
+    })
+}
+
 function exampleDataWithFC(callback) {
     const requestBackground = axios.get("/exampleBackground")
     const requestTP1 = axios.get("/exampleCondition?name=timepoint_with_fc_1.txt")
@@ -121,5 +132,7 @@ export {
     performCorrelation,
     getGOheader,
     exampleData,
+    exampleMouse,
+    exampleTreponema,
     exampleDataWithFC
 };
