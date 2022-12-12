@@ -28,12 +28,13 @@ const ExampleDataTable = (props) => {
                     Lavelle, Aonghus, et al. "Baseline microbiota composition modulates antibiotic-mediated effects on
                     the gut microbiota and host." Microbiome 7.1 (2019): 1-13.
                 </TableCell>
-                <TableCell>4</TableCell>
+                <TableCell>5</TableCell>
                 <TableCell>
                     The authors addressed the question how antibiotics change the transcriptome response across a time
                     window of 18 days in two mice. For this, they sampled RNA at four different time points (Day 0, 8,
                     11 and 18), analyzed the expression levels using microarrays and computed differentially expressed
-                    genes between each time point.
+                    genes between each time point. For each pairwise comparison with diff. expr. genes (five out of six)
+                    a list of enriched GO terms was computed by the authors.
                 </TableCell>
             </TableRow>
             <TableRow>
