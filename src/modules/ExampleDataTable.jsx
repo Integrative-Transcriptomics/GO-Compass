@@ -1,6 +1,7 @@
 import React from 'react';
 import PropTypes from "prop-types";
-import {Button, Table, TableBody, TableCell, TableHead, TableRow} from "@material-ui/core";
+import {Button, Link, Table, TableBody, TableCell, TableHead, TableRow} from "@material-ui/core";
+import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 
 const ExampleDataTable = (props) => {
     return (<Table>
@@ -13,6 +14,7 @@ const ExampleDataTable = (props) => {
                 <TableCell>Original study</TableCell>
                 <TableCell>Number of lists</TableCell>
                 <TableCell>Description</TableCell>
+                <TableCell>Data</TableCell>
             </TableRow>
         </TableHead>
         <TableBody>
@@ -36,6 +38,13 @@ const ExampleDataTable = (props) => {
                     genes between each time point. For each pairwise comparison with diff. expr. genes (five out of six)
                     a list of enriched GO terms was computed by the authors.
                 </TableCell>
+                <TableCell>
+                    <Link
+                        href="https://github.com/Integrative-Transcriptomics/GO-Compass/tree/master/gocompass/data/MusMusculus"
+                        target="_blank" rel="noopener noreferrer">
+                        <OpenInNewIcon/>
+                    </Link>
+                </TableCell>
             </TableRow>
             <TableRow>
                 <TableCell>
@@ -52,6 +61,13 @@ const ExampleDataTable = (props) => {
                 <TableCell>
                     A phylogenetic SNP tree was constructed from 76 T.pallidum samples and GO enrichment has been
                     conducted for genes associated with SNPs in three phylogenetic clades.
+                </TableCell>
+                <TableCell>
+                    <Link
+                        href="https://github.com/Integrative-Transcriptomics/GO-Compass/tree/master/gocompass/data/TreponemaPallidum"
+                        target="_blank" rel="noopener noreferrer">
+                        <OpenInNewIcon/>
+                    </Link>
                 </TableCell>
             </TableRow>
         </TableBody>
