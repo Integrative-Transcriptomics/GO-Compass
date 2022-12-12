@@ -589,13 +589,13 @@ def go_list_revigo(go_enrichment_file, background_anno, gene_list_files, method,
 @app.route("/load_mus_musculus", methods=["GET"])
 def load_mus_musculus():
     folder = os.path.join(here, "data", "MusMusculus")
-    background_files = [open(os.path.join(folder, "BackgroundMusMusculus.txt"), "rb")]
+    background_files = [open(os.path.join(folder, "BackgroundMusMusculus.tsv"), "rb")]
     go_enrichment_file = open(os.path.join(folder, "GO_enrichment_results.tsv"), "rb")
-    gene_list_files = [open(os.path.join(folder, "D8vsD0.txt"), "rb"),
-                       open(os.path.join(folder, "D11vsD8.txt"), "rb"),
-                       open(os.path.join(folder, "D11vsD0.txt"), "rb"),
-                       open(os.path.join(folder, "D18vsD8.txt"), "rb"),
-                       open(os.path.join(folder, "D18vsD0.txt"), "rb")]
+    gene_list_files = [open(os.path.join(folder, "D8vsD0.tsv"), "rb"),
+                       open(os.path.join(folder, "D11vsD8.tsv"), "rb"),
+                       open(os.path.join(folder, "D11vsD0.tsv"), "rb"),
+                       open(os.path.join(folder, "D18vsD8.tsv"), "rb"),
+                       open(os.path.join(folder, "D18vsD0.tsv"), "rb")]
     pvalue_filter = 0.0005
     background_anno = process_backgrounds(background_files, True, True)
     gene_lists = create_genes_dfs(gene_list_files, True)
@@ -605,8 +605,8 @@ def load_mus_musculus():
 @app.route("/load_treponema_pallidum", methods=["GET"])
 def load_treponema_pallidum():
     folder = os.path.join(here, "data", "TreponemaPallidum")
-    background_files = [open(os.path.join(folder, "Background_TreponemaPallidum.csv"), "rb")]
-    go_enrichment_file = open(os.path.join(folder, "GO_enrichment_results.csv"), "rb")
+    background_files = [open(os.path.join(folder, "Background_TreponemaPallidum.tsv"), "rb")]
+    go_enrichment_file = open(os.path.join(folder, "GO_enrichment_results.tsv"), "rb")
     gene_list_files = [open(os.path.join(folder, "SNPs_per_gene_SS14.tsv"), "rb"),
                        open(os.path.join(folder, "SNPs_per_gene_TEN.tsv"), "rb"),
                        open(os.path.join(folder, "SNPs_per_gene_TPE.tsv"), "rb")]
