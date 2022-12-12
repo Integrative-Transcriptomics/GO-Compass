@@ -2,6 +2,7 @@ import React from 'react';
 import PropTypes from "prop-types";
 import {Button, Link, Table, TableBody, TableCell, TableHead, TableRow} from "@material-ui/core";
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
+import PlayArrowIcon from '@material-ui/icons/PlayArrow';
 
 const ExampleDataTable = (props) => {
     return (<Table>
@@ -20,8 +21,8 @@ const ExampleDataTable = (props) => {
         <TableBody>
             <TableRow>
                 <TableCell>
-                    <Button size="small" style={{backgroundColor: "green", color: "white"}}
-                            onClick={props.loadMouse} disabled={props.isLoading}>Analyze Data</Button>
+                    <Button size="small" endIcon={<PlayArrowIcon/>}
+                            onClick={props.loadMouse} variant={"contained"} disabled={props.isLoading}>Analyze Data</Button>
                 </TableCell>
                 <TableCell>
                     Functional enrichment of antibiotic response in the mouse transcriptome
@@ -48,7 +49,7 @@ const ExampleDataTable = (props) => {
             </TableRow>
             <TableRow>
                 <TableCell>
-                    <Button size="small" style={{backgroundColor: "green", color: "white"}}
+                    <Button size="small" variant={"contained"} endIcon={<PlayArrowIcon/>}
                             onClick={props.loadTreponema} disabled={props.isLoading}>Analyze Data</Button>
                 </TableCell>
                 <TableCell>
