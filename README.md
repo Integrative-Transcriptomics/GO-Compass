@@ -17,6 +17,8 @@ GO-Compass is a tool for the interactive comparison of GO enrichment analyses. D
 * **Gene list input:** Simple line-break separated gene lists or a tsv if the genes are associated with values.
 * **Background file:** Two column tsv. First column contains gene ids, second column contains semicolon separated GO Terms
 
+Find example data [here](https://github.com/Integrative-Transcriptomics/GO-Compass/tree/master/gocompass/data).
+
 Background lists can be downloaded (for example) at [http://genome2d.molgenrug.nl/](http://genome2d.molgenrug.nl/) 
 
 ## Running GO-Compass locally
