@@ -10,14 +10,16 @@ import {
 import PropTypes from "prop-types";
 import {RootStore} from "./stores/RootStore";
 import HelpIcon from '@material-ui/icons/Help';
+import HomeIcon from '@material-ui/icons/Home';
+import GitHubIcon from '@material-ui/icons/GitHub';
 import {
     Backdrop,
     Button,
-    CircularProgress,
+    CircularProgress, Container,
     createStyles,
     FormControl,
     FormControlLabel,
-    InputLabel,
+    InputLabel, Link,
     List,
     ListItem,
     ListSubheader,
@@ -33,6 +35,7 @@ import {
 import SpecifyBackgrounds from "../SpecifyBackgrounds";
 import LinkGOGene from "../LinkGOGene";
 import ExampleDataTable from "./ExampleDataTable";
+import {Alert} from "@material-ui/lab";
 
 
 const SelectData = (props) => {
@@ -112,12 +115,51 @@ const SelectData = (props) => {
     return (
         <div>
             <Tabs value={tab} onChange={(e, val) => setTab(val)} aria-label="simple tabs example">
+                <Tab label={<HomeIcon/>} disabled={isLoading}/>
                 <Tab label="Data Upload" disabled={isLoading}/>
                 <Tab label="Example Data" disabled={isLoading}/>
             </Tabs>
+            <div role="tabpanel" hidden={tab !== 0}>
+                <Container>
+                    <Typography variant={"h5"}> Welcome to Go-Compass!
+                    </Typography>
+                    <Typography>
+                        Go-Compass (Gene Ontology list comparison using Semantic Similarity) is a visual analytics tool
+                        for the dispensability reduction and visual comparison of lists of GO terms. For dispensability
+                        reduction, we adapted the REVIGO algorithm, a summarization method based on semantic similarity
+                        of GO terms, to perform hierarchical dispensability clustering on multiple lists. In an
+                        interactive dashboard, GO-Compass offers several visualizations for the comparison and improved
+                        interpretability of GO terms lists. The hierarchical dispensability clustering is visualized as
+                        a tree, where users can interactively filter out dispensable GO terms and create flat clusters.
+                        The flat clusters are visualized in animated treemaps, and are compared using a correlation
+                        heatmap, UpSet plots, and bar charts.
+                    </Typography>
+                    <Alert severity={"info"}>Looking for example data? Get started <Link
+                        component="button"
+                        variant="body2"
+                        onClick={() => {
+                            setTab(2);
+                        }}
+                    >
+                        here
+                    </Link> </Alert>
+                    <Typography variant={"subtitle1"}>More information:
+                        <Link href="https://tuevis.cs.uni-tuebingen.de/go-compass/" target="_blank"
+                              rel="noopener noreferrer">https://tuevis.cs.uni-tuebingen.de/go-compass/</Link>
+
+                    </Typography>
+                    <Typography variant={"subtitle1"}>
+                        GitHub:
+                        <Link href="https://github.com/Integrative-Transcriptomics/GO-Compass" className={classes.link}
+                              target="_blank" rel="noopener noreferrer">
+                            <GitHubIcon/>
+                        </Link>
+                    </Typography>
+                </Container>
+            </div>
             <div
                 role="tabpanel"
-                hidden={tab !== 0}
+                hidden={tab !== 1}
             >
                 <List dense>
                     <ListItem>
@@ -289,7 +331,7 @@ const SelectData = (props) => {
                         </List>
                     </ListItem>
                 </List></div>
-            <div hidden={tab !== 1}>
+            <div hidden={tab !== 2}>
                 <ExampleDataTable loadMouse={loadMouse} loadTreponema={loadTreponema} isLoading={isLoading}/>
             </div>
             <Backdrop className={classes.backdrop} open={isLoading}>
