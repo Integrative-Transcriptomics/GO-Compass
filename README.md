@@ -21,6 +21,20 @@ Find example data [here](https://github.com/Integrative-Transcriptomics/GO-Compa
 
 Background lists can be downloaded (for example) at [http://genome2d.molgenrug.nl/](http://genome2d.molgenrug.nl/) 
 
+## Component description
+
+### Dispensability tree and cutoff selection
+The tree visualizes the dispensability clustering created with the modified REVIGO algorithm.  The nodes in the tree represent GO terms, positioned by their dispensability indicated on the x-axis. Two sliders in the tree can be used for selecting the data for the other visualizations. With the right slider, redundant terms can be filtered out. The left slider cuts the tree at a specific dispensability to produce flat clusters.
+
+Next to each slider a number is shown indicating the number of flat clusters and the total number of GO terms currently visualized. Numbers next to the GO terms indicate the number of direct descendants of this term in the hierarchical clustering that are currently filtered out. 
+
+The heatmap shows the negative logarithm of the p-values in the different lists using a color scale from white (high p-value) to red (low p-value). The p-values that pass the significance threshold defined by the user are indicated using a black dot in the center of the heatmap cell.
+### Treemaps
+For list-centered overviews, the significance of GO terms at each condition is visualized using treemaps. The size of a rectangle corresponds to the negative logarithm of the p-value. Rectangles representing GO terms with significant p-values receive a full color fill, non-significant GO terms are indicated with a striped fill. One condition is selected to be shown as the main treemap, while the others are visualized in small multiples.
+### Summary visualizations
+Two summary visualizations show the similarity of GO terms between the lists. The user can choose between visualizing the correlation of the p-values of the GO terms or the intersecting sets of significant GO terms across the lists. A correlation heatmap visualizes Pearson’s correlation of the p-values of GO terms between the lists regardless of the significance threshold. The set summary visualization shows the overlap of significantly enriched GO terms between the conditions. For less than three lists, a Venn diagram is used. For more than three lists an UpSet plot is visualized instead.
+### Bar chart
+By hovering over a cell in the correlation heatmap or over an intersection of the Venn diagram or UpSet plot, the GO terms can be compared in more detail in vertically juxtaposed bar charts, where each bar chart corresponds to one list.
 ## Running GO-Compass locally
 
 To run GO-Compass in the development environment do the following:
