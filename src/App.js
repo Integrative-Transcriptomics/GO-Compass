@@ -46,7 +46,7 @@ const App = () => {
     // create one view for each ontology
     if (rootStore !== null) {
         rootStore.ontologies.forEach(ont => {
-            if(rootStore.dataStores[ont.id]!==null) {
+            if (rootStore.dataStores[ont.id] !== null) {
                 views.push(<div key={ont.id} style={{display: rootStore.ontology === ont.id ? "block" : "none"}}>
                     <Provider dataStore={rootStore.dataStores[ont.id]} visStore={rootStore.dataStores[ont.id].visStore}>
                         <Plots logSigThreshold={rootStore.logSigThreshold} sigThreshold={rootStore.sigThreshold}
@@ -71,9 +71,8 @@ const App = () => {
                         {rootStore != null ?
                             <Typography>
                                 {"Ontology: " + rootStore.ontologies_map[rootStore.ontology] + ", Method: "
-                                + rootStore.selectedMeasure + ", p-Value Filter: " + rootStore.pvalueFilter}
-                            </Typography> : null
-                        }
+                                    + rootStore.selectedMeasure + ", p-Value Filter: " + rootStore.pvalueFilter}
+                            </Typography> : null}
                     </Toolbar>
                 </AppBar>
             </React.Fragment>
@@ -81,8 +80,8 @@ const App = () => {
                 {rootStore !== null ? <Provider rootStore={rootStore}>
                     <AppDrawer open={open} toggleDrawer={toggleDrawer}/>
                 </Provider> : null}
-                {rootStore !== null && views.length>0 ? views : <SelectData setRootStore={setRootStore}/>}
-                {rootStore !== null && views.length === 0?<Typography>No significant results</Typography>:null}
+                {rootStore !== null && views.length > 0 ? views : <SelectData setRootStore={setRootStore}/>}
+                {rootStore !== null && views.length === 0 ? <Typography>No significant results</Typography> : null}
             </React.Fragment>
         </div>
     );
