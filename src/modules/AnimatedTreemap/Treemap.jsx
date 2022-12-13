@@ -5,17 +5,14 @@ import SmallMultiples from "./SmallMultiples";
 import MobileStepper from "@material-ui/core/MobileStepper";
 import Button from "@material-ui/core/Button";
 import {KeyboardArrowLeft, KeyboardArrowRight} from "@material-ui/icons";
-import {ButtonGroup, IconButton} from "@material-ui/core";
+import {ButtonGroup} from "@material-ui/core";
 import SettingsIcon from '@material-ui/icons/Settings';
 import SettingsModal from "./SettingsModal";
 import {exportPDF} from "../../UtilityFunctions";
 import GetAppIcon from "@material-ui/icons/GetApp";
+import ButtonGroupIconButton from "../../ButtonGroupIconButton";
+import HelpIcon from "@material-ui/icons/Help";
 
-function ButtonGroupIconButton(props) {
-    // intercept props only implemented by `Button`
-    const {disableElevation, fullWidth, variant, ...iconButtonProps} = props;
-    return <IconButton {...iconButtonProps} />;
-}
 
 const Treemap = inject("dataStore", "visStore")(observer((props) => {
     const [showGenes, setShowGenes] = useState(true);
@@ -31,7 +28,7 @@ const Treemap = inject("dataStore", "visStore")(observer((props) => {
         if (props.dataStore.rootStore.hasFCs) {
             if (glyphEncoding === "updown") {
                 text = text + " (Set size, #upregulated:#downregulated)"
-            } else{
+            } else {
                 text = text + " (Set size, median)"
             }
         } else if (props.dataStore.rootStore.hasGeneInfo) {
@@ -64,6 +61,10 @@ const Treemap = inject("dataStore", "visStore")(observer((props) => {
                         variant="text"
                         activeStep={props.visStore.conditionIndex}
                         nextButton={<ButtonGroup>
+                            <ButtonGroupIconButton
+                                href="https://github.com/Integrative-Transcriptomics/GO-Compass#treemaps"
+                                target="_blank"
+                                rel="noopener noreferrer"><HelpIcon/></ButtonGroupIconButton>
                             <ButtonGroupIconButton onClick={() => exportPDF(props.id, true)}>
                                 <GetAppIcon/>
                             </ButtonGroupIconButton>

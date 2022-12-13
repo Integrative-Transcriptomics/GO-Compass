@@ -149,7 +149,6 @@ const SelectData = (props) => {
 
                     </Typography>
                     <Typography variant={"subtitle1"}>
-                        GitHub:
                         <Link href="https://github.com/Integrative-Transcriptomics/GO-Compass" className={classes.link}
                               target="_blank" rel="noopener noreferrer">
                             <GitHubIcon/>

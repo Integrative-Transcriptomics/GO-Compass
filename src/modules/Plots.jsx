@@ -2,7 +2,7 @@ import React, {createRef, useCallback, useEffect, useState} from "react";
 import Grid from "@material-ui/core/Grid";
 import SimpleChart from "./SimpleCharts/SimpleChart";
 import {makeStyles} from "@material-ui/core/styles";
-import {createStyles, IconButton, Tab, Tabs} from "@material-ui/core";
+import {ButtonGroup, createStyles, Tab, Tabs} from "@material-ui/core";
 import Paper from "@material-ui/core/Paper";
 import DataTable from "./DetailedTable/DataTable";
 import CorrelationHeatmap from "./CorrelationHeatmap";
@@ -15,6 +15,8 @@ import TabPanel from "./TabPanel";
 import GetAppIcon from '@material-ui/icons/GetApp';
 import {exportPDF} from "../UtilityFunctions";
 import {v4 as uuidv4} from 'uuid'
+import HelpIcon from '@material-ui/icons/Help';
+import ButtonGroupIconButton from "../ButtonGroupIconButton";
 
 
 /**
@@ -64,9 +66,15 @@ const Plots = inject("dataStore", "visStore")(observer((props) => {
                 <Paper className={classes.paper}>
                     <Typography>
                         Cutoff Selection in GO Dispensability Tree
-                        <IconButton onClick={() => exportPDF(treeID, true)}>
+                        <ButtonGroup>
+                        <ButtonGroupIconButton onClick={() => exportPDF(treeID, true)}>
                             <GetAppIcon/>
-                        </IconButton>
+                        </ButtonGroupIconButton>
+                        <ButtonGroupIconButton
+                            href="https://github.com/Integrative-Transcriptomics/GO-Compass#dispensability-tree-and-cutoff-selection"
+                            target="_blank"
+                            rel="noopener noreferrer"><HelpIcon/></ButtonGroupIconButton>
+                            </ButtonGroup>
                     </Typography>
                     <ClusteredHeatmap
                         logSigThreshold={props.logSigThreshold}
@@ -87,9 +95,14 @@ const Plots = inject("dataStore", "visStore")(observer((props) => {
                 <Paper className={classes.paper}>
                     <Typography>
                         List Comparison
-                        <IconButton onClick={() => exportPDF(summaryID, true)}>
+                        <ButtonGroup>
+                        <ButtonGroupIconButton onClick={() => exportPDF(summaryID, true)}>
                             <GetAppIcon/>
-                        </IconButton>
+                        </ButtonGroupIconButton>
+                        <ButtonGroupIconButton href="https://github.com/Integrative-Transcriptomics/GO-Compass#summary-visualizations"
+                              target="_blank"
+                              rel="noopener noreferrer"><HelpIcon/></ButtonGroupIconButton>
+                        </ButtonGroup>
                     </Typography>
                     <Tabs ref={tabRef} value={selectedTab} onChange={(e, v) => setSelectedTab(v)}>
                         <Tab label="All GO-Terms"/>
@@ -117,9 +130,15 @@ const Plots = inject("dataStore", "visStore")(observer((props) => {
             <Grid item xs={6}>
                 <Paper className={classes.paper}>
                     <Typography>Detailed Comparison
-                        <IconButton onClick={() => exportPDF(barChartID, true)}>
+                        <ButtonGroup>
+                        <ButtonGroupIconButton onClick={() => exportPDF(barChartID, true)}>
                             <GetAppIcon/>
-                        </IconButton></Typography>
+                        </ButtonGroupIconButton>
+                        <ButtonGroupIconButton href="https://github.com/Integrative-Transcriptomics/GO-Compass#bar-chart"
+                              target="_blank"
+                              rel="noopener noreferrer"><HelpIcon/></ButtonGroupIconButton>
+                            </ButtonGroup>
+                    </Typography>
                     <SimpleChart sigThreshold={props.sigThreshold} logSigThreshold={props.logSigThreshold}
                                  isTimeSeries={props.isTimeSeries}
                                  width={props.visStore.screenWidth / 2} height={props.visStore.plotHeight / 2}
