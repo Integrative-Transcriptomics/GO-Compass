@@ -60,7 +60,7 @@ def find_all_descendants(input_go_term, children):
 
 # ====================================================================#
 
-def getDescendants(input_go_term):
+def get_descendants(input_go_term):
     # find all the descendants of the term 'input_go_term':
     descendants = find_all_descendants(input_go_term, children)
     return descendants

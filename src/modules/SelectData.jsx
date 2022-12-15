@@ -293,10 +293,10 @@ const SelectData = (props) => {
                                         disabled={isLoading}
                                         onChange={(e) => selectMeasure(e.target.value)}
                                     >
-                                        <MenuItem value="Edge based">Edge based</MenuItem>
-                                        <MenuItem value="Resnik">Resnik</MenuItem>
-                                        <MenuItem value="Lin">Lin</MenuItem>
                                         <MenuItem value="Wang">Wang</MenuItem>
+                                        <MenuItem value="Lin">Lin</MenuItem>
+                                        <MenuItem value="Resnik">Resnik</MenuItem>
+                                        <MenuItem value="Edge distance">Edge distance</MenuItem>
                                     </Select>
                                 </FormControl>
                             </ListItem>
