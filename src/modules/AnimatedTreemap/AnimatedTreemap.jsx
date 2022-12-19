@@ -151,7 +151,7 @@ const AnimatedTreemap = inject("dataStore", "visStore")(observer((props) => {
                 }
                 const propHeight = 10;
                 const propWidth = 30;
-                if ((propWidth < rectWidth && propHeight < rectHeight) || (propWidth < rectHeight && propHeight < rectWidth)) {
+                if ((propWidth < rectWidth && propHeight < (rectHeight-10)) || (propWidth < (rectHeight-10) && propHeight < rectWidth)) {
                     let sigWidth = propWidth / size * total;
                     let rotate = "";
                     if (propWidth > rectWidth) {
@@ -167,7 +167,7 @@ const AnimatedTreemap = inject("dataStore", "visStore")(observer((props) => {
                         }
                     }
                     proportions.push(<g key={child.data.id} transform={'translate(' + child.x0 + ',' + child.y0 + ')'}>
-                        {props.showNumbers ?
+                        {props.showNumbers && rotate==="" && (rectHeight-10>30)?
                             <g transform={transformNumbers}>
                                 <text textAnchor={"end"} fontSize={fontSize}>{visText}</text>
                             </g> : null}
