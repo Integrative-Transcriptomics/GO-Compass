@@ -10,6 +10,7 @@ import {Provider} from "mobx-react";
 import IconButton from "@material-ui/core/IconButton";
 import MenuIcon from '@material-ui/icons/Menu';
 import AppDrawer from "./modules/AppDrawer";
+import GitHubIcon from "@material-ui/icons/GitHub";
 
 
 const App = () => {
@@ -71,8 +72,12 @@ const App = () => {
                         {rootStore != null ?
                             <Typography>
                                 {"Ontology: " + rootStore.ontologies_map[rootStore.ontology] + ", Method: "
-                                    + rootStore.selectedMeasure + ", p-Value Filter: " + rootStore.pvalueFilter}
-                            </Typography> : null}
+                                    + rootStore.selectedMeasure + ", p-Value Filter: " + rootStore.pvalueFilter + ", Documentation"}
+                            </Typography> : <Typography>{"Documentation:"}</Typography>}
+                        <IconButton href="https://github.com/Integrative-Transcriptomics/GO-Compass"
+                                    target="_blank"
+                                    rel="noopener noreferrer"> <GitHubIcon style={{color: "white"}}/>
+                        </IconButton>
                     </Toolbar>
                 </AppBar>
             </React.Fragment>

@@ -22,14 +22,17 @@ const ExampleDataTable = (props) => {
             <TableRow>
                 <TableCell>
                     <Button size="small" endIcon={<PlayArrowIcon/>}
-                            onClick={props.loadMouse} variant={"contained"} disabled={props.isLoading}>Analyze Data</Button>
+                            onClick={props.loadMouse} variant={"contained"} disabled={props.isLoading}>Analyze
+                        Data</Button>
                 </TableCell>
                 <TableCell>
                     Functional enrichment of antibiotic response in the mouse transcriptome
                 </TableCell>
                 <TableCell>
                     Lavelle, Aonghus, et al. "Baseline microbiota composition modulates antibiotic-mediated effects on
-                    the gut microbiota and host." Microbiome 7.1 (2019): 1-13.
+                    the gut microbiota and host." Microbiome 7.1 (2019): 1-13. <Link
+                    href="https://doi.org/10.1186/s40168-019-0725-3" target="_blank"
+                    rel="noopener noreferrer">https://doi.org/10.1186/s40168-019-0725-3</Link>
                 </TableCell>
                 <TableCell>5</TableCell>
                 <TableCell>
@@ -56,7 +59,9 @@ const ExampleDataTable = (props) => {
                     Genomic variability in the syphilis agent, Treponema pallidum </TableCell>
                 <TableCell>
                     Pla-Díaz, Marta, et al. "Evolutionary processes in the emergence and recent spread of the syphilis
-                    agent, Treponema pallidum." Molecular biology and evolution 39.1 (2022): msab318.
+                    agent, Treponema pallidum." Molecular biology and evolution 39.1 (2022): msab318. <Link
+                    href="https://doi.org/10.1093/molbev/msab318" target="_blank"
+                    rel="noopener noreferrer">https://doi.org/10.1093/molbev/msab318</Link>
                 </TableCell>
                 <TableCell>3</TableCell>
                 <TableCell>

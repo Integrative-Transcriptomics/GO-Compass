@@ -10,8 +10,6 @@ import {
     Select,
     TextField
 } from "@material-ui/core";
-import IconButton from "@material-ui/core/IconButton";
-import GitHubIcon from "@material-ui/icons/GitHub";
 
 const AppDrawer = inject("rootStore")(observer((props) => {
     return (<Drawer anchor={"left"} open={props.open} onClose={props.toggleDrawer}>
@@ -42,13 +40,6 @@ const AppDrawer = inject("rootStore")(observer((props) => {
                                       value={ontology.id}>{ontology.name}</MenuItem>)}
                     </Select>
                 </FormControl>
-            </ListItem>
-            <ListItem>
-                Documentation:
-                <IconButton href="https://github.com/Integrative-Transcriptomics/GO-Compass"
-                            target="_blank"
-                            rel="noopener noreferrer"> <GitHubIcon/>
-                </IconButton>
             </ListItem>
         </List>
     </Drawer>)

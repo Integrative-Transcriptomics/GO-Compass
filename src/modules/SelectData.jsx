@@ -272,7 +272,8 @@ const SelectData = (props) => {
                     </ListItem>
                     <ListItem>
                         <List dense>
-                            <Typography>Settings</Typography>
+                            <Typography>Settings <Tooltip
+                                title={"Semantic similarity: Wang's semantic similarity is usually a good choice. View the documentation for more information.\n P-value filter: GO-terms with p-values higher than the specified threshold in all lists are not considered for the clustering."}><HelpIcon/></Tooltip></Typography>
                             {geneFiles.length > 0 && goFile === null && multiBackground.length > 0 ? <ListItem>
                                 <FormControl component="fieldset">
                                     <RadioGroup value={direction} onChange={(e) => setDirection(e.target.value)}>
@@ -287,7 +288,7 @@ const SelectData = (props) => {
                             </ListItem> : null}
                             <ListItem>
                                 <FormControl className={classes.formControl}>
-                                    <InputLabel>Similarity measure</InputLabel>
+                                    <InputLabel>Similarity measure </InputLabel>
                                     <Select
                                         value={selectedMeasure}
                                         disabled={isLoading}
