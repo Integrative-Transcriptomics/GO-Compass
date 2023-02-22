@@ -86,6 +86,7 @@ const Plots = inject("dataStore", "visStore")(observer((props) => {
             </Grid>
             <Grid item xs={6}>
                 <Paper className={classes.paper}>
+                    <Typography>Single List View</Typography>
                     <Treemap logSigThreshold={props.logSigThreshold}
                              height={props.visStore.plotHeight / 2}
                              width={props.visStore.screenWidth / 2} id={treeMapID}/>
@@ -94,7 +95,7 @@ const Plots = inject("dataStore", "visStore")(observer((props) => {
             <Grid item xs={6}>
                 <Paper className={classes.paper}>
                     <Typography>
-                        List Comparison
+                        Overview List Comparison
                         <ButtonGroup>
                         <ButtonGroupIconButton onClick={() => exportPDF(summaryID, true)}>
                             <GetAppIcon/>
