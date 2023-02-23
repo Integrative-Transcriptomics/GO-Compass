@@ -207,7 +207,7 @@ const AnimatedTreemap = inject("dataStore", "visStore")(observer((props) => {
                               stroke={props.visStore.childHighlights.includes(child.data.id) ? "black" : "white"}
                               strokeWidth={1}
                               opacity={filledOpacity}/>
-                        <g>
+                        {props.showLabels?<g>
                             <defs>
                                 <clipPath id={"clip" + clipID}>
                                     <use xlinkHref={"#rect" + clipID}/>
@@ -216,7 +216,7 @@ const AnimatedTreemap = inject("dataStore", "visStore")(observer((props) => {
                             <text clipPath={'url(#clip' + clipID + ')'} x={2} y={10} fontSize={fontSize}>
                                 {rectWidth > 0 && rectHeight > 0 ? child.data.name : null}
                             </text>
-                        </g>
+                        </g>:null}
                     </g>
                 </Tooltip>
             )
@@ -256,6 +256,7 @@ const AnimatedTreemap = inject("dataStore", "visStore")(observer((props) => {
 }));
 
 AnimatedTreemap.propTypes = {
+    showLabels: PropTypes.bool.isRequired,
     logSigThreshold: PropTypes.number.isRequired,
     glyphEncoding: PropTypes.string.isRequired,
     isTimeseries: PropTypes.bool.isRequired,

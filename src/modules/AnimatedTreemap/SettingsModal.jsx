@@ -20,6 +20,11 @@ const SettingsModal = (props) => {
         <DialogContent>
             <FormGroup>
                 <FormControlLabel
+                    control={<Checkbox checked={props.showLabels} onChange={() => props.setShowLabels(!props.showLabels)}
+                                       name="checkedA"/>}
+                    label="Show GO term names"
+                />
+                <FormControlLabel
                     control={<Checkbox checked={props.showGenes} onChange={() => props.setShowGenes(!props.showGenes)}
                                        name="checkedA"/>}
                     label="Show gene visualization glyph"
@@ -66,6 +71,7 @@ const SettingsModal = (props) => {
 }
 export default SettingsModal;
 SettingsModal.propTypes = {
+    showLabels: PropTypes.bool.isRequired,
     showGenes: PropTypes.bool.isRequired,
     setShowGenes: PropTypes.func.isRequired,
     showNumbers: PropTypes.bool.isRequired,
@@ -76,6 +82,6 @@ SettingsModal.propTypes = {
     open: PropTypes.bool.isRequired,
     close: PropTypes.func.isRequired,
     hasFCs: PropTypes.bool.isRequired,
-    isTimeseries:PropTypes.bool.isRequired,
+    isTimeseries: PropTypes.bool.isRequired,
     setIsTimeseries: PropTypes.func.isRequired,
 };

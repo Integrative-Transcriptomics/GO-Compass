@@ -15,6 +15,7 @@ import HelpIcon from "@material-ui/icons/Help";
 
 
 const Treemap = inject("dataStore", "visStore")(observer((props) => {
+    const [showLabels, setShowLabels] = useState(true);
     const [showGenes, setShowGenes] = useState(true);
     const [showNumbers, setShowNumbers] = useState(false);
     const [adaptedScalingFactor, setAdaptedScalingFactor] = useState(0.25);
@@ -87,7 +88,9 @@ const Treemap = inject("dataStore", "visStore")(observer((props) => {
                             </Button>
                         }
                     />
-                    <SettingsModal showGenes={showGenes} setShowGenes={setShowGenes}
+                    <SettingsModal showLabels={showLabels}
+                                   setShowLabels={setShowLabels}
+                                   showGenes={showGenes} setShowGenes={setShowGenes}
                                    showNumbers={showNumbers}
                                    setShowNumbers={setShowNumbers} geneSetText={geneSetText}
                                    glyphEncoding={glyphEncoding} setGlyphEncoding={setGlyphEncoding}
@@ -98,6 +101,7 @@ const Treemap = inject("dataStore", "visStore")(observer((props) => {
                 </div>
                 <AnimatedTreemap logSigThreshold={props.logSigThreshold}
                                  glyphEncoding={glyphEncoding}
+                                 showLabels={showLabels}
                                  showGenes={showGenes}
                                  showNumbers={showNumbers}
                                  isTimeseries={isTimeseries}
