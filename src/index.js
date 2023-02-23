@@ -3,10 +3,12 @@ import ReactDOM from 'react-dom';
 import './index.css';
 import App from './App';
 import * as serviceWorker from './serviceWorker';
+import {RootStore} from "./modules/stores/RootStore";
 
+const rootStore = new RootStore();
 ReactDOM.render(
     <React.Fragment>
-        <App/>
+        <App rootStore={rootStore}/>
     </React.Fragment>,
     document.getElementById('root')
 );
