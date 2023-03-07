@@ -48,7 +48,7 @@ const CorrelationHeatmap = inject("dataStore", "visStore")(observer((props) => {
                 {rects}
             </g>
             <g transform={"translate(" + (props.width - margins.right - 100) + "," + margins.top + ")"}>
-                <GradientLegend range={color.domain().map(d => color(d))} domain={color.domain()} label={"Correlation"}/>
+                <GradientLegend range={color.domain().map(d => color(d))} domain={color.domain()} label={"P-value Correlation"}/>
             </g>
         </svg>
     </div>);
