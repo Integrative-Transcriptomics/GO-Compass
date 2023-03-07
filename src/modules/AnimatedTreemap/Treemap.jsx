@@ -56,12 +56,8 @@ const Treemap = inject("dataStore", "visStore")(observer((props) => {
             <div style={{width: "75%", float: "left"}}>
                 <div ref={controlsRef}>
                     {/* eslint-disable-next-line react/jsx-no-undef */}
-                    <MobileStepper
-                        steps={props.dataStore.conditions.length}
-                        position="static"
-                        variant="text"
-                        activeStep={props.visStore.conditionIndex}
-                        nextButton={<ButtonGroup>
+                    <img src={"glyph.png"} height={100}/>
+                    <ButtonGroup>
                             <ButtonGroupIconButton
                                 href="https://github.com/Integrative-Transcriptomics/GO-Compass#treemaps"
                                 target="_blank"
@@ -72,22 +68,7 @@ const Treemap = inject("dataStore", "visStore")(observer((props) => {
                             <ButtonGroupIconButton variant="outlined" color="primary" onClick={() => setOpen(true)}>
                                 <SettingsIcon/>
                             </ButtonGroupIconButton>
-                            <Button size="small"
-                                    onClick={() => props.visStore.setConditionIndex(props.visStore.conditionIndex + 1)}
-                                    disabled={props.visStore.conditionIndex === props.dataStore.conditions.length - 1}>
-                                Next
-                                <KeyboardArrowRight/>
-                            </Button>
-                        </ButtonGroup>}
-                        backButton={
-                            <Button size="small"
-                                    onClick={() => props.visStore.setConditionIndex(props.visStore.conditionIndex - 1)}
-                                    disabled={props.visStore.conditionIndex === 0}>
-                                <KeyboardArrowLeft/>
-                                Back
-                            </Button>
-                        }
-                    />
+                        </ButtonGroup>
                     <SettingsModal showLabels={showLabels}
                                    setShowLabels={setShowLabels}
                                    showGenes={showGenes} setShowGenes={setShowGenes}
