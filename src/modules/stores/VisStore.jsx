@@ -20,6 +20,7 @@ export class VisStore {
             childHighlight: null,
             childHighlights: [],
             selectedConditions: [],
+            selectionLocked: false,
             conditionIndex: 0,
             stepsize: 10,
 
@@ -134,8 +135,26 @@ export class VisStore {
             setSigThreshold: action((threshold) => {
                 this.sigThreshold = threshold;
             }),
+            unlock: action(() => {
+                this.selectionLocked = false;
+                this.selectedConditions=[];
+            }),
+            setLockedSelection: action((indices) => {
+                const newIndices=[...new Set(indices)];
+                if(this.selectionLocked) {
+                    if (newIndices.toString() === this.selectedConditions.toString()) {
+                        this.selectionLocked=false
+                    } else{
+                        this.selectedConditions = newIndices
+                    }
+                } else{
+                    this.selectionLocked=true
+                }
+            }),
             selectConditions: action((indices) => {
-                this.selectedConditions = [...new Set(indices)];
+                if (!this.selectionLocked) {
+                    this.selectedConditions = [...new Set(indices)];
+                }
             }),
 
         })

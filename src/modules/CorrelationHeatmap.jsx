@@ -23,14 +23,18 @@ const CorrelationHeatmap = inject("dataStore", "visStore")(observer((props) => {
     props.dataStore.correlation.forEach((row, i) => row.forEach((cor, j) => {
         if (j >= i) {
             rects.push(<g key={props.dataStore.conditions[j] + props.dataStore.conditions[i]}
+                          onClick={() => props.visStore.setLockedSelection([j, i])}
                           onMouseEnter={() => {
                               props.visStore.selectConditions([j, i])
-                          }} onMouseLeave={() => {
-                props.visStore.selectConditions([])
-            }}>
-                <rect fill={color(cor)} x={xScale(props.dataStore.conditions[i])}
-                      y={yScale(props.dataStore.conditions[j])}
-                      width={xScale.bandwidth()} height={yScale.bandwidth()}/>
+                          }}
+                          onMouseLeave={() => {
+                              props.visStore.selectConditions([])
+                          }}
+                          transform={"translate(" + xScale(props.dataStore.conditions[i]) + "," + yScale(props.dataStore.conditions[j]) + ")"}>
+                <rect fill={color(cor)} width={xScale.bandwidth()} height={yScale.bandwidth()}/>
+                {props.visStore.selectionLocked && props.visStore.selectedConditions.toString() === [...new Set([j, i])].toString() ?
+                    <path
+                        d={"M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"}/> : null}
                 <title>{cor}</title>
             </g>)
         }
@@ -48,7 +52,8 @@ const CorrelationHeatmap = inject("dataStore", "visStore")(observer((props) => {
                 {rects}
             </g>
             <g transform={"translate(" + (props.width - margins.right - 100) + "," + margins.top + ")"}>
-                <GradientLegend range={color.domain().map(d => color(d))} domain={color.domain()} label={"P-value Correlation"}/>
+                <GradientLegend range={color.domain().map(d => color(d))} domain={color.domain()}
+                                label={"P-value correlation"}/>
             </g>
         </svg>
     </div>);

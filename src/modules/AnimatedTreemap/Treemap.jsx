@@ -2,9 +2,6 @@ import {inject, observer} from "mobx-react";
 import AnimatedTreemap from "./AnimatedTreemap";
 import React, {createRef, useEffect, useMemo, useState} from "react";
 import SmallMultiples from "./SmallMultiples";
-import MobileStepper from "@material-ui/core/MobileStepper";
-import Button from "@material-ui/core/Button";
-import {KeyboardArrowLeft, KeyboardArrowRight} from "@material-ui/icons";
 import {ButtonGroup} from "@material-ui/core";
 import SettingsIcon from '@material-ui/icons/Settings';
 import SettingsModal from "./SettingsModal";
@@ -56,7 +53,7 @@ const Treemap = inject("dataStore", "visStore")(observer((props) => {
             <div style={{width: "75%", float: "left"}}>
                 <div ref={controlsRef}>
                     {/* eslint-disable-next-line react/jsx-no-undef */}
-                    <img src={"glyph.png"} height={100}/>
+                    <img src={"glyph.png"} alt="Glyph legend" height={100}/>
                     <ButtonGroup>
                             <ButtonGroupIconButton
                                 href="https://github.com/Integrative-Transcriptomics/GO-Compass#treemaps"
