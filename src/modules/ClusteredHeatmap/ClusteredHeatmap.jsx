@@ -26,13 +26,14 @@ const useStyles = makeStyles({
 const ClusteredHeatmap = inject("dataStore", "visStore")(observer((props) => {
     const classes = useStyles();
     const [xPos, setXPos] = useState(0);
+    const [yPos, setYPos] = useState(0)
     const [mouseDown, setMouseDown] = useState(false);
     const [offset, setOffset] = useState(0);
     //const [innerWidth, setInnerWidth] = useState(props.width);
 
     const margins = {
-        top: props.visStore.maxConditionTextSize*0.8 > 40 ? props.visStore.maxConditionTextSize*0.8 : 40,
-        right: props.visStore.maxConditionTextSize*0.25,
+        top: props.visStore.maxConditionTextSize * 0.8 > 40 ? props.visStore.maxConditionTextSize * 0.8 : 40,
+        right: props.visStore.maxConditionTextSize * 0.25,
         bottom: 40,
         left: 0,
     };
@@ -64,6 +65,11 @@ const ClusteredHeatmap = inject("dataStore", "visStore")(observer((props) => {
         }
         props.visStore.setTreeStepSize(stepsize);
     }, [height, props.dataStore.currentGOterms.length, props.visStore])
+    useEffect(() => {
+        if (scrollContainer && scrollContainer.current && scrollContainer.current.scrollTop !== offset) {
+            scrollContainer.current.scrollTop = offset
+        }
+    }, [offset, scrollContainer])
     const totalHeight = props.visStore.stepsize * props.dataStore.currentGOterms.length;
     const descendants = props.visStore.treeLayout;
     if (descendants.length > 0) {
@@ -103,11 +109,14 @@ const ClusteredHeatmap = inject("dataStore", "visStore")(observer((props) => {
                     </g>
                 </svg>
                 <div>
-                    <div style={{float: "left"}}>
+                    <div style={{float: "left"}} onMouseMove={(e) => setYPos(e.pageY)}>
                         <ScrollOverview length={height}
                                         breadth={overviewWidth}
+                                        mouseDown={mouseDown}
                                         outerLength={height} innerLength={totalHeight}
                                         currentPosition={offset}
+                                        yPos={yPos}
+                                        setCurrentPosition={setOffset}
                                         orientation={"y"}
                                         pattern={props.visStore.parentSizes}
                                         colorScale={props.visStore.termColorScale}/>
