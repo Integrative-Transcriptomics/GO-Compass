@@ -1,21 +1,18 @@
 import {inject, observer} from "mobx-react";
-import React, {useCallback, useState} from "react";
+import React, {useCallback, useEffect, useState} from "react";
 import UpSetJS, {VennDiagram} from '@upsetjs/react';
-import LockOpenIcon from '@material-ui/icons/LockOpen';
 
 
 const UpSet = inject("upSetStore", "dataStore", "visStore")(observer((props) => {
     const [localSelection, setLocalSelection] = useState(null)
-    const unlock=useCallback(()=>{
-        setLocalSelection(null);
-        props.visStore.unlock();
-    },[props.visStore])
+    useEffect(()=>{
+        if(props.visStore.selectedConditions.length===0){
+            setLocalSelection(null)
+        }
+    },[props.visStore.selectedConditions.length])
     const select = useCallback((selection) => {
         if (selection === null) {
             props.visStore.selectConditions([])
-            if (!props.visStore.selectionLocked) {
-                setLocalSelection(null);
-            }
             props.visStore.setChildHighlights([])
         } else {
             if (selection.type === "distinctIntersection" || selection.type === "intersection") {
@@ -36,7 +33,7 @@ const UpSet = inject("upSetStore", "dataStore", "visStore")(observer((props) => 
             } else if (selection.type === "set") {
                 props.visStore.setLockedSelection([props.dataStore.conditions.indexOf(selection.name)])
             }
-            if(props.visStore.selectionLocked){
+            if (props.visStore.selectionLocked) {
                 setLocalSelection(selection)
             }
         }
@@ -55,7 +52,6 @@ const UpSet = inject("upSetStore", "dataStore", "visStore")(observer((props) => 
                             onClick={handleClick}/>;
     }
     return (<div id={props.id}>
-        {props.visStore.selectionLocked?<LockOpenIcon onClick={unlock}/>:null}
         {plot}
     </div>)
 }));
