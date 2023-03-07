@@ -156,9 +156,13 @@ const ClusteredHeatmap = inject("dataStore", "visStore")(observer((props) => {
                     <g transform={"translate(" + (margins.left + overviewWidth) + ",0)"}>
                         <Axis h={0} w={treeWidth} axis={xAxis} axisType={'x'} label={'Dispensability'}/>
                     </g>
-                    <g transform={"translate(" + (innerWidth) + ",0)"}>
+                    <g transform={"translate(" + (innerWidth-100) + ",0)"}>
                         <GradientLegend range={heatmapRange} domain={heatmapDomain} label={"-log(pVal)"}
                                         align={"right"}/>
+                    </g>
+                    <g transform={"translate(" + (innerWidth-100) + ",0)"}>
+                         <rect width={2} height={2} x={9} y={9} fill={"black"}/>
+                        <text x={15} y={15}>significant</text>
                     </g>
                 </svg>
             </div>
