@@ -42,17 +42,16 @@ const BarChart = inject("dataStore", "visStore")(observer((props) => {
         sigLine = <SignificanceLine width={width} height={yScale(props.logSigThreshold)}
                                     sigThreshold={props.sigThreshold}/>
     }
+    const xAxisScale=  d3.scaleBand().domain(props.xScale.domain().map(d=>props.dataStore.dataTable[d].description)).range(props.xScale.range()).padding(0.25);
     const xAxis = d3.axisBottom()
-        .scale(props.xScale)
-        .tickFormat(props.fullAxis ? (d) => props.dataStore.dataTable[d].description : "")
+        .scale(xAxisScale)
+        .tickFormat(props.fullAxis ? d => d : "")
         .tickSize(props.fullAxis ? 4 : 0);
     return (
         <g transform={'translate(' + margins.left + ',' + margins.top + ')'}>
             <Axis h={height} w={width} axis={xAxis} axisType={'x'} label={''} rotate={true}/>
             {rects}
-            {/*<g ref={highlightRef}>{highlighters}</g>*/}
             {sigLine}
-
         </g>
     );
 }));
