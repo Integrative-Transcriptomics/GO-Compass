@@ -28,10 +28,7 @@ const SmallTreemap = inject("dataStore", "visStore")(observer((props) => {
                             <line x1="0" y="0" x2="0" y2="4.5" stroke={fill} strokeWidth="5"/>
                         </pattern>
                     </defs>
-                    <rect onMouseEnter={() => props.visStore.setChildHighlight(child.data.id)}
-                          onMouseLeave={() => props.visStore.setChildHighlight(null)}
-                          onClick={() => props.visStore.setConditionIndex(props.index)}
-                          id={"rectSmall" + id}
+                    <rect id={"rectSmall" + id}
                           width={child.x1 - child.x0} height={child.y1 - child.y0}
                           fill={props.logSigThreshold < child.value ? fill : "url(#" + id + ")"}
                           stroke="white"
@@ -58,8 +55,7 @@ const SmallTreemap = inject("dataStore", "visStore")(observer((props) => {
     }, [props.visStore.conditionIndex]);
     return (
         <svg width={width} height={height}>
-            <rect width={width} height={height} fill="white"
-                  onClick={() => props.visStore.setConditionIndex(props.index)}/>
+            <rect width={width} height={height} fill="white"/>
             <g transform={"scale(" + props.scalingFactor + ")"}>
                 {children}
             </g>
