@@ -3,8 +3,6 @@ import AnimatedTreemap from "./AnimatedTreemap";
 import React, {createRef, useEffect, useMemo, useState} from "react";
 import SmallMultiples from "./SmallMultiples";
 import SettingsModal from "./SettingsModal";
-import TreemapLegend from "./TreemapLegend";
-
 
 const Treemap = inject("dataStore", "visStore")(observer((props) => {
     const [showLabels, setShowLabels] = useState(true);

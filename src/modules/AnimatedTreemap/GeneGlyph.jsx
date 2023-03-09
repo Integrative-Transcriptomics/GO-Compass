@@ -1,6 +1,5 @@
 import React from "react";
 import PropTypes from "prop-types";
-import AnimatedTreemap from "./AnimatedTreemap";
 import {inject, observer} from "mobx-react";
 
 const GeneGlyph = inject("dataStore", "visStore")(observer((props) => {
