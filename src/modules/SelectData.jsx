@@ -8,7 +8,6 @@ import {
     multiSpeciesRevigo
 } from "../parseDataFlask";
 import PropTypes from "prop-types";
-import {RootStore} from "./stores/RootStore";
 import HelpIcon from '@material-ui/icons/Help';
 import HomeIcon from '@material-ui/icons/Home';
 import GitHubIcon from '@material-ui/icons/GitHub';
@@ -76,7 +75,7 @@ const SelectData = (props) => {
                 return geneFiles[d.index];
             });
             multiRevigoGoLists(goFile, reorderedFiles, [...multiBackground], propagateBackground, selectedMeasure, pvalueFilter, response => {
-                props.setRootStore(new RootStore(response.results, response.conditions, response.tableColumns, response.hasFC, response.geneValues, response.goSetSize, selectedMeasure, pvalueFilter));
+                props.setRootStore(response.results, response.conditions, response.tableColumns, response.hasFC, response.geneValues, response.goSetSize, selectedMeasure, pvalueFilter);
             });
 
         } else {
@@ -84,21 +83,21 @@ const SelectData = (props) => {
                 return geneFiles[d.index];
             });
             multiSpeciesRevigo(reorderedFiles, [...multiBackground], propagateBackground, conditions.map(d => d.condition), conditions.map(d => d.background), selectedMeasure, pvalueFilter, direction, response => {
-                props.setRootStore(new RootStore(response.results, response.conditions, response.tableColumns, response.hasFC, response.geneValues, response.goSetSize, selectedMeasure, pvalueFilter));
+                props.setRootStore(response.results, response.conditions, response.tableColumns, response.hasFC, response.geneValues, response.goSetSize, selectedMeasure, pvalueFilter);
             });
         }
     }, [goFile, conditions, multiBackground, propagateBackground, selectedMeasure, pvalueFilter, geneFiles, props, direction]);
     const loadMouse = useCallback(() => {
         setIsLoading(true)
         exampleMouse((response) => {
-            props.setRootStore(new RootStore(response.results, response.conditions, response.tableColumns, response.hasFC, response.geneValues, response.goSetSize, selectedMeasure, pvalueFilter));
+            props.setRootStore(response.results, response.conditions, response.tableColumns, response.hasFC, response.geneValues, response.goSetSize, selectedMeasure, pvalueFilter);
             setIsLoading(false)
         })
     }, [props, pvalueFilter, selectedMeasure])
     const loadTreponema = useCallback(() => {
         setIsLoading(true)
         exampleTreponema((response) => {
-            props.setRootStore(new RootStore(response.results, response.conditions, response.tableColumns, response.hasFC, response.geneValues, response.goSetSize, selectedMeasure, pvalueFilter));
+            props.setRootStore(response.results, response.conditions, response.tableColumns, response.hasFC, response.geneValues, response.goSetSize, selectedMeasure, pvalueFilter);
             setIsLoading(false)
         })
     }, [props, pvalueFilter, selectedMeasure])

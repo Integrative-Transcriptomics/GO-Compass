@@ -19,7 +19,6 @@ const SmallTreemap = inject("dataStore", "visStore")(observer((props) => {
     currentLayout.children.forEach((parent, j) =>
         parent.children.forEach((child, i) => {
             const id = mapId + '-' + j + '-' + i;
-            const isHighlighted = props.visStore.childHighlights.length === 0 || props.visStore.childHighlights.includes(child.data.id);
             const fill = props.visStore.termColorScale(parent.data.id);
             children.push(
                 <g key={child.data.id} transform={'translate(' + child.x0 + ',' + child.y0 + ')'}>
@@ -29,15 +28,11 @@ const SmallTreemap = inject("dataStore", "visStore")(observer((props) => {
                             <line x1="0" y="0" x2="0" y2="4.5" stroke={fill} strokeWidth="5"/>
                         </pattern>
                     </defs>
-                    <rect onMouseEnter={() => props.visStore.setChildHighlight(child.data.id)}
-                          onMouseLeave={() => props.visStore.setChildHighlight(null)}
-                          onClick={() => props.visStore.setConditionIndex(props.index)}
-                          id={"rectSmall" + id}
+                    <rect id={"rectSmall" + id}
                           width={child.x1 - child.x0} height={child.y1 - child.y0}
                           fill={props.logSigThreshold < child.value ? fill : "url(#" + id + ")"}
-                          stroke={props.visStore.childHighlights.includes(child.data.id) ? "black" : "white"}
-                          strokeWidth={1}
-                          opacity={isHighlighted ? 1 : 0.5}/>
+                          stroke="white"
+                          strokeWidth={1}/>
                     <title>
                         {child.data.name}
                     </title>
@@ -60,8 +55,7 @@ const SmallTreemap = inject("dataStore", "visStore")(observer((props) => {
     }, [props.visStore.conditionIndex]);
     return (
         <svg width={width} height={height}>
-            <rect width={width} height={height} fill="white"
-                  onClick={() => props.visStore.setConditionIndex(props.index)}/>
+            <rect width={width} height={height} fill="white"/>
             <g transform={"scale(" + props.scalingFactor + ")"}>
                 {children}
             </g>

@@ -2,7 +2,7 @@ import React, {createRef, useCallback, useEffect, useState} from "react";
 import Grid from "@material-ui/core/Grid";
 import SimpleChart from "./SimpleCharts/SimpleChart";
 import {makeStyles} from "@material-ui/core/styles";
-import {ButtonGroup, createStyles, Tab, Tabs} from "@material-ui/core";
+import {Button, ButtonGroup, createStyles, Tab, Tabs} from "@material-ui/core";
 import Paper from "@material-ui/core/Paper";
 import DataTable from "./DetailedTable/DataTable";
 import CorrelationHeatmap from "./CorrelationHeatmap";
@@ -17,12 +17,15 @@ import {exportPDF} from "../UtilityFunctions";
 import {v4 as uuidv4} from 'uuid'
 import HelpIcon from '@material-ui/icons/Help';
 import ButtonGroupIconButton from "../ButtonGroupIconButton";
+import LockOpenIcon from "@material-ui/icons/LockOpen";
+import SettingsIcon from "@material-ui/icons/Settings";
 
 
 /**
  * @return {null}
  */
 const Plots = inject("dataStore", "visStore")(observer((props) => {
+    const [treemapSettingsOpen, setTreemapSettingsOpen]=useState(false);
     const useStyles = makeStyles((theme) =>
         createStyles({
             root: {
@@ -67,14 +70,14 @@ const Plots = inject("dataStore", "visStore")(observer((props) => {
                     <Typography>
                         Cutoff Selection in GO Dispensability Tree
                         <ButtonGroup>
-                        <ButtonGroupIconButton onClick={() => exportPDF(treeID, true)}>
-                            <GetAppIcon/>
-                        </ButtonGroupIconButton>
-                        <ButtonGroupIconButton
-                            href="https://github.com/Integrative-Transcriptomics/GO-Compass#dispensability-tree-and-cutoff-selection"
-                            target="_blank"
-                            rel="noopener noreferrer"><HelpIcon/></ButtonGroupIconButton>
-                            </ButtonGroup>
+                            <ButtonGroupIconButton onClick={() => exportPDF(treeID, true)}>
+                                <GetAppIcon/>
+                            </ButtonGroupIconButton>
+                            <ButtonGroupIconButton
+                                href="https://github.com/Integrative-Transcriptomics/GO-Compass#dispensability-tree-and-cutoff-selection"
+                                target="_blank"
+                                rel="noopener noreferrer"><HelpIcon/></ButtonGroupIconButton>
+                        </ButtonGroup>
                     </Typography>
                     <ClusteredHeatmap
                         logSigThreshold={props.logSigThreshold}
@@ -86,10 +89,23 @@ const Plots = inject("dataStore", "visStore")(observer((props) => {
             </Grid>
             <Grid item xs={6}>
                 <Paper className={classes.paper}>
-                    <Typography>Single List View</Typography>
+                    <Typography>Single List View
+                     <ButtonGroup>
+                            <ButtonGroupIconButton
+                                href="https://github.com/Integrative-Transcriptomics/GO-Compass#treemaps"
+                                target="_blank"
+                                rel="noopener noreferrer"><HelpIcon/></ButtonGroupIconButton>
+                            <ButtonGroupIconButton onClick={() => exportPDF(treeMapID, true)}>
+                                <GetAppIcon/>
+                            </ButtonGroupIconButton>
+                            <ButtonGroupIconButton variant="outlined" color="primary" onClick={() => setTreemapSettingsOpen(true)}>
+                                <SettingsIcon/>
+                            </ButtonGroupIconButton>
+                        </ButtonGroup>
+                    </Typography>
                     <Treemap logSigThreshold={props.logSigThreshold}
                              height={props.visStore.plotHeight / 2}
-                             width={props.visStore.screenWidth / 2} id={treeMapID}/>
+                             width={props.visStore.screenWidth / 2} id={treeMapID} isOpen={treemapSettingsOpen} setIsOpen={setTreemapSettingsOpen}/>
                 </Paper>
             </Grid>
             <Grid item xs={6}>
@@ -97,15 +113,23 @@ const Plots = inject("dataStore", "visStore")(observer((props) => {
                     <Typography>
                         Overview List Comparison
                         <ButtonGroup>
-                        <ButtonGroupIconButton onClick={() => exportPDF(summaryID, true)}>
-                            <GetAppIcon/>
-                        </ButtonGroupIconButton>
-                        <ButtonGroupIconButton href="https://github.com/Integrative-Transcriptomics/GO-Compass#summary-visualizations"
-                              target="_blank"
-                              rel="noopener noreferrer"><HelpIcon/></ButtonGroupIconButton>
+                            <ButtonGroupIconButton onClick={() => exportPDF(summaryID, true)}>
+                                <GetAppIcon/>
+                            </ButtonGroupIconButton>
+                            <ButtonGroupIconButton
+                                href="https://github.com/Integrative-Transcriptomics/GO-Compass#summary-visualizations"
+                                target="_blank"
+                                rel="noopener noreferrer"><HelpIcon/></ButtonGroupIconButton>
+                            {props.visStore.selectionLocked ?
+                                <Button onClick={props.visStore.unlock} startIcon={<LockOpenIcon/>}>
+                                    Clear selection
+                                </Button> : null}
                         </ButtonGroup>
                     </Typography>
-                    <Tabs ref={tabRef} value={selectedTab} onChange={(e, v) => setSelectedTab(v)}>
+                    <Tabs ref={tabRef} value={selectedTab} onChange={(e, v) => {
+                        props.visStore.unlock();
+                        setSelectedTab(v)
+                    }}>
                         <Tab label="All GO-Terms"/>
                         <Tab label="Significant GO-Terms"/>
                     </Tabs>
@@ -132,13 +156,14 @@ const Plots = inject("dataStore", "visStore")(observer((props) => {
                 <Paper className={classes.paper}>
                     <Typography>Detailed Comparison
                         <ButtonGroup>
-                        <ButtonGroupIconButton onClick={() => exportPDF(barChartID, true)}>
-                            <GetAppIcon/>
-                        </ButtonGroupIconButton>
-                        <ButtonGroupIconButton href="https://github.com/Integrative-Transcriptomics/GO-Compass#bar-chart"
-                              target="_blank"
-                              rel="noopener noreferrer"><HelpIcon/></ButtonGroupIconButton>
-                            </ButtonGroup>
+                            <ButtonGroupIconButton onClick={() => exportPDF(barChartID, true)}>
+                                <GetAppIcon/>
+                            </ButtonGroupIconButton>
+                            <ButtonGroupIconButton
+                                href="https://github.com/Integrative-Transcriptomics/GO-Compass#bar-chart"
+                                target="_blank"
+                                rel="noopener noreferrer"><HelpIcon/></ButtonGroupIconButton>
+                        </ButtonGroup>
                     </Typography>
                     <SimpleChart sigThreshold={props.sigThreshold} logSigThreshold={props.logSigThreshold}
                                  isTimeSeries={props.isTimeSeries}
