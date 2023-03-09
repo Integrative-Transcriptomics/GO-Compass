@@ -72,7 +72,7 @@ const AnimatedTreemap = inject("dataStore", "visStore")(observer((props) => {
     const stripedRects = [];
     const setSizeScale = useMemo(() => {
         const setSizes = props.visStore.treeOrder.map(d => props.dataStore.geneInformation[d][index].setSize);
-        return (d3.scaleLinear().domain([d3.min(setSizes), d3.max(setSizes)]).range(["grey", "white"]))
+        return (d3.scaleLinear().domain([d3.min(setSizes), d3.max(setSizes)]).range(["#efefef", "gray"]))
     }, [index, props.dataStore.geneInformation, props.visStore.treeOrder])
     let glyphColorScale;
     let geneMedians = {}
@@ -235,8 +235,6 @@ const AnimatedTreemap = inject("dataStore", "visStore")(observer((props) => {
     );
     return (
         <div id={props.id}>
-            <TreemapLegend foregroundScale={glyphColorScale} backgroundScale={setSizeScale}
-                           glyphEncoding={props.glyphEncoding}/>
             <svg width={props.visStore.treemapWidth} height={props.visStore.treemapHeight}>
                 <rect width={props.visStore.treemapWidth} height={props.visStore.treemapHeight} fill={"none"}
                       stroke={"lightgray"} strokeWidth={"1px"}/>
@@ -244,6 +242,8 @@ const AnimatedTreemap = inject("dataStore", "visStore")(observer((props) => {
                 <g ref={leafRef}>{rects}</g>
                 <g ref={propRef}>{proportions}</g>
             </svg>
+            <TreemapLegend foregroundScale={glyphColorScale} backgroundScale={setSizeScale}
+                           glyphEncoding={props.glyphEncoding}/>
         </div>
     );
 }));

@@ -40,7 +40,7 @@ const Treemap = inject("dataStore", "visStore")(observer((props) => {
     }, [props.visStore, props.width]);
     useEffect(() => {
         if (controlsRef.current !== null) {
-            props.visStore.setTreemapHeight(props.height - controlsRef.current.getBoundingClientRect().height)
+            props.visStore.setTreemapHeight(props.height - controlsRef.current.getBoundingClientRect().height-50)
         }
     }, [controlsRef, props.height, props.visStore])
     return (<React.Fragment key={"anchor"}>
