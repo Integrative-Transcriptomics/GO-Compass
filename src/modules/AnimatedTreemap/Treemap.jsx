@@ -2,13 +2,8 @@ import {inject, observer} from "mobx-react";
 import AnimatedTreemap from "./AnimatedTreemap";
 import React, {createRef, useEffect, useMemo, useState} from "react";
 import SmallMultiples from "./SmallMultiples";
-import {ButtonGroup} from "@material-ui/core";
-import SettingsIcon from '@material-ui/icons/Settings';
 import SettingsModal from "./SettingsModal";
-import {exportPDF} from "../../UtilityFunctions";
-import GetAppIcon from "@material-ui/icons/GetApp";
-import ButtonGroupIconButton from "../../ButtonGroupIconButton";
-import HelpIcon from "@material-ui/icons/Help";
+import TreemapLegend from "./TreemapLegend";
 
 
 const Treemap = inject("dataStore", "visStore")(observer((props) => {
@@ -17,7 +12,6 @@ const Treemap = inject("dataStore", "visStore")(observer((props) => {
     const [showNumbers, setShowNumbers] = useState(false);
     const [adaptedScalingFactor, setAdaptedScalingFactor] = useState(0.25);
     const [glyphEncoding, setGlyphEncoding] = useState("updown");
-    const [open, setOpen] = React.useState(false);
     const [isTimeseries, setIsTimeseries] = useState(false);
     const scalingFactor = 0.25;
     const controlsRef = createRef();
@@ -53,27 +47,14 @@ const Treemap = inject("dataStore", "visStore")(observer((props) => {
             <div style={{width: "75%", float: "left"}}>
                 <div ref={controlsRef}>
                     {/* eslint-disable-next-line react/jsx-no-undef */}
-                    <img src={"glyph.png"} alt="Glyph legend" height={100}/>
-                    <ButtonGroup>
-                            <ButtonGroupIconButton
-                                href="https://github.com/Integrative-Transcriptomics/GO-Compass#treemaps"
-                                target="_blank"
-                                rel="noopener noreferrer"><HelpIcon/></ButtonGroupIconButton>
-                            <ButtonGroupIconButton onClick={() => exportPDF(props.id, true)}>
-                                <GetAppIcon/>
-                            </ButtonGroupIconButton>
-                            <ButtonGroupIconButton variant="outlined" color="primary" onClick={() => setOpen(true)}>
-                                <SettingsIcon/>
-                            </ButtonGroupIconButton>
-                        </ButtonGroup>
                     <SettingsModal showLabels={showLabels}
                                    setShowLabels={setShowLabels}
                                    showGenes={showGenes} setShowGenes={setShowGenes}
                                    showNumbers={showNumbers}
                                    setShowNumbers={setShowNumbers} geneSetText={geneSetText}
                                    glyphEncoding={glyphEncoding} setGlyphEncoding={setGlyphEncoding}
-                                   open={open}
-                                   close={() => setOpen(false)}
+                                   open={props.isOpen}
+                                   close={() => props.setIsOpen(false)}
                                    hasFCs={props.dataStore.rootStore.hasFCs}
                                    isTimeseries={isTimeseries} setIsTimeseries={setIsTimeseries}/>
                 </div>

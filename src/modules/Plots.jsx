@@ -18,12 +18,14 @@ import {v4 as uuidv4} from 'uuid'
 import HelpIcon from '@material-ui/icons/Help';
 import ButtonGroupIconButton from "../ButtonGroupIconButton";
 import LockOpenIcon from "@material-ui/icons/LockOpen";
+import SettingsIcon from "@material-ui/icons/Settings";
 
 
 /**
  * @return {null}
  */
 const Plots = inject("dataStore", "visStore")(observer((props) => {
+    const [treemapSettingsOpen, setTreemapSettingsOpen]=useState(false);
     const useStyles = makeStyles((theme) =>
         createStyles({
             root: {
@@ -87,10 +89,23 @@ const Plots = inject("dataStore", "visStore")(observer((props) => {
             </Grid>
             <Grid item xs={6}>
                 <Paper className={classes.paper}>
-                    <Typography>Single List View</Typography>
+                    <Typography>Single List View
+                     <ButtonGroup>
+                            <ButtonGroupIconButton
+                                href="https://github.com/Integrative-Transcriptomics/GO-Compass#treemaps"
+                                target="_blank"
+                                rel="noopener noreferrer"><HelpIcon/></ButtonGroupIconButton>
+                            <ButtonGroupIconButton onClick={() => exportPDF(treeMapID, true)}>
+                                <GetAppIcon/>
+                            </ButtonGroupIconButton>
+                            <ButtonGroupIconButton variant="outlined" color="primary" onClick={() => setTreemapSettingsOpen(true)}>
+                                <SettingsIcon/>
+                            </ButtonGroupIconButton>
+                        </ButtonGroup>
+                    </Typography>
                     <Treemap logSigThreshold={props.logSigThreshold}
                              height={props.visStore.plotHeight / 2}
-                             width={props.visStore.screenWidth / 2} id={treeMapID}/>
+                             width={props.visStore.screenWidth / 2} id={treeMapID} isOpen={treemapSettingsOpen} setIsOpen={setTreemapSettingsOpen}/>
                 </Paper>
             </Grid>
             <Grid item xs={6}>

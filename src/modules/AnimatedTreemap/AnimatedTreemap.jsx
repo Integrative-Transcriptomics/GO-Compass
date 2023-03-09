@@ -5,6 +5,8 @@ import {inject, observer} from "mobx-react";
 import {v4 as uuidv4} from 'uuid'
 import {Tooltip} from "@material-ui/core";
 import TermTooltip from "../TermToolstip";
+import TreemapLegend from "./TreemapLegend";
+import GeneGlyph from "./GeneGlyph";
 
 
 /**
@@ -145,13 +147,13 @@ const AnimatedTreemap = inject("dataStore", "visStore")(observer((props) => {
                             visText = size + ", " + up + ":" + down;
                         } else {
                             proportionFill = glyphColorScale(geneMedians[child.data.id])
-                            visText = size + ", " + Math.round(geneMedians[child.data.id]*100)/100
+                            visText = size + ", " + Math.round(geneMedians[child.data.id] * 100) / 100
                         }
                     }
                 }
                 const propHeight = 10;
                 const propWidth = 30;
-                if ((propWidth < rectWidth && propHeight < (rectHeight-10)) || (propWidth < (rectHeight-10) && propHeight < rectWidth)) {
+                if ((propWidth < rectWidth && propHeight < (rectHeight - 10)) || (propWidth < (rectHeight - 10) && propHeight < rectWidth)) {
                     let sigWidth = propWidth / size * total;
                     let rotate = "";
                     if (propWidth > rectWidth) {
@@ -167,26 +169,15 @@ const AnimatedTreemap = inject("dataStore", "visStore")(observer((props) => {
                         }
                     }
                     proportions.push(<g key={child.data.id} transform={'translate(' + child.x0 + ',' + child.y0 + ')'}>
-                        {props.showNumbers && rotate==="" && (rectHeight-10>30)?
+                        {props.showNumbers && rotate === "" && (rectHeight - 10 > 30) ?
                             <g transform={transformNumbers}>
                                 <text textAnchor={"end"} fontSize={fontSize}>{visText}</text>
                             </g> : null}
                         {props.showGenes ?
                             <g transform={transformGlyph}>
-                                <rect width={propWidth} height={propHeight}
-                                      fill={setSizeScale(size)}/>
-                                {props.dataStore.rootStore.hasGeneInfo ?
-                                    <rect y={propHeight / 4} width={sigWidth} height={propHeight * 0.5}
-                                          fill={proportionFill}/> : null}
-                                <line x2={propWidth} stroke={"white"}/>
-                                {props.dataStore.rootStore.hasFCs ? <polygon
-                                    points={sigWidth + ",0 " + sigWidth + "," + (-propHeight / 2) + " " + (sigWidth - propHeight) + "," + (-propHeight / 4)}
-                                    fill={proportionFill}/> : null}
-                                {props.dataStore.rootStore.hasFCs ?
-                                    <rect x={sigWidth > 2 ? sigWidth - 2 : 0} y={-0.25 * propHeight}
-                                          width={sigWidth > 2 ? 2 : sigWidth} height={propHeight}
-                                          fill={proportionFill}/> : null}
-                                <line y1={-0.5} y2={propHeight} stroke={"white"}/>
+                                <GeneGlyph height={propHeight} width={propWidth}
+                                           sigWidth={sigWidth} backgroundColor={setSizeScale(size)}
+                                           foregroundColor={proportionFill}/>
                             </g> : null}
                     </g>)
                 }
@@ -207,7 +198,7 @@ const AnimatedTreemap = inject("dataStore", "visStore")(observer((props) => {
                               stroke={props.visStore.childHighlights.includes(child.data.id) ? "black" : "white"}
                               strokeWidth={1}
                               opacity={filledOpacity}/>
-                        {props.showLabels?<g>
+                        {props.showLabels ? <g>
                             <defs>
                                 <clipPath id={"clip" + clipID}>
                                     <use xlinkHref={"#rect" + clipID}/>
@@ -216,7 +207,7 @@ const AnimatedTreemap = inject("dataStore", "visStore")(observer((props) => {
                             <text clipPath={'url(#clip' + clipID + ')'} x={2} y={10} fontSize={fontSize}>
                                 {rectWidth > 0 && rectHeight > 0 ? child.data.name : null}
                             </text>
-                        </g>:null}
+                        </g> : null}
                     </g>
                 </Tooltip>
             )
@@ -244,6 +235,8 @@ const AnimatedTreemap = inject("dataStore", "visStore")(observer((props) => {
     );
     return (
         <div id={props.id}>
+            <TreemapLegend foregroundScale={glyphColorScale} backgroundScale={setSizeScale}
+                           glyphEncoding={props.glyphEncoding}/>
             <svg width={props.visStore.treemapWidth} height={props.visStore.treemapHeight}>
                 <rect width={props.visStore.treemapWidth} height={props.visStore.treemapHeight} fill={"none"}
                       stroke={"lightgray"} strokeWidth={"1px"}/>
