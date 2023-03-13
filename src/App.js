@@ -102,7 +102,7 @@ const App = observer((props) => {
                                     value={props.rootStore.sigThreshold}
                                     onChange={(e) => props.rootStore.setSigThreshold(e.target.value)}
                                 >
-                                    {[0.05,0.01,0.005,0.001,0.0005,0.0001].map(pval =>
+                                    {[0.05,0.01,0.005,0.001,0.0005,0.0001,0.00005,0.00001].map(pval =>
                                         <MenuItem key={pval}
                                                   value={pval}>{pval}</MenuItem>)}
                                 </Select>
