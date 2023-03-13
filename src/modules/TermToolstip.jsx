@@ -19,7 +19,7 @@ const TermTooltip = inject("dataStore", "visStore")(observer((props) => {
 
         </div>
         {"Set size: " + props.setSize + (props.total !== undefined ? props.up !== undefined
-            ? ", Up: " + (props.up) + " Down: " + (props.total - props.up)
+            ? ", Up: " + (props.up) + " Down: " + (props.down)
             +  " Median:" + (Math.round(props.median*100)/100) :
             " Expressed: " + props.total : "")}
     </div>)
