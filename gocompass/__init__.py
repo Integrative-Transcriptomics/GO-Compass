@@ -431,6 +431,7 @@ def process_backgrounds(background_files, propagate_background, is_local):
         propagate_background -- true if background should be propagated
         is_local -- true if local files are used (example data)
     """
+    #print(background_files)
     background_anno = dict()
     if not propagate_background:
         if not is_local:
@@ -441,6 +442,7 @@ def process_backgrounds(background_files, propagate_background, is_local):
                 background_anno[os.path.basename(file.name)] = read_background(file, is_local)
     else:
         for index, file in enumerate(background_files):
+            #print(index,file)
             if not is_local:
                 objanno = read_background(file, is_local)
             else:
@@ -460,7 +462,7 @@ def process_backgrounds(background_files, propagate_background, is_local):
             background_df = pd.DataFrame.from_dict(background_semi_separated, orient="index")
             background_file = tempfile.NamedTemporaryFile()
             background_df.to_csv(background_file.name, sep="\t")
-            background_anno[os.path.basename(file.name)] = get_objanno(background_file.name, 'id2gos', godag=godag)
+            background_anno[os.path.basename(file.filename)] = get_objanno(background_file.name, 'id2gos', godag=godag)
             background_file.close()
     return background_anno
 
@@ -474,7 +476,6 @@ def create_genes_dfs(gene_list_files, is_local):
     """
     genes_dfs = []
     for index, file in enumerate(gene_list_files):
-        # print(type(file))
         if not is_local:
             genes_df = pd.read_csv(StringIO(file.stream.read().decode("utf-8"), newline=None), sep='\t', index_col=0,
                                    header=None)
@@ -548,7 +549,6 @@ def perform_revigo(background_anno, go_enrichment, gene_lists, method, pvalue_fi
     if has_genes:
         genes_dfs = []
         for index, genes_df in enumerate(gene_lists):
-            # print(file.name)
             if len(genes_df.columns) > 0:
                 genes_df.columns = [index]
                 genes_dfs.append(genes_df)

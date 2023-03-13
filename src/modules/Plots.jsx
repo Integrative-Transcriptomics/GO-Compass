@@ -89,7 +89,7 @@ const Plots = inject("dataStore", "visStore")(observer((props) => {
             </Grid>
             <Grid item xs={6}>
                 <Paper className={classes.paper}>
-                    <Typography>Single List View
+                    <Typography>Significance per list
                      <ButtonGroup>
                             <ButtonGroupIconButton
                                 href="https://github.com/Integrative-Transcriptomics/GO-Compass#treemaps"

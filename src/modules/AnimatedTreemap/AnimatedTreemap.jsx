@@ -147,7 +147,7 @@ const AnimatedTreemap = inject("dataStore", "visStore")(observer((props) => {
                             visText = size + "," + up + ":" + down;
                         } else {
                             proportionFill = glyphColorScale(geneMedians[child.data.id])
-                            visText = size + "," + (up+down)+"," + Math.round(geneMedians[child.data.id] * 100) / 100
+                            visText = size + "," + (up + down) + "," + Math.round(geneMedians[child.data.id] * 100) / 100
                         }
                     }
                 }
@@ -242,8 +242,15 @@ const AnimatedTreemap = inject("dataStore", "visStore")(observer((props) => {
                 <g ref={leafRef}>{rects}</g>
                 <g ref={propRef}>{proportions}</g>
             </svg>
-            <TreemapLegend foregroundScale={glyphColorScale} backgroundScale={setSizeScale}
-                           glyphEncoding={props.glyphEncoding}/>
+            <div style={{alignItems: "center"}}>
+                <div style={{float: "left"}}>
+                    Gene set legend
+                </div>
+                <div style={{float: "left"}}>
+                    <TreemapLegend foregroundScale={glyphColorScale} backgroundScale={setSizeScale}
+                                   glyphEncoding={props.glyphEncoding}/>
+                </div>
+            </div>
         </div>
     );
 }));
