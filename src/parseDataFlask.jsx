@@ -11,23 +11,22 @@ function performCorrelation(data, callback) {
     })
 }
 
-function multiRevigoGoLists(goFile, dataFiles, backgroundFiles, propagateBackground, method, pvalueFilter, callback) {
-    if (goFile != null) {
-        const formData = new FormData();
-        backgroundFiles.forEach(file => formData.append("backgrounds[]", file));
-        formData.append("propagateBackground", propagateBackground);
-        dataFiles.forEach(file => formData.append("geneLists[]", file));
-        formData.append("goEnrichment", goFile);
-        formData.append("pvalueFilter", pvalueFilter);
-        formData.append("method", method);
-        axios.post("/GoListsMultiREVIGO", formData)
-            .then(response => {
-                callback(response.data)
-            })
-            .catch(function (error) {
-                console.log(error);
-            });
-    }
+function multiRevigoGoLists(goFile, dataFiles, backgroundFiles, propagateBackground, method, pvalueFilter, direction, callback) {
+    const formData = new FormData();
+    backgroundFiles.forEach(file => formData.append("backgrounds[]", file));
+    formData.append("propagateBackground", propagateBackground);
+    dataFiles.forEach(file => formData.append("geneLists[]", file));
+    formData.append("goEnrichment", goFile);
+    formData.append("pvalueFilter", pvalueFilter);
+    formData.append("method", method);
+    formData.append("direction", direction);
+    axios.post("/MultiREVIGO", formData)
+        .then(response => {
+            callback(response.data)
+        })
+        .catch(function (error) {
+            console.log(error);
+        });
 }
 
 function multiSpeciesRevigo(dataFiles, backgroundFiles, propagateBackground, conditions, backgroundMap, method, pvalueFilter, direction, callback) {
@@ -95,6 +94,7 @@ function exampleMouse(callback) {
         callback(response.data)
     })
 }
+
 function exampleTreponema(callback) {
     axios.get("/load_treponema_pallidum").then((response) => {
         callback(response.data)

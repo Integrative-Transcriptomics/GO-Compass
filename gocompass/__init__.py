@@ -413,8 +413,8 @@ def multi_revigo():
     pvalue_filter = float(request.form['pvalueFilter'])
     background_anno = process_backgrounds(background_files, propagate_background, False)
     gene_lists = create_genes_dfs(gene_list_files, False)
-    if "goEnrichment" in request.form:
-        go_enrichment = request.form["goEnrichment"]
+    go_enrichment = request.files.get('goEnrichment', None)
+    if go_enrichment is not None:
         return go_list_revigo(go_enrichment.stream, background_anno, gene_lists, method, pvalue_filter)
     else:
         conditions = request.form.getlist("conditions[]")
@@ -431,7 +431,7 @@ def process_backgrounds(background_files, propagate_background, is_local):
         propagate_background -- true if background should be propagated
         is_local -- true if local files are used (example data)
     """
-    #print(background_files)
+    # print(background_files)
     background_anno = dict()
     if not propagate_background:
         if not is_local:
@@ -442,7 +442,7 @@ def process_backgrounds(background_files, propagate_background, is_local):
                 background_anno[os.path.basename(file.name)] = read_background(file, is_local)
     else:
         for index, file in enumerate(background_files):
-            #print(index,file)
+            # print(index,file)
             if not is_local:
                 objanno = read_background(file, is_local)
             else:
@@ -465,7 +465,8 @@ def process_backgrounds(background_files, propagate_background, is_local):
             if is_local:
                 background_anno[os.path.basename(file.name)] = get_objanno(background_file.name, 'id2gos', godag=godag)
             else:
-                background_anno[os.path.basename(file.filename)] = get_objanno(background_file.name, 'id2gos', godag=godag)
+                background_anno[os.path.basename(file.filename)] = get_objanno(background_file.name, 'id2gos',
+                                                                               godag=godag)
             background_file.close()
     return background_anno
 

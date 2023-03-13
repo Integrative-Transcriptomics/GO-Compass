@@ -74,7 +74,7 @@ const SelectData = (props) => {
             const reorderedFiles = conditions.map(d => {
                 return geneFiles[d.index];
             });
-            multiRevigoGoLists(goFile, reorderedFiles, [...multiBackground], propagateBackground, selectedMeasure, pvalueFilter, response => {
+            multiRevigoGoLists(goFile, reorderedFiles, [...multiBackground], propagateBackground, selectedMeasure, pvalueFilter, direction, response => {
                 props.setRootStore(response.results, response.conditions, response.tableColumns, response.hasFC, response.geneValues, response.goSetSize, selectedMeasure, pvalueFilter);
             });
 
