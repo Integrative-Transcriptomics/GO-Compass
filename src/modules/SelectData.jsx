@@ -90,10 +90,10 @@ const SelectData = (props) => {
     const loadMouse = useCallback(() => {
         setIsLoading(true)
         exampleMouse((response) => {
-            props.setRootStore(response.results, response.conditions, response.tableColumns, response.hasFC, response.geneValues, response.goSetSize, selectedMeasure, pvalueFilter);
+            props.setRootStore(response.results, response.conditions, response.tableColumns, response.hasFC, response.geneValues, response.goSetSize, selectedMeasure, 0.0005);
             setIsLoading(false)
         })
-    }, [props, pvalueFilter, selectedMeasure])
+    }, [props, selectedMeasure])
     const loadTreponema = useCallback(() => {
         setIsLoading(true)
         exampleTreponema((response) => {
