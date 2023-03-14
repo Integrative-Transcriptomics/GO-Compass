@@ -15,7 +15,9 @@ const TreemapLegend = (props) => {
                 domain={props.glyphEncoding === "updown" ? props.foregroundScale.domain().map(d => d * 100) : props.foregroundScale.domain()}
                 range={props.foregroundScale.range()} label={foreGroundLabel}/>
             <g transform={"translate(" + 110 + ",0)"}>
+                <text fontSize={12}>0</text>
                 <GeneGlyph height={20} width={100} sigWidth={50} backgroundColor={"grey"} foregroundColor={"red"}/>
+                <text x={80} fontSize={12}>100</text>
                 <text y={32} fontSize={12}>% present</text>
             </g>
             <polygon points={"100,0 110,7 110,13 100,20"} fill={"red"} opacity={0.5}/>
