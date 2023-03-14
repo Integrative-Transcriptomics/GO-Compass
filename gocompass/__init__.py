@@ -680,7 +680,7 @@ def load_streptomyces():
     pvalue_filter = 0.05
     background_anno = process_backgrounds(background_files, True, True)
     gene_lists = create_genes_dfs(gene_list_files, True)
-    conditions=["timepoint_1","timepoint_2","timepoint_3","timepoint_4", "timepoint_5"]
+    conditions=["timepoint1","timepoint2","timepoint3","timepoint4", "timepoint5"]
     return gene_list_revigo(background_anno, gene_lists, conditions, ["scoelicolor.txt"] * 5, "+", "Wang", pvalue_filter)
 
 
