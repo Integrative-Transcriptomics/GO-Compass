@@ -90,7 +90,7 @@ const SelectData = (props) => {
     const loadMouse = useCallback(() => {
         setIsLoading(true)
         exampleMouse((response) => {
-            props.setRootStore(response.results, response.conditions, response.tableColumns, response.hasFC, response.geneValues, response.goSetSize, selectedMeasure, 0.00001);
+            props.setRootStore(response.results, response.conditions, response.tableColumns, response.hasFC, response.geneValues, response.goSetSize, selectedMeasure, 0.00005);
             setIsLoading(false)
         })
     }, [props, selectedMeasure])

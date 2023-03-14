@@ -642,7 +642,7 @@ def load_mus_musculus():
                        open(os.path.join(folder, "D11vsD0.tsv"), "rb"),
                        open(os.path.join(folder, "D18vsD8.tsv"), "rb"),
                        open(os.path.join(folder, "D18vsD0.tsv"), "rb")]
-    pvalue_filter = 0.00001
+    pvalue_filter = 0.00005
     background_anno = process_backgrounds(background_files, True, True)
     gene_lists = create_genes_dfs(gene_list_files, True)
     return go_list_revigo(go_enrichment_file, background_anno, gene_lists, "Wang", pvalue_filter)
