@@ -242,9 +242,9 @@ const AnimatedTreemap = inject("dataStore", "visStore")(observer((props) => {
                 <g ref={leafRef}>{rects}</g>
                 <g ref={propRef}>{proportions}</g>
             </svg>
-            <div style={{alignItems: "center"}}>
-                <div style={{float: "left"}}>
-                    Gene set legend
+            <div style={{display: "flex", alignItems: "center"}}>
+                <div style={{marginRight: "10px"}}>
+                    Gene set legend:
                 </div>
                 <div style={{float: "left"}}>
                     <TreemapLegend foregroundScale={glyphColorScale} backgroundScale={setSizeScale}
