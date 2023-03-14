@@ -75,13 +75,14 @@ const ScrollOverview = (props) => {
         total += d.count;
     })
     const rectPos = props.length * (props.currentPosition / props.innerLength);
-    let viewRect = <rect ref={ref}
-                         onMouseDown={mouseDown}
-                         cursor={"grab"} pointerEvents={"visible"} y={props.breadth * (3 / 8)}
-                         height={props.breadth * (1 / 4)}
-                         width={rectLength}
-                         x={rectPos} fill={"none"}
-                         stroke={"gray"} strokeWidth={2}/>
+    let viewRect = props.innerLength === props.outerLength ? null : <rect ref={ref}
+                                                                          onMouseDown={mouseDown}
+                                                                          cursor={"grab"} pointerEvents={"visible"}
+                                                                          y={props.breadth * (3 / 8)}
+                                                                          height={props.breadth * (1 / 4)}
+                                                                          width={rectLength}
+                                                                          x={rectPos} fill={"none"}
+                                                                          stroke={"gray"} strokeWidth={2}/>
     let polygon = <polygon points={rectPos + "," + props.breadth * (3 / 8) + " 0,0 "
         + props.length + ",0 " + (rectLength + rectPos) + "," + props.breadth * (3 / 8)}
                            fill={increase_brightness(props.colorScale.range()[0], 80)}/>
