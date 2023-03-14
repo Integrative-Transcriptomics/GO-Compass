@@ -10,7 +10,7 @@ const LineChart = inject("dataStore", "visStore")(observer((props) => {
     const margins = {
         top: 10,
         right: 10,
-        bottom: 10,
+        bottom: 20,
         left: 20,
     };
     const width = props.width - margins.left - margins.right;
@@ -24,7 +24,7 @@ const LineChart = inject("dataStore", "visStore")(observer((props) => {
     });
     const xAxis = d3.axisBottom()
         .scale(xScale)
-        .tickFormat(() => "");
+        .tickFormat(d=>d+1)
     const yAxis = d3.axisLeft()
         .scale(yScale)
         .ticks(0);
