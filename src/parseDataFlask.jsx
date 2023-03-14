@@ -50,30 +50,6 @@ function multiSpeciesRevigo(dataFiles, backgroundFiles, propagateBackground, con
     }
 }
 
-function exampleData(callback) {
-    const requestBackground = axios.get("/exampleBackground")
-    const requestTP1 = axios.get("/exampleCondition?name=timepoint1.txt")
-    const requestTP2 = axios.get("/exampleCondition?name=timepoint2.txt")
-    const requestTP3 = axios.get("/exampleCondition?name=timepoint3.txt")
-    const requestTP4 = axios.get("/exampleCondition?name=timepoint4.txt")
-    const requestTP5 = axios.get("/exampleCondition?name=timepoint5.txt")
-    axios.all([requestBackground, requestTP1, requestTP2, requestTP3, requestTP4, requestTP5])
-        .then(axios.spread((...responses) => {
-                const data = {
-                    background: responses[0].data,
-                    lists: {
-                        timepoint1: responses[1].data,
-                        timepoint2: responses[2].data,
-                        timepoint3: responses[3].data,
-                        timepoint4: responses[4].data,
-                        timepoint5: responses[5].data,
-                    }
-                }
-                callback(data)
-            }
-        ))
-
-}
 
 function getGOheader(goFile, callback) {
     if (goFile != null) {
@@ -101,38 +77,20 @@ function exampleTreponema(callback) {
     })
 }
 
-function exampleDataWithFC(callback) {
-    const requestBackground = axios.get("/exampleBackground")
-    const requestTP1 = axios.get("/exampleCondition?name=timepoint_with_fc_1.txt")
-    const requestTP2 = axios.get("/exampleCondition?name=timepoint_with_fc_2.txt")
-    const requestTP3 = axios.get("/exampleCondition?name=timepoint_with_fc_3.txt")
-    const requestTP4 = axios.get("/exampleCondition?name=timepoint_with_fc_4.txt")
-    const requestTP5 = axios.get("/exampleCondition?name=timepoint_with_fc_5.txt")
-    axios.all([requestBackground, requestTP1, requestTP2, requestTP3, requestTP4, requestTP5])
-        .then(axios.spread((...responses) => {
-                const data = {
-                    background: responses[0].data,
-                    lists: {
-                        timepoint1: responses[1].data,
-                        timepoint2: responses[2].data,
-                        timepoint3: responses[3].data,
-                        timepoint4: responses[4].data,
-                        timepoint5: responses[5].data,
-                    }
-                }
-                callback(data)
-            }
-        ))
-
+function exampleStrepto(callback){
+     axios.get("/load_streptomyces").then((response) => {
+        callback(response.data)
+    })
 }
+
+
 
 export {
     multiRevigoGoLists,
     multiSpeciesRevigo,
     performCorrelation,
     getGOheader,
-    exampleData,
     exampleMouse,
     exampleTreponema,
-    exampleDataWithFC
+    exampleStrepto
 };

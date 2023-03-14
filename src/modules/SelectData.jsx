@@ -1,7 +1,7 @@
 import React, {useCallback, useEffect, useState} from 'react';
 import 'mobx-react-lite/batchingForReactDom'
 import {
-    exampleMouse,
+    exampleMouse, exampleStrepto,
     exampleTreponema,
     getGOheader,
     multiRevigoGoLists,
@@ -97,6 +97,13 @@ const SelectData = (props) => {
     const loadTreponema = useCallback(() => {
         setIsLoading(true)
         exampleTreponema((response) => {
+            props.setRootStore(response.results, response.conditions, response.tableColumns, response.hasFC, response.geneValues, response.goSetSize, selectedMeasure, pvalueFilter);
+            setIsLoading(false)
+        })
+    }, [props, pvalueFilter, selectedMeasure])
+    const loadStreptomyces = useCallback(() => {
+        setIsLoading(true)
+        exampleStrepto((response) => {
             props.setRootStore(response.results, response.conditions, response.tableColumns, response.hasFC, response.geneValues, response.goSetSize, selectedMeasure, pvalueFilter);
             setIsLoading(false)
         })
@@ -331,7 +338,7 @@ const SelectData = (props) => {
                     </ListItem>
                 </List></div>
             <div hidden={tab !== 2}>
-                <ExampleDataTable loadMouse={loadMouse} loadTreponema={loadTreponema} isLoading={isLoading}/>
+                <ExampleDataTable loadMouse={loadMouse} loadTreponema={loadTreponema} loadStrepto={loadStreptomyces} isLoading={isLoading}/>
             </div>
             <Backdrop className={classes.backdrop} open={isLoading}>
                 <CircularProgress color="inherit"/>

@@ -665,6 +665,25 @@ def load_treponema_pallidum():
     return go_list_revigo(go_enrichment_file, background_anno, gene_lists, "Wang", pvalue_filter)
 
 
+@app.route("/load_streptomyces", methods=["GET"])
+def load_streptomyces():
+    """
+    Loads streptomyces example data
+    """
+    folder = os.path.join(here, "data", "Scoelicolor")
+    background_files = [open(os.path.join(folder, "scoelicolor.txt"), "rb")]
+    gene_list_files = [open(os.path.join(folder, "timepoint_1.txt"), "rb"),
+                       open(os.path.join(folder, "timepoint_2.txt"), "rb"),
+                       open(os.path.join(folder, "timepoint_3.txt"), "rb"),
+                       open(os.path.join(folder, "timepoint_4.txt"), "rb"),
+                       open(os.path.join(folder, "timepoint_5.txt"), "rb")]
+    pvalue_filter = 0.05
+    background_anno = process_backgrounds(background_files, True, True)
+    gene_lists = create_genes_dfs(gene_list_files, True)
+    conditions=["timepoint_1","timepoint_2","timepoint_3","timepoint_4", "timepoint_5"]
+    return gene_list_revigo(background_anno, gene_lists, conditions, ["scoelicolor.txt"] * 5, "+", "Wang", pvalue_filter)
+
+
 @app.route('/')
 def index():
     return app.send_static_file('index.html')

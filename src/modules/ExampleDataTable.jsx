@@ -76,6 +76,31 @@ const ExampleDataTable = (props) => {
                     </Link>
                 </TableCell>
             </TableRow>
+            <TableRow>
+                <TableCell>
+                    <Button size="small" variant={"contained"} endIcon={<PlayArrowIcon/>}
+                            onClick={props.loadStrepto} disabled={props.isLoading}>Analyze Data</Button>
+                </TableCell>
+                <TableCell>
+                    Streptomyces coelicolor Test Dataset </TableCell>
+                <TableCell>
+                    Sulheim, Snorre, et al. "Enzyme-constrained models and omics analysis of Streptomyces coelicolor
+                    reveal metabolic changes that enhance heterologous production." Iscience 23.9 (2020): 101525. <Link
+                    href="https://doi.org/10.1093/molbev/msab318" target="_blank"
+                    rel="noopener noreferrer">https://doi.org/10.1016/j.isci.2020.101525</Link>
+                </TableCell>
+                <TableCell>5</TableCell>
+                <TableCell>
+                    Differential expression between two Streptomyces coelicolor strains (M145 and M1152) in a time series experiment.
+                </TableCell>
+                <TableCell>
+                    <Link
+                        href="https://github.com/Integrative-Transcriptomics/GO-Compass/tree/master/gocompass/data/Scoelicolor"
+                        target="_blank" rel="noopener noreferrer">
+                        <OpenInNewIcon/>
+                    </Link>
+                </TableCell>
+            </TableRow>
         </TableBody>
     </Table>)
 };
