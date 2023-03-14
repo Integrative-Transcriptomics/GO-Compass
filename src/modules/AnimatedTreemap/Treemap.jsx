@@ -17,12 +17,12 @@ const Treemap = inject("dataStore", "visStore")(observer((props) => {
         let text = "Show gene set numbers"
         if (props.dataStore.rootStore.hasFCs) {
             if (glyphEncoding === "updown") {
-                text = text + " (Set size, #upregulated:#downregulated)"
+                text = text + " (Set size,#upregulated:#downregulated)"
             } else {
-                text = text + " (Set size, median)"
+                text = text + " (Set size,#present,median)"
             }
         } else if (props.dataStore.rootStore.hasGeneInfo) {
-            text = text + " (Set size, #expressed)"
+            text = text + " (Set size,#present)"
         } else {
             text = text + (" (Set size)")
         }
