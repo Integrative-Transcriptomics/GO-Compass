@@ -52,6 +52,7 @@ const SelectData = (props) => {
     const [selectedMeasure, selectMeasure] = useState("Wang");
     const [pvalueFilter, setPvalueFilter] = useState(0.05);
     const [tab, setTab] = React.useState(0);
+    const [isError, setIsError]= React.useState(false);
 
     const useStyles = makeStyles((theme: Theme) => createStyles({
         root: {
@@ -76,7 +77,13 @@ const SelectData = (props) => {
                 return geneFiles[d.index];
             });
             multiRevigoGoLists(goFile, reorderedFiles, [...multiBackground], propagateBackground, selectedMeasure, pvalueFilter, direction, response => {
-                props.setRootStore(response.results, response.conditions, response.tableColumns, response.hasFC, response.geneValues, response.goSetSize, selectedMeasure, pvalueFilter);
+                console.log(response)
+                if (response !== undefined) {
+                    props.setRootStore(response.results, response.conditions, response.tableColumns, response.hasFC, response.geneValues, response.goSetSize, selectedMeasure, pvalueFilter);
+                } else {
+                    setIsLoading(false)
+                    setIsError(true)
+                }
             });
 
         } else {
@@ -84,7 +91,12 @@ const SelectData = (props) => {
                 return geneFiles[d.index];
             });
             multiSpeciesRevigo(reorderedFiles, [...multiBackground], propagateBackground, conditions.map(d => d.condition), conditions.map(d => d.background), selectedMeasure, pvalueFilter, direction, response => {
-                props.setRootStore(response.results, response.conditions, response.tableColumns, response.hasFC, response.geneValues, response.goSetSize, selectedMeasure, pvalueFilter);
+                if (response !== undefined) {
+                    props.setRootStore(response.results, response.conditions, response.tableColumns, response.hasFC, response.geneValues, response.goSetSize, selectedMeasure, pvalueFilter);
+                } else {
+                    setIsLoading(false)
+                    setIsError(true)
+                }
             });
         }
     }, [goFile, conditions, multiBackground, propagateBackground, selectedMeasure, pvalueFilter, geneFiles, props, direction]);
@@ -132,7 +144,6 @@ const SelectData = (props) => {
                         GO-Compass (Gene Ontology list comparison using Semantic Similarity) is a visual analytics tool
                         for the dispensability reduction and visual comparison of lists of GO terms.
                         GO-Compass performs the analysis in multiple steps:
-
                     </Typography>
                     <ol>
                         <li> (Optional) For gene list input: GO-enrichment for each list of genes to obtain lists of
@@ -179,6 +190,9 @@ const SelectData = (props) => {
                 hidden={tab !== 1}
             >
                 <List dense>
+                    {isError?<ListItem>
+                        <Alert severity={"warning"}>Something went wrong. Please check your input files!</Alert>
+                    </ListItem>:null}
                     <ListItem>
                         <List dense>
                             <Typography>Upload Gene or GO-term lists (1 required)<Tooltip

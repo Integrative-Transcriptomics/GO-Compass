@@ -24,9 +24,19 @@ function multiRevigoGoLists(goFile, dataFiles, backgroundFiles, propagateBackgro
         .then(response => {
             callback(response.data)
         })
-        .catch(function (error) {
-            console.log(error);
-        });
+        .catch(error => {
+            if (error.response) {
+                console.log(error.response.data);
+                console.log(error.response.status);
+                console.log(error.response.headers);
+            } else if (error.request) {
+                console.log(error.request);
+            } else {
+                // Something happened in setting up the request that triggered an Error
+                console.log('Error', error.message);
+            }
+            callback()
+        })
 }
 
 function multiSpeciesRevigo(dataFiles, backgroundFiles, propagateBackground, conditions, backgroundMap, method, pvalueFilter, direction, callback) {
@@ -44,9 +54,19 @@ function multiSpeciesRevigo(dataFiles, backgroundFiles, propagateBackground, con
             .then(response => {
                 callback(response.data)
             })
-            .catch(function (error) {
-                console.log(error)
-            });
+            .catch(error => {
+                if (error.response) {
+                    console.log(error.response.data);
+                    console.log(error.response.status);
+                    console.log(error.response.headers);
+                } else if (error.request) {
+                    console.log(error.request);
+                } else {
+                    // Something happened in setting up the request that triggered an Error
+                    console.log('Error', error.message);
+                }
+                callback()
+            })
     }
 }
 
@@ -77,12 +97,11 @@ function exampleTreponema(callback) {
     })
 }
 
-function exampleStrepto(callback){
-     axios.get("/load_streptomyces").then((response) => {
+function exampleStrepto(callback) {
+    axios.get("/load_streptomyces").then((response) => {
         callback(response.data)
     })
 }
-
 
 
 export {

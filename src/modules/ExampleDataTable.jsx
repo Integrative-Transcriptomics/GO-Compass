@@ -82,7 +82,7 @@ const ExampleDataTable = (props) => {
                             onClick={props.loadStrepto} disabled={props.isLoading}>Analyze Data</Button>
                 </TableCell>
                 <TableCell>
-                    Streptomyces coelicolor Test Dataset </TableCell>
+                    Streptomyces coelicolor test dataset </TableCell>
                 <TableCell>
                     Sulheim, Snorre, et al. "Enzyme-constrained models and omics analysis of Streptomyces coelicolor
                     reveal metabolic changes that enhance heterologous production." Iscience 23.9 (2020): 101525. <Link
