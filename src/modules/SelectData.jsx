@@ -130,35 +130,36 @@ const SelectData = (props) => {
                 <Container>
                     <Typography variant={"h5"}> Welcome to Go-Compass!
                     </Typography>
-                    <img src={schematic} alt={"Workflow Schematic"} width={window.innerWidth / 2}/>
+                    <img src={schematic} alt={"Workflow Schematic"} width={"100%"}/>
                     <Typography>
                         Go-Compass (Gene Ontology list comparison using Semantic Similarity) is a visual analytics tool
                         for the dispensability reduction and visual comparison of lists of GO terms.
                         GO-Compass performs the analysis in multiple steps:
-                        <ol>
-                            <li> (Optional) For gene list input: GO-enrichment for each list of genes to obtain lists of
-                                GO temrs
-                            </li>
-                            <li>Dispensability clustering: Adapted version of the REVIGO algorithm, a summarization
-                                method based on semantic similarity
-                                of GO terms, to perform hierarchical dispensability clustering on multiple lists.
-                            </li>
-                            <li>Interactive comparison: GO-Compass offers several visualizations for the comparison and
-                                improved
-                                interpretability of GO terms lists. The hierarchical dispensability clustering is
-                                visualized as
-                                a tree, where users can interactively filter out dispensable GO terms and create flat
-                                clusters.
-                                The flat clusters are visualized in animated treemaps, and are compared using a
-                                correlation
-                                heatmap, UpSet plots, and bar charts.
-                            </li>
-                        </ol>
 
                     </Typography>
+                    <ol>
+                        <li> (Optional) For gene list input: GO-enrichment for each list of genes to obtain lists of
+                            GO temrs
+                        </li>
+                        <li>Dispensability clustering: Adapted version of the REVIGO algorithm, a summarization
+                            method based on semantic similarity
+                            of GO terms, to perform hierarchical dispensability clustering on multiple lists.
+                        </li>
+                        <li>Interactive comparison: GO-Compass offers several visualizations for the comparison and
+                            improved
+                            interpretability of GO terms lists. The hierarchical dispensability clustering is
+                            visualized as
+                            a tree, where users can interactively filter out dispensable GO terms and create flat
+                            clusters.
+                            The flat clusters are visualized in animated treemaps, and are compared using a
+                            correlation
+                            heatmap, UpSet plots, and bar charts.
+                        </li>
+                    </ol>
                     <Typography variant={"subtitle1"}>More information:
                         <Link href="https://tuevis.cs.uni-tuebingen.de/go-compass/" target="_blank"
-                              rel="noopener noreferrer" style={{marginRight:"10px"}}>https://tuevis.cs.uni-tuebingen.de/go-compass/</Link>
+                              rel="noopener noreferrer"
+                              style={{marginRight: "10px"}}>https://tuevis.cs.uni-tuebingen.de/go-compass/</Link>
                         <Link href="https://github.com/Integrative-Transcriptomics/GO-Compass" className={classes.link}
                               target="_blank" rel="noopener noreferrer">
                             <GitHubIcon/>
