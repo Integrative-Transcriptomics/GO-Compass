@@ -129,7 +129,7 @@ const SelectData = (props) => {
                     </Typography>
                     <img src={schematic} alt={"Workflow Schematic"} width={"100%"}/>
                     <Typography>
-                        Go-Compass (Gene Ontology list comparison using Semantic Similarity) is a visual analytics tool
+                        GO-Compass (Gene Ontology list comparison using Semantic Similarity) is a visual analytics tool
                         for the dispensability reduction and visual comparison of lists of GO terms.
                         GO-Compass performs the analysis in multiple steps:
 
