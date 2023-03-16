@@ -71,7 +71,7 @@ const App = observer((props) => {
                             GO-Compass
                         </Typography>
                         {props.rootStore.initialized ?
-                            [<FormControl className={classes.menuButton}>
+                            [<FormControl className={classes.menuButton} key={"ont"}>
                                 <InputLabel style={{color: "white"}}
                                 >Ontology</InputLabel>
                                 <Select
@@ -89,7 +89,7 @@ const App = observer((props) => {
                                                   value={ontology.id}>{ontology.name}</MenuItem>)}
                                 </Select>
                             </FormControl>,
-                                <FormControl className={classes.menuButton}>
+                                <FormControl className={classes.menuButton} key={"sig"}>
                                 <InputLabel style={{color: "white"}}
                                 >Significance Threshold</InputLabel>
                                 <Select
@@ -107,7 +107,7 @@ const App = observer((props) => {
                                                   value={pval}>{pval}</MenuItem>)}
                                 </Select>
                             </FormControl>,
-                                <Typography>
+                                <Typography key={"info"}>
                                     {"Method: "
                                         + props.rootStore.selectedMeasure + ", p-Value Filter: " + props.rootStore.pvalueFilter + ", Help"}
                                 </Typography>] : <Typography>{"Help"}</Typography>}

@@ -92,21 +92,18 @@ const SelectData = (props) => {
         setIsLoading(true)
         exampleMouse((response) => {
             props.setRootStore(response.results, response.conditions, response.tableColumns, response.hasFC, response.geneValues, response.goSetSize, selectedMeasure, 0.00005);
-            setIsLoading(false)
         })
     }, [props, selectedMeasure])
     const loadTreponema = useCallback(() => {
         setIsLoading(true)
         exampleTreponema((response) => {
             props.setRootStore(response.results, response.conditions, response.tableColumns, response.hasFC, response.geneValues, response.goSetSize, selectedMeasure, pvalueFilter);
-            setIsLoading(false)
         })
     }, [props, pvalueFilter, selectedMeasure])
     const loadStreptomyces = useCallback(() => {
         setIsLoading(true)
         exampleStrepto((response) => {
             props.setRootStore(response.results, response.conditions, response.tableColumns, response.hasFC, response.geneValues, response.goSetSize, selectedMeasure, pvalueFilter);
-            setIsLoading(false)
         })
     }, [props, pvalueFilter, selectedMeasure])
     useEffect(() => {
@@ -128,7 +125,7 @@ const SelectData = (props) => {
             </Tabs>
             <div role="tabpanel" hidden={tab !== 0}>
                 <Container>
-                    <Typography variant={"h5"}> Welcome to Go-Compass!
+                    <Typography variant={"h5"}> Welcome to GO-Compass!
                     </Typography>
                     <img src={schematic} alt={"Workflow Schematic"} width={"100%"}/>
                     <Typography>

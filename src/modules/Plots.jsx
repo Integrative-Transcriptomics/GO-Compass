@@ -8,7 +8,6 @@ import DataTable from "./DetailedTable/DataTable";
 import CorrelationHeatmap from "./CorrelationHeatmap";
 import {inject, observer, Provider} from "mobx-react";
 import ClusteredHeatmap from "./ClusteredHeatmap/ClusteredHeatmap";
-import Typography from "@material-ui/core/Typography";
 import UpSet from "./UpSet";
 import Treemap from "./AnimatedTreemap/Treemap";
 import TabPanel from "./TabPanel";
@@ -67,7 +66,6 @@ const Plots = inject("dataStore", "visStore")(observer((props) => {
         <Grid className={classes.root} container spacing={1}>
             <Grid item xs={6}>
                 <Paper className={classes.paper}>
-                    <Typography>
                         Cutoff Selection in GO Dispensability Tree
                         <ButtonGroup>
                             <ButtonGroupIconButton onClick={() => exportPDF(treeID, true)}>
@@ -78,7 +76,6 @@ const Plots = inject("dataStore", "visStore")(observer((props) => {
                                 target="_blank"
                                 rel="noopener noreferrer"><HelpIcon/></ButtonGroupIconButton>
                         </ButtonGroup>
-                    </Typography>
                     <ClusteredHeatmap
                         logSigThreshold={props.logSigThreshold}
                         width={props.visStore.screenWidth / 2}
@@ -89,7 +86,7 @@ const Plots = inject("dataStore", "visStore")(observer((props) => {
             </Grid>
             <Grid item xs={6}>
                 <Paper className={classes.paper}>
-                    <Typography>Significance per list
+                   Significance per list
                      <ButtonGroup>
                             <ButtonGroupIconButton
                                 href="https://github.com/Integrative-Transcriptomics/GO-Compass#treemaps"
@@ -102,7 +99,6 @@ const Plots = inject("dataStore", "visStore")(observer((props) => {
                                 <SettingsIcon/>
                             </ButtonGroupIconButton>
                         </ButtonGroup>
-                    </Typography>
                     <Treemap logSigThreshold={props.logSigThreshold}
                              height={props.visStore.plotHeight / 2}
                              width={props.visStore.screenWidth / 2} id={treeMapID} isOpen={treemapSettingsOpen} setIsOpen={setTreemapSettingsOpen}/>
@@ -110,7 +106,6 @@ const Plots = inject("dataStore", "visStore")(observer((props) => {
             </Grid>
             <Grid item xs={6}>
                 <Paper className={classes.paper}>
-                    <Typography>
                         Overview List Comparison
                         <ButtonGroup>
                             <ButtonGroupIconButton onClick={() => exportPDF(summaryID, true)}>
@@ -125,7 +120,6 @@ const Plots = inject("dataStore", "visStore")(observer((props) => {
                                     Clear selection
                                 </Button> : null}
                         </ButtonGroup>
-                    </Typography>
                     <Tabs ref={tabRef} value={selectedTab} onChange={(e, v) => {
                         props.visStore.unlock();
                         setSelectedTab(v)
@@ -154,7 +148,7 @@ const Plots = inject("dataStore", "visStore")(observer((props) => {
             </Grid>
             <Grid item xs={6}>
                 <Paper className={classes.paper}>
-                    <Typography>Detailed Comparison
+                   Detailed Comparison
                         <ButtonGroup>
                             <ButtonGroupIconButton onClick={() => exportPDF(barChartID, true)}>
                                 <GetAppIcon/>
@@ -164,7 +158,6 @@ const Plots = inject("dataStore", "visStore")(observer((props) => {
                                 target="_blank"
                                 rel="noopener noreferrer"><HelpIcon/></ButtonGroupIconButton>
                         </ButtonGroup>
-                    </Typography>
                     <SimpleChart sigThreshold={props.sigThreshold} logSigThreshold={props.logSigThreshold}
                                  isTimeSeries={props.isTimeSeries}
                                  width={props.visStore.screenWidth / 2} height={props.visStore.plotHeight / 2}

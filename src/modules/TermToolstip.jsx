@@ -6,7 +6,7 @@ import BarChart from "./SimpleCharts/MiniBarChart";
 import {Typography} from "@material-ui/core";
 
 const TermTooltip = inject("dataStore", "visStore")(observer((props) => {
-    let condLegend = props.dataStore.conditions.map((cond, i) => <span>{i + 1 + ": " + cond}<br/></span>)
+    let condLegend = props.dataStore.conditions.map((cond, i) => <span key={cond}>{i + 1 + ": " + cond}<br/></span>)
     return (<div style={{overflow: "auto"}}>
         <Typography>{props.dataStore.dataTable[props.id].description}</Typography>
         List comparison:
@@ -36,7 +36,7 @@ const TermTooltip = inject("dataStore", "visStore")(observer((props) => {
 }));
 TermTooltip.propTypes = {
     id: PropTypes.string.isRequired,
-    median: PropTypes.number.isRequired,
+    median: PropTypes.number,
     logSigThreshold: PropTypes.number.isRequired,
     isTimeseries: PropTypes.bool.isRequired,
 };

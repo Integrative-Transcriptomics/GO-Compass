@@ -30,8 +30,8 @@ const TreemapLegend = (props) => {
     </svg>
 }
 TreemapLegend.propTypes = {
-    foregroundScale: PropTypes.arrayOf(PropTypes.func).isRequired,
-    backgroundScale: PropTypes.arrayOf(PropTypes.func).isRequired,
+    foregroundScale: PropTypes.func.isRequired,
+    backgroundScale: PropTypes.func.isRequired,
     glyphEncoding: PropTypes.string.isRequired,
 };
 export default TreemapLegend;
