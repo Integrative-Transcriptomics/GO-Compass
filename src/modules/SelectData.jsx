@@ -52,7 +52,8 @@ const SelectData = (props) => {
     const [selectedMeasure, selectMeasure] = useState("Wang");
     const [pvalueFilter, setPvalueFilter] = useState(0.05);
     const [tab, setTab] = React.useState(0);
-    const [isError, setIsError]= React.useState(false);
+    const [isError, setIsError] = React.useState(false);
+    const [waitText, setWaitText] = React.useState("");
 
     const useStyles = makeStyles((theme: Theme) => createStyles({
         root: {
@@ -66,18 +67,26 @@ const SelectData = (props) => {
             color: '#fff',
         },
     }),);
+    const startTimer = () => {
+        return new Promise((resolve, reject) => {
+            setTimeout(() => resolve(), 30000);
+        })
+    }
+
     /**
      * Launches the application
      * @type {function(): void}
      */
     const launch = useCallback(() => {
         setIsLoading(true);
+        startTimer().then(() => {
+            setWaitText("Thank you for your patience!")
+        })
         if (goFile !== null) {
             const reorderedFiles = conditions.map(d => {
                 return geneFiles[d.index];
             });
             multiRevigoGoLists(goFile, reorderedFiles, [...multiBackground], propagateBackground, selectedMeasure, pvalueFilter, direction, response => {
-                console.log(response)
                 if (response !== undefined) {
                     props.setRootStore(response.results, response.conditions, response.tableColumns, response.hasFC, response.geneValues, response.goSetSize, selectedMeasure, pvalueFilter);
                 } else {
@@ -102,18 +111,27 @@ const SelectData = (props) => {
     }, [goFile, conditions, multiBackground, propagateBackground, selectedMeasure, pvalueFilter, geneFiles, props, direction]);
     const loadMouse = useCallback(() => {
         setIsLoading(true)
+        startTimer().then(() => {
+            setWaitText("Thank you for your patience!")
+        })
         exampleMouse((response) => {
             props.setRootStore(response.results, response.conditions, response.tableColumns, response.hasFC, response.geneValues, response.goSetSize, selectedMeasure, 0.00005);
         })
     }, [props, selectedMeasure])
     const loadTreponema = useCallback(() => {
         setIsLoading(true)
+        startTimer().then(() => {
+            setWaitText("Thank you for your patience!")
+        })
         exampleTreponema((response) => {
             props.setRootStore(response.results, response.conditions, response.tableColumns, response.hasFC, response.geneValues, response.goSetSize, selectedMeasure, pvalueFilter);
         })
     }, [props, pvalueFilter, selectedMeasure])
     const loadStreptomyces = useCallback(() => {
         setIsLoading(true)
+        startTimer().then(() => {
+            setWaitText("Thank you for your patience!")
+        })
         exampleStrepto((response) => {
             props.setRootStore(response.results, response.conditions, response.tableColumns, response.hasFC, response.geneValues, response.goSetSize, selectedMeasure, pvalueFilter);
         })
@@ -190,9 +208,9 @@ const SelectData = (props) => {
                 hidden={tab !== 1}
             >
                 <List dense>
-                    {isError?<ListItem>
+                    {isError ? <ListItem>
                         <Alert severity={"warning"}>Something went wrong. Please check your input files!</Alert>
-                    </ListItem>:null}
+                    </ListItem> : null}
                     <ListItem>
                         <List dense>
                             <Typography>Upload Gene or GO-term lists (1 required)<Tooltip
@@ -368,7 +386,10 @@ const SelectData = (props) => {
                                   isLoading={isLoading}/>
             </div>
             <Backdrop className={classes.backdrop} open={isLoading}>
-                <CircularProgress color="inherit"/>
+                <Container align="center">
+                    <CircularProgress/>
+                    <Typography>{waitText}</Typography>
+                </Container>;
             </Backdrop>
         </div>);
 };
