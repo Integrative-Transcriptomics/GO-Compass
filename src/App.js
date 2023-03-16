@@ -109,8 +109,8 @@ const App = observer((props) => {
                             </FormControl>,
                                 <Typography>
                                     {"Method: "
-                                        + props.rootStore.selectedMeasure + ", p-Value Filter: " + props.rootStore.pvalueFilter + ", Documentation"}
-                                </Typography>] : <Typography>{"Help:"}</Typography>}
+                                        + props.rootStore.selectedMeasure + ", p-Value Filter: " + props.rootStore.pvalueFilter + ", Help"}
+                                </Typography>] : <Typography>{"Help"}</Typography>}
                         <IconButton href="https://github.com/Integrative-Transcriptomics/GO-Compass"
                                     target="_blank"
                                     rel="noopener noreferrer"> <GitHubIcon style={{color: "white"}}/>
