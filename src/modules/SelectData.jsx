@@ -55,7 +55,7 @@ const SelectData = (props) => {
     const [isError, setIsError] = React.useState(false);
     const [waitText, setWaitText] = React.useState("");
 
-    const useStyles = makeStyles((theme: Theme) => createStyles({
+    const useStyles = makeStyles((theme) => createStyles({
         root: {
             flexGrow: 1,
         }, menuButton: {

@@ -1,5 +1,6 @@
 {
   "name": "go-compass",
+  "type": "module",
   "version": "0.1.0",
   "homepage": ".",
   "private": true,
@@ -9,11 +10,9 @@
     "@material-ui/icons": "^4.9.1",
     "@material-ui/lab": "^4.0.0-alpha.56",
     "@material-ui/styles": "latest",
-    "@testing-library/jest-dom": "^4.2.4",
-    "@testing-library/react": "^9.5.0",
-    "@testing-library/user-event": "^7.2.1",
     "@upsetjs/react": "^1.6.2",
-    "axios": "^0.21.2",
+    "@vitejs/plugin-react": "^4.2.1",
+    "axios": "^1.6.5",
     "d3": "^5.16.0",
     "html2canvas": "^1.4.1",
     "jspdf": "^2.5.1",
@@ -23,17 +22,16 @@
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
     "react-refresh": "^0.12.0",
-    "react-scripts": "3.4.1",
     "react-select": "^3.1.0",
-    "uuid": "latest"
+    "uuid": "latest",
+    "vite": "^5.0.11",
+    "vite-tsconfig-paths": "^4.2.3"
   },
   "scripts": {
-    "dev": "concurrently \"npm run server\" \"npm run start\"",
-    "server": "cd gocompass && flask run --no-debugger",
-    "start": "react-scripts start -FAST_REFRESH=true",
-    "build": "react-scripts build",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "dev": "concurrently \"yarn run server\" \"yarn run start\"",
+    "server": "cd gocompass && flask run",
+    "start": "vite",
+    "build": "vite build"
   },
   "eslintConfig": {
     "extends": "react-app"

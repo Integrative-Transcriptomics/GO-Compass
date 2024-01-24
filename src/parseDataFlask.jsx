@@ -6,7 +6,7 @@ import axios from 'axios';
  * @param {function} callback
  */
 function performCorrelation(data, callback) {
-    axios.post("/correlation", {data: data}).then((response) => {
+    axios.post("/api/correlation", {data: data}).then((response) => {
         callback(response.data);
     })
 }
@@ -20,7 +20,7 @@ function multiRevigoGoLists(goFile, dataFiles, backgroundFiles, propagateBackgro
     formData.append("pvalueFilter", pvalueFilter);
     formData.append("method", method);
     formData.append("direction", direction);
-    axios.post("/MultiREVIGO", formData)
+    axios.post("/api/MultiREVIGO", formData)
         .then(response => {
             callback(response.data)
         })
@@ -50,7 +50,7 @@ function multiSpeciesRevigo(dataFiles, backgroundFiles, propagateBackground, con
     formData.append("method", method);
     formData.append("direction", direction);
     if (dataFiles.length > 0 && backgroundFiles.length > 0) {
-        axios.post("/MultiREVIGO", formData)
+        axios.post("/api/MultiREVIGO", formData)
             .then(response => {
                 callback(response.data)
             })
@@ -75,7 +75,7 @@ function getGOheader(goFile, callback) {
     if (goFile != null) {
         const formData = new FormData();
         formData.append("goEnrichment", goFile);
-        axios.post("/readFileHeader", formData)
+        axios.post("/api/readFileHeader", formData)
             .then(response => {
                 callback(response.data)
             })
@@ -86,19 +86,19 @@ function getGOheader(goFile, callback) {
 }
 
 function exampleMouse(callback) {
-    axios.get("/load_mus_musculus").then((response) => {
+    axios.get("/api/load_mus_musculus").then((response) => {
         callback(response.data)
     })
 }
 
 function exampleTreponema(callback) {
-    axios.get("/load_treponema_pallidum").then((response) => {
+    axios.get("/api/load_treponema_pallidum").then((response) => {
         callback(response.data)
     })
 }
 
 function exampleStrepto(callback) {
-    axios.get("/load_streptomyces").then((response) => {
+    axios.get("/api/load_streptomyces").then((response) => {
         callback(response.data)
     })
 }
