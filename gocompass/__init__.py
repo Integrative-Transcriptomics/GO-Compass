@@ -113,12 +113,15 @@ def iterate_matrix(matrix, go_terms, go_enrichment, background):
     avgs = dict()
 
     # calculate averages for each term for uniqueness value
-    for index, term in enumerate(go_terms):
-        col = matrix[:, index]
-        row = matrix[index, :]
-        col = col[col != -1]
-        row = row[row != -1]
-        avgs[term] = (col.sum() + row.sum()) / (len(go_terms) - 1)
+    if len(go_terms) == 1:
+        avgs[go_terms[0]]=0
+    else:
+        for index, term in enumerate(go_terms):
+            col = matrix[:, index]
+            row = matrix[index, :]
+            col = col[col != -1]
+            row = row[row != -1]
+            avgs[term] = (col.sum() + row.sum()) / (len(go_terms) - 1)
 
     # stores tree structure
     tree = dict()

@@ -23,7 +23,7 @@ export class RootStore {
                 return -Math.log10(this.sigThreshold);
             },
             init: action((results, conditions, tableColumns, hasFC, geneValues, goSetSize, selectedMeasure, pvalueFilter) => {
-                this.initialized=true
+                this.initialized=true;
                 this.selectedMeasure = selectedMeasure;
                 this.pvalueFilter = pvalueFilter;
                 this.hasGeneInfo = Object.keys(geneValues).length > 0;
@@ -41,7 +41,6 @@ export class RootStore {
                     return ({id: ont, name: this.ontologies_map[ont]})
                 });
                 this.sigThreshold = Number(pvalueFilter) <= 0.05 ? Number(pvalueFilter) : 0.05
-
             }),
             setOntology: action((ontology) => {
                 this.ontology = ontology;
