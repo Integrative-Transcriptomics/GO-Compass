@@ -4,7 +4,7 @@ click==7.1.2
 docopt==0.6.2
 Flask==1.1.2
 goatools==1.1.6
-idna==2.10
+idna==3.15
 itsdangerous==1.1.0
 Jinja2==2.11.3
 MarkupSafe==1.1.1
