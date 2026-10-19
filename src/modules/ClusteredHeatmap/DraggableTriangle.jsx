@@ -1,4 +1,4 @@
-import React, {createRef, useCallback, useEffect, useState} from 'react';
+import React, {createRef, useCallback, useEffect, useState, useRef } from 'react';
 import PropTypes from "prop-types";
 import * as d3 from "d3";
 import {inject, observer} from "mobx-react";
@@ -11,6 +11,18 @@ const DraggableTriangle = inject("visStore")(observer((props) => {
     const xScale = props.xScale;
     const ref = createRef();
 
+    /* Detect the exact moment the user finished dragging their mouse
+    * Effect fires when a drag ends, aka exactly when a drag gets "committed" by the user.
+    * This prevent us from reading thousands of irrelevant little mouse movements human users tend to make while dragging things around
+    */
+    const userWasDragging = useRef(false);
+    
+    useEffect(() => {
+        if (userWasDragging.current && !dragging) {
+            props.onDragEnd();
+        }
+        userWasDragging.current = dragging;
+    }, [dragging, props]);
 
     const mouseDown = useCallback((event) => {
         event.preventDefault();
@@ -83,6 +95,9 @@ DraggableTriangle.propTypes = {
     text: PropTypes.string.isRequired,
     min: PropTypes.number.isRequired,
     max: PropTypes.number.isRequired,
+
+    // Required to provide ClusteredHeatmap.jsx with onDragEnd() function
+    onDragEnd: PropTypes.func.isRequired,
 };
 export default DraggableTriangle;
 

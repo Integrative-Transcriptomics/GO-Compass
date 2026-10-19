@@ -324,13 +324,14 @@ def read_background(background_file, is_local):
     reads background file
     """
     # helper file needs to be created since GOAtools method is only able to read files
-    helper_file = tempfile.NamedTemporaryFile()
+    helper_file = tempfile.NamedTemporaryFile(delete=False) # Windows compatibility fix 1
     if not is_local:
         helper_file.write(background_file.stream.read())
     else:
         helper_file.write(background_file.read())
-    objanno = get_objanno(helper_file.name, 'id2gos', godag=godag)
     helper_file.close()
+    objanno = get_objanno(helper_file.name, 'id2gos', godag=godag)
+    os.unlink(helper_file.name) # Windows compatibility fix 2
     return objanno
 
 
@@ -464,14 +465,15 @@ def process_backgrounds(background_files, propagate_background, is_local):
             for id in background:
                 background_semi_separated[id] = ";".join(background[id])
             background_df = pd.DataFrame.from_dict(background_semi_separated, orient="index")
-            background_file = tempfile.NamedTemporaryFile()
+            background_file = tempfile.NamedTemporaryFile(delete=False) # Windows compatibility fix 1
+            background_file.close() # close the temp file handle immediately after creating it before to_csv opens this path
             background_df.to_csv(background_file.name, sep="\t")
             if is_local:
                 background_anno[os.path.basename(file.name)] = get_objanno(background_file.name, 'id2gos', godag=godag)
             else:
                 background_anno[os.path.basename(file.filename)] = get_objanno(background_file.name, 'id2gos',
                                                                                godag=godag)
-            background_file.close()
+            os.unlink(background_file.name) # manually delete temp file when it's not needed anymore
     return background_anno
 
 

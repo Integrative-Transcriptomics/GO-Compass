@@ -13,7 +13,11 @@ import GeneGlyph from "./GeneGlyph";
  * @return {null}
  */
 const AnimatedTreemap = inject("dataStore", "visStore")(observer((props) => {
-    const [index, setIndex] = useState(0);
+    
+    // Fix for the visualization in the top right area appearing strangely messed up upon session import until the user manually selects a comparison pair (e.g. D8vsD0)
+    // If we initialize [index, setIndex] using the up-to-date state from visStore, this visualization starts up sync'd right away
+    const [index, setIndex] = useState(props.visStore.conditionIndex);
+
     const leafRef = React.createRef();
     const stripedRef = React.createRef();
     const propRef = React.createRef();

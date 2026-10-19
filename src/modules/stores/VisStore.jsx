@@ -3,6 +3,9 @@ import * as d3 from "d3";
 import {getTextWidth} from "../../UtilityFunctions";
 import traverseTree from "../ClusteredHeatmap/RFLayout";
 
+// Import Trrack functionality from ProvenanceStore.jsx
+import { setConditiionIndexAction, setOverviewListComparisonTabAction, setLockedSelectionAction, setScaleLockedAction } from "./ProvenanceStore";
+
 /**
  * store for visualization operations
  */
@@ -23,6 +26,10 @@ export class VisStore {
             selectionLocked: false,
             conditionIndex: 0,
             stepsize: 10,
+
+            // Extra MobX-observed fields for provenance tracking
+            overviewListComparisonTab: 0,      // Overview List Comparison in bottom left quadrant starts in tab 0: "All GO-Terms"
+            scaleLocked: true,                 // per default, "LOCK Y-SCALE" in bottom right quadrant starts locked ("true")
 
             /**
              * color Scale for terms
@@ -131,24 +138,60 @@ export class VisStore {
             }),
             setConditionIndex: action((index) => {
                 this.conditionIndex = index;
+
+                // If provenance data is present, update the current conditionIndex inside of this provenance data based on the current ontology
+                if (this.dataStore.rootStore.provenance) {
+                    this.dataStore.rootStore.provenance.apply(
+                        setConditiionIndexAction({
+                            ontology: this.dataStore.ontology,
+                            index: index
+                        }),
+                         `(${this.dataStore.ontology}) ${this.dataStore.conditions[index]}`);
+                }
             }),
             setSigThreshold: action((threshold) => {
                 this.sigThreshold = threshold;
             }),
             unlock: action(() => {
+                // Only appy on provenance data if there was is a locked-in selection
+                // unlock also triggers on every tab switch even if nothing is selected
+                const lockedOrSelected = (this.selectionLocked || this.selectedConditions.length > 0);
+
                 this.selectionLocked = false;
-                this.selectedConditions=[];
+                this.selectedConditions = [];
+
+                if (lockedOrSelected && this.dataStore.rootStore.provenance) {
+                    this.dataStore.rootStore.provenance.apply(
+                        setLockedSelectionAction({ontology: this.dataStore.ontology, selectionLocked: false, selectedConditions: []}), `OLC: Clear selection`);
+                }
             }),
             setLockedSelection: action((indices) => {
-                const newIndices=[...new Set(indices)];
+                const conditionIndicesWithoutDuplicates=[...new Set(indices)];
                 if(this.selectionLocked) {
-                    if (newIndices.toString() === this.selectedConditions.toString()) {
-                        this.selectionLocked=false
-                    } else{
-                        this.selectedConditions = newIndices
+                    if (conditionIndicesWithoutDuplicates.toString() === this.selectedConditions.toString()) {
+                        this.selectionLocked = false;
+                    } else {
+                        this.selectedConditions = conditionIndicesWithoutDuplicates;
                     }
-                } else{
-                    this.selectionLocked=true
+                } else {
+                    this.selectionLocked = true;
+                    this.selectedConditions = conditionIndicesWithoutDuplicates;
+                }
+                // New case for provenance handling: If provenance data is present, apply setLockedSelectionAction to the provenance data as well
+                if (this.dataStore.rootStore.provenance) {
+
+                    const selectedConditionNames = [];
+                    this.selectedConditions.forEach(conditionIndex => {
+                        selectedConditionNames.push(this.dataStore.conditions[conditionIndex]);
+                    });
+
+                    this.dataStore.rootStore.provenance.apply(
+                        setLockedSelectionAction({ // try saying setLockedSelectionAction ten times in a row
+                            ontology: this.dataStore.ontology,
+                            selectionLocked: this.selectionLocked,
+                            selectedConditions: this.selectedConditions
+                        }),
+                        `${this.selectionLocked ? "Lock" : "Unlock"} ${selectedConditionNames.join(", ")}`);
                 }
             }),
             selectConditions: action((indices) => {
@@ -156,7 +199,29 @@ export class VisStore {
                     this.selectedConditions = [...new Set(indices)];
                 }
             }),
-
+            // Provenance-enabled Overview List Comparison Tab display for when the user clicks the ALL GO-Terms / Significant GO-Terms tab in Overview List Comparison (bottom left quadrant)
+            setOverviewListComparisonTab: action((tab) => {
+                // Update MobX observed/observable overviewListComparisonTab field in VisStore instance
+                this.overviewListComparisonTab = tab;
+                // If provenance data is present, update the current tab inside of this provenance data based on the current ontology
+                if (this.dataStore.rootStore.provenance) {
+                    this.dataStore.rootStore.provenance.apply(
+                        setOverviewListComparisonTabAction({ ontology: this.dataStore.ontology, tab: tab }),
+                        // if in tab 0, display All GO-Terms, otherwise display Significant GO-Terms
+                        `${tab === 0 ? "All GO-Terms" : "Significant GO-Terms"}`);
+                }
+            }),
+            // Provenance-enabled (UN)LOCK Y-SCALE for when the user clicks sole button in Detailed Comparison (bottom right quadrant)
+            setScaleLocked: action((locked) => {
+                // Update MobX observed/observable locked field in VisStore instance
+                this.scaleLocked = locked;
+                // If provenance data is present, update the current tab inside of this provenance data based on the current ontology
+                if (this.dataStore.rootStore.provenance) {
+                    this.dataStore.rootStore.provenance.apply(
+                        setScaleLockedAction({ ontology: this.dataStore.ontology, locked: locked }),
+                        `DC: ${locked ? "Lock" : "Unlock"} Y-Scale`);
+                }
+            })
         })
     }
 }

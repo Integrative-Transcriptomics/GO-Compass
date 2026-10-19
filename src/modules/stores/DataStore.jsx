@@ -5,13 +5,19 @@ import {TableStore} from "./TableStore";
 import {VisStore} from "./VisStore";
 import {UpSetStore} from "./UpSetStore";
 
+// Import Trrack functionality from ProvenanceStore.jsx
+import { setFilterCutoffAction, setClusterCutoffAction } from "./ProvenanceStore";
+
 /**
  * Central store for data operations
  */
 export class DataStore {
-    constructor(dataTable, tree, conditions, tableColumns, rootStore) {
-        this.rootStore = rootStore
-        this.tableStore = new TableStore(dataTable, conditions, tableColumns);
+    // Per default, RootStore creates one DataStore per ontology. We now need to provide each DataStore instance with a way to check which ontology it belongs to
+    constructor(ontology, dataTable, tree, conditions, tableColumns, rootStore) {
+        this.ontology = ontology;
+
+        this.rootStore = rootStore;
+        this.tableStore = new TableStore(this, dataTable, conditions, tableColumns);
         this.visStore = new VisStore(this);
         this.upSetStore = new UpSetStore(this, this.visStore)
         this.tableColumns = tableColumns;
@@ -29,6 +35,7 @@ export class DataStore {
             pca: [],
             pcaLoaded: false,
             correlationLoaded: false,
+            correlationRequestID: 0,
             /**
              * flat hierarchy of cluster representatives and other GO terms
              * @returns {{}}
@@ -167,18 +174,40 @@ export class DataStore {
             setClusterCutoff: action((cutoff) => {
                 this.clusterCutoff = cutoff;
             }),
+            // commits the current filter cutoff to our provenance (called once on drag end) [could also call on intermediate sliper steps if desired by chair]
+            commitFilterCutoff: action(() => {
+                if (this.rootStore.provenance) {
+                    this.rootStore.provenance.apply(
+                        setFilterCutoffAction({ontology: this.ontology, cutoff: this.filterCutoff}),
+                        `Filter: ${this.filterCutoff}`);
+                }
+            }),
+            // commits the current cluster cutoff to our provenance (called once on drag end) [could also call on intermediate sliper steps if desired by chair]
+            commitClusterCutoff: action(() => {
+                if (this.rootStore.provenance) {
+                    this.rootStore.provenance.apply(
+                        setClusterCutoffAction({ontology: this.ontology, cutoff: this.clusterCutoff}),
+                        `Cluster: ${this.clusterCutoff}`);
+                }
+            }),
             recalculateFiltering: action((cutoff) => {
                 this.filteredTree = this.filterTree(this.tree, cutoff);
                 this.filterHierarchy = this.extractHierarchy(this.tree, cutoff, false, false);
             })
-
         });
         // when the filter slider is moved, recalculate pca and correlation
         reaction(
             () => this.filteredPvalues,
             () => {
+                this.correlationRequestID += 1;
+                const requestID = this.correlationRequestID;
+
                 performCorrelation(this.filteredPvalues, response => {
-                    this.correlation = response;
+                    if ( requestID === this.correlationRequestID) {
+                        this.correlation = response;
+                    } else {
+                        console.log("Dropped response (request " + requestID + ", current is " + this.correlationRequestID +")");
+                    }
                 })
             });
         // when the filter slider is moved, restructure table
@@ -205,8 +234,15 @@ export class DataStore {
         /**
          * Calculates p-value correlation
          */
+        this.correlationRequestID += 1;
+        const requestID = this.correlationRequestID;
+
         performCorrelation(this.filteredPvalues, response => {
-            this.correlation = response;
+            if ( requestID === this.correlationRequestID) {
+                this.correlation = response;
+            } else {
+                console.log("Dropped response (request " + requestID + ", current is " + this.correlationRequestID +")");
+            }
             this.correlationLoaded = true;
         });
         this.tableStore.initTermState(Object.keys(this.filterHierarchy));

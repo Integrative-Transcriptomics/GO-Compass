@@ -12,7 +12,10 @@ import SignificanceLine from "./SignificanceLine";
 const SimpleChart = inject("dataStore", "visStore")(observer((props) => {
     const store = useLocalStore(() => ({
         chartHeight: 150,
-        scaleLocked: true,
+
+        // The value below is now provenance-enabled and gets handled globally by visStore.scaleLocked 
+        // scaleLocked: true,
+
         setChartHeight: action((height) => {
             store.chartHeight = height;
         }),
@@ -33,9 +36,10 @@ const SimpleChart = inject("dataStore", "visStore")(observer((props) => {
         <Box>
             <div ref={rest}>
                 <Button
-                    onClick={() => store.setScaleLocked(!store.scaleLocked)} variant="contained"
-                    startIcon={store.scaleLocked ? <LockOpen/> : <Lock/>}>
-                    {store.scaleLocked ? "Unlock y-Scale" : "Lock y-Scale"}
+                    // onClick={() => store.setScaleLocked(!store.scaleLocked)} variant="contained"
+                    onClick={() => props.visStore.setScaleLocked(!props.visStore.scaleLocked)} variant="contained"
+                    startIcon={props.visStore.scaleLocked ? <LockOpen/> : <Lock/>}>
+                    {props.visStore.scaleLocked ? "Unlock Y-Scale" : "Lock Y-Scale"}
                 </Button>
                                         <svg width={150} height={20}>
                             <SignificanceLine width={20} height={10}/>
@@ -46,7 +50,7 @@ const SimpleChart = inject("dataStore", "visStore")(observer((props) => {
                            height={store.chartHeight}
                            sigThreshold={props.sigThreshold}
                            logSigThreshold={props.logSigThreshold}
-                           scaleLocked={store.scaleLocked} id={props.id}/> </Box>
+                           scaleLocked={props.visStore.scaleLocked} id={props.id}/> </Box>
     );
 }));
 

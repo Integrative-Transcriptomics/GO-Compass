@@ -3,6 +3,8 @@
 # dependencies
 /node_modules
 /venv
+/gocompass/venv
+/gocompass/__pycache__
 /.pnp
 .pnp.js
 
@@ -13,6 +15,7 @@
 /build
 
 # misc
+.local
 .DS_Store
 .env.local
 .env.development.local

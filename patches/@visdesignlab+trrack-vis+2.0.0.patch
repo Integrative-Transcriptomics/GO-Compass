@@ -1,0 +1,224 @@
+diff --git a/node_modules/@visdesignlab/trrack-vis/dist/trrackvis.cjs.development.js b/node_modules/@visdesignlab/trrack-vis/dist/trrackvis.cjs.development.js
+index 6f0d109..3f7ad89 100644
+--- a/node_modules/@visdesignlab/trrack-vis/dist/trrackvis.cjs.development.js
++++ b/node_modules/@visdesignlab/trrack-vis/dist/trrackvis.cjs.development.js
+@@ -162,10 +162,12 @@ function BackboneNode(_ref) {
+   };
+   var handleClose = function handleClose() {
+     var _prov$getLatestAnnota3;
+-    setAnnotateText((_prov$getLatestAnnota3 = prov.getLatestAnnotation(node.id)) == null ? void 0 : _prov$getLatestAnnota3.annotation);
++    setAnnotateText(((_prov$getLatestAnnota3 = prov.getLatestAnnotation(node.id)) == null ? void 0 : _prov$getLatestAnnota3.annotation) || '');
+     setAnnotationOpen(-1);
+   };
+-  var handleInputChange = function handleInputChange() {};
++  var handleInputChange = function handleInputChange(e) {
++    setAnnotateText(e.target.value);
++  };
+   // console.log(JSON.parse(JSON.stringify(node)));
+   var glyph = React__default.createElement("circle", {
+     style: cursorStyle,
+@@ -216,7 +218,7 @@ function BackboneNode(_ref) {
+     label = node.label;
+   }
+   if (node.artifacts && node.artifacts.annotations.length > 0 && annotationOpen !== nodeMap[node.id].depth) {
+-    annotate = node.artifacts.annotations[0].annotation;
++    annotate = node.artifacts.annotations[node.artifacts.annotations.length - 1].annotation;
+   }
+   if (!nodeMap[node.id]) {
+     return null;
+@@ -408,8 +410,8 @@ function BookmarkNode(_ref) {
+   }
+   var label = '';
+   var annotate = '';
+-  if (node.artifacts && node.artifacts.annotations.length > 0 && node.artifacts.annotations[0].annotation.length > 0) {
+-    annotate = node.artifacts.annotations[0].annotation;
++  if (node.artifacts && node.artifacts.annotations.length > 0 && node.artifacts.annotations[node.artifacts.annotations.length - 1].annotation.length > 0) {
++    annotate = node.artifacts.annotations[node.artifacts.annotations.length - 1].annotation;
+   }
+   label = node.label;
+   if (annotate.length > 20) annotate = annotate.substr(0, 20) + "..";
+@@ -493,7 +495,8 @@ function BookmarkTransitions(xOffset, yOffset, nodeList) {
+ function BookmarkListView(_ref) {
+   var graph = _ref.graph,
+     eventConfig = _ref.eventConfig,
+-    currentNode = _ref.currentNode;
++    currentNode = _ref.currentNode,
++    changeCurrent = _ref.changeCurrent;
+   if (graph === undefined) {
+     return null;
+   }
+@@ -504,14 +507,17 @@ function BookmarkListView(_ref) {
+   var yOffset = verticalSpace;
+   // eslint-disable-next-line no-restricted-syntax
+   for (var j in graph.nodes) {
+-    if (graph.nodes[j].bookmarked) {
++    var isAnnotated = graph.nodes[j].artifacts &&
++      graph.nodes[j].artifacts.annotations.length > 0 &&
++      graph.nodes[j].artifacts.annotations[graph.nodes[j].artifacts.annotations.length - 1].annotation.length > 0;
++    if (graph.nodes[j].bookmarked || isAnnotated) {
+       bookmarks.push(graph.nodes[j]);
+     }
+   }
+   return React__default.createElement(reactMove.NodeGroup, Object.assign({
+     data: bookmarks,
+     keyAccessor: function keyAccessor(d) {
+-      return d.label;
++      return d.id;
+     }
+   }, BookmarkTransitions(xOffset, yOffset, bookmarks)), function (innerBookmarks) {
+     return React__default.createElement(React__default.Fragment, null, innerBookmarks.map(function (bookmark) {
+@@ -520,7 +526,13 @@ function BookmarkListView(_ref) {
+         state = bookmark.state;
+       return React__default.createElement("g", {
+         key: key,
+-        transform: translate(state.x, state.y)
++        transform: translate(state.x, state.y),
++        style: { cursor: 'pointer' },
++        onClick: function () {
++          if (changeCurrent) {
++            changeCurrent(d.id);
++          }
++        }
+       }, React__default.createElement(BookmarkNode, {
+         current: currentNode === d.id,
+         node: d,
+@@ -1134,7 +1146,7 @@ function ProvVis(_ref) {
+     style: {
+       overflow: 'visible'
+     },
+-    height: maxHeight < height ? height : maxHeight,
++    height: maxHeight * yOffset < height ? height : maxHeight * yOffset + 40,
+     width: svgWidth,
+     id: "bookmarkView"
+   }, React__default.createElement("g", {
+@@ -1143,7 +1155,8 @@ function ProvVis(_ref) {
+   }, React__default.createElement(BookmarkListView, {
+     graph: prov ? prov.graph : undefined,
+     eventConfig: eventConfig,
+-    currentNode: current
++    currentNode: current,
++    changeCurrent: changeCurrent
+   })));
+   var graphTabView = React__default.createElement("div", null, React__default.createElement("div", {
+     id: "undoRedoDiv"
+@@ -1172,7 +1185,7 @@ function ProvVis(_ref) {
+       overflow: 'visible'
+     },
+     id: 'topSvg',
+-    height: maxHeight < height ? height : maxHeight,
++    height: maxHeight * yOffset < height ? height : maxHeight * yOffset + 40,
+     width: svgWidth
+   }, React__default.createElement("rect", {
+     height: height,
+diff --git a/node_modules/@visdesignlab/trrack-vis/dist/trrackvis.esm.js b/node_modules/@visdesignlab/trrack-vis/dist/trrackvis.esm.js
+index 44ee100..1875dd4 100644
+--- a/node_modules/@visdesignlab/trrack-vis/dist/trrackvis.esm.js
++++ b/node_modules/@visdesignlab/trrack-vis/dist/trrackvis.esm.js
+@@ -155,10 +155,12 @@ function BackboneNode(_ref) {
+   };
+   var handleClose = function handleClose() {
+     var _prov$getLatestAnnota3;
+-    setAnnotateText((_prov$getLatestAnnota3 = prov.getLatestAnnotation(node.id)) == null ? void 0 : _prov$getLatestAnnota3.annotation);
++    setAnnotateText(((_prov$getLatestAnnota3 = prov.getLatestAnnotation(node.id)) == null ? void 0 : _prov$getLatestAnnota3.annotation) || '');
+     setAnnotationOpen(-1);
+   };
+-  var handleInputChange = function handleInputChange() {};
++  var handleInputChange = function handleInputChange(e) {
++    setAnnotateText(e.target.value);
++  };
+   // console.log(JSON.parse(JSON.stringify(node)));
+   var glyph = React.createElement("circle", {
+     style: cursorStyle,
+@@ -209,7 +211,7 @@ function BackboneNode(_ref) {
+     label = node.label;
+   }
+   if (node.artifacts && node.artifacts.annotations.length > 0 && annotationOpen !== nodeMap[node.id].depth) {
+-    annotate = node.artifacts.annotations[0].annotation;
++    annotate = node.artifacts.annotations[node.artifacts.annotations.length - 1].annotation;
+   }
+   if (!nodeMap[node.id]) {
+     return null;
+@@ -401,8 +403,8 @@ function BookmarkNode(_ref) {
+   }
+   var label = '';
+   var annotate = '';
+-  if (node.artifacts && node.artifacts.annotations.length > 0 && node.artifacts.annotations[0].annotation.length > 0) {
+-    annotate = node.artifacts.annotations[0].annotation;
++  if (node.artifacts && node.artifacts.annotations.length > 0 && node.artifacts.annotations[node.artifacts.annotations.length - 1].annotation.length > 0) {
++    annotate = node.artifacts.annotations[node.artifacts.annotations.length - 1].annotation;
+   }
+   label = node.label;
+   if (annotate.length > 20) annotate = annotate.substr(0, 20) + "..";
+@@ -486,7 +488,8 @@ function BookmarkTransitions(xOffset, yOffset, nodeList) {
+ function BookmarkListView(_ref) {
+   var graph = _ref.graph,
+     eventConfig = _ref.eventConfig,
+-    currentNode = _ref.currentNode;
++    currentNode = _ref.currentNode,
++    changeCurrent = _ref.changeCurrent;
+   if (graph === undefined) {
+     return null;
+   }
+@@ -497,14 +500,17 @@ function BookmarkListView(_ref) {
+   var yOffset = verticalSpace;
+   // eslint-disable-next-line no-restricted-syntax
+   for (var j in graph.nodes) {
+-    if (graph.nodes[j].bookmarked) {
++    var isAnnotated = graph.nodes[j].artifacts &&
++      graph.nodes[j].artifacts.annotations.length > 0 &&
++      graph.nodes[j].artifacts.annotations[graph.nodes[j].artifacts.annotations.length - 1].annotation.length > 0;
++    if (graph.nodes[j].bookmarked || isAnnotated) {
+       bookmarks.push(graph.nodes[j]);
+     }
+   }
+   return React.createElement(NodeGroup, Object.assign({
+     data: bookmarks,
+     keyAccessor: function keyAccessor(d) {
+-      return d.label;
++      return d.id;
+     }
+   }, BookmarkTransitions(xOffset, yOffset, bookmarks)), function (innerBookmarks) {
+     return React.createElement(React.Fragment, null, innerBookmarks.map(function (bookmark) {
+@@ -513,7 +519,13 @@ function BookmarkListView(_ref) {
+         state = bookmark.state;
+       return React.createElement("g", {
+         key: key,
+-        transform: translate(state.x, state.y)
++        transform: translate(state.x, state.y),
++        style: { cursor: 'pointer' },
++        onClick: function () {
++          if (changeCurrent) {
++            changeCurrent(d.id);
++          }
++        }
+       }, React.createElement(BookmarkNode, {
+         current: currentNode === d.id,
+         node: d,
+@@ -1127,7 +1139,7 @@ function ProvVis(_ref) {
+     style: {
+       overflow: 'visible'
+     },
+-    height: maxHeight < height ? height : maxHeight,
++    height: maxHeight * yOffset < height ? height : maxHeight * yOffset + 40,
+     width: svgWidth,
+     id: "bookmarkView"
+   }, React.createElement("g", {
+@@ -1136,7 +1148,8 @@ function ProvVis(_ref) {
+   }, React.createElement(BookmarkListView, {
+     graph: prov ? prov.graph : undefined,
+     eventConfig: eventConfig,
+-    currentNode: current
++    currentNode: current,
++    changeCurrent: changeCurrent
+   })));
+   var graphTabView = React.createElement("div", null, React.createElement("div", {
+     id: "undoRedoDiv"
+@@ -1165,7 +1178,7 @@ function ProvVis(_ref) {
+       overflow: 'visible'
+     },
+     id: 'topSvg',
+-    height: maxHeight < height ? height : maxHeight,
++    height: maxHeight * yOffset < height ? height : maxHeight * yOffset + 40,
+     width: svgWidth
+   }, React.createElement("rect", {
+     height: height,

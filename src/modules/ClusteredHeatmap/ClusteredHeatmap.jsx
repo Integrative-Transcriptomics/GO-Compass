@@ -88,6 +88,10 @@ const ClusteredHeatmap = inject("dataStore", "visStore")(observer((props) => {
                         <DraggableTriangle xPos={xPos}
                                            xScale={dispScale}
                                            mouseUp={props.dataStore.setClusterCutoff} duration={0}
+
+                                           // Inform Track that ClusterCutoff has been committed by the user
+                                           onDragEnd={props.dataStore.commitClusterCutoff}
+
                                            min={0}
                                            height={margins.top}
                                            max={dispScale(props.dataStore.filterCutoff)}
@@ -97,6 +101,10 @@ const ClusteredHeatmap = inject("dataStore", "visStore")(observer((props) => {
                         <DraggableTriangle xPos={xPos}
                                            xScale={dispScale}
                                            mouseUp={props.dataStore.setFilterCutoff} duration={0}
+
+                                           // Inform Track that FilterCutoff has been committed by the user
+                                           onDragEnd={props.dataStore.commitFilterCutoff}
+
                                            min={dispScale(props.dataStore.clusterCutoff)}
                                            height={margins.top}
                                            max={treeWidth - gapWidth}

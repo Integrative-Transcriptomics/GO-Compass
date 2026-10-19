@@ -1,36 +1,44 @@
 # syntax=docker/dockerfile:1
-# first stage build the frontend
-FROM node:20-alpine3.18 as build
-# Set the working directory in the container to /app
+
+# Stage 1: Build frontend.
+FROM node:22-alpine3.23 AS build
+
 WORKDIR /build
-# Copy the current directory contents into the container at /app
 COPY . .
 
-RUN corepack enable
-# Install Node.js dependencies
-RUN yarn install
-RUN yarn build
+RUN corepack enable \
+    && yarn install --frozen-lockfile --production=false \
+    && yarn build
 
-FROM python:slim
+# Stage 2: Python application.
+FROM python:3.12-slim-bookworm
 
-# Set the working directory in the container to /app
 WORKDIR /app
 
-# copy the server directory and dist from previous buildstage into the container at /app
+# Copy application files.
 COPY --from=build /build/dist /app/dist
-COPY /gocompass /app/gocompass
-COPY /setup.py /app
+COPY gocompass /app/gocompass
+COPY setup.py /app/
 
-# install python dependencies
-RUN pip install -r gocompass/requirements.txt
+# Install dependencies and application.
+RUN python -m pip install --no-cache-dir \
+        -r gocompass/requirements.txt \
+    && python -m pip install --no-cache-dir --no-deps -e . \
+    && python -m pip check
 
-# Install the server package
-RUN pip install -e .
+# Verify important imports.
+RUN python -c "\
+import flask, goatools, numpy, pandas, scipy, sklearn, simplejson; \
+from goatools.anno.factory import get_objanno; \
+print('Dependency imports successful')"
 
 WORKDIR /app/gocompass
 
-# Make port 5000 available to the server
 EXPOSE 5000
 
-# The command that will be executed when the container is run to then be proxied out to the host
-CMD ["gunicorn","--workers", "3","--timeout","500","--graceful-timeout", "500", "--bind", "0.0.0.0:5000","__init__:app"]
+CMD ["gunicorn", \
+     "--workers", "3", \
+     "--timeout", "500", \
+     "--graceful-timeout", "500", \
+     "--bind", "0.0.0.0:5000", \
+     "__init__:app"]
