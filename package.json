@@ -36,7 +36,8 @@
     "dev": "concurrently \"yarn run server\" \"yarn run start\"",
     "server": "cd gocompass && flask run",
     "start": "vite",
-    "build": "vite build"
+    "build": "vite build",
+    "postinstall": "patch-package --error-on-fail"
   },
   "eslintConfig": {
     "extends": "react-app"
