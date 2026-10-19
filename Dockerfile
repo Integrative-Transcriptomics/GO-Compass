@@ -7,7 +7,7 @@ WORKDIR /build
 COPY . .
 
 RUN corepack enable \
-    && yarn install \
+    && yarn install --frozen-lockfile --production=false \
     && yarn build
 
 # Stage 2: Python application.
