@@ -20,7 +20,7 @@ from goatools.semsim.termwise.wang import SsWang
 
 from gocompass.findDescendants import get_descendants
 
-app = Flask(__name__, static_folder='../build', static_url_path='/')
+app = Flask(__name__, static_folder='../dist', static_url_path='/')
 here = os.path.dirname(__file__)
 
 godag = GODag(os.path.join(here, "go-basic.obo"))
@@ -113,12 +113,15 @@ def iterate_matrix(matrix, go_terms, go_enrichment, background):
     avgs = dict()
 
     # calculate averages for each term for uniqueness value
-    for index, term in enumerate(go_terms):
-        col = matrix[:, index]
-        row = matrix[index, :]
-        col = col[col != -1]
-        row = row[row != -1]
-        avgs[term] = (col.sum() + row.sum()) / (len(go_terms) - 1)
+    if len(go_terms) == 1:
+        avgs[go_terms[0]]=0
+    else:
+        for index, term in enumerate(go_terms):
+            col = matrix[:, index]
+            row = matrix[index, :]
+            col = col[col != -1]
+            row = row[row != -1]
+            avgs[term] = (col.sum() + row.sum()) / (len(go_terms) - 1)
 
     # stores tree structure
     tree = dict()
@@ -376,7 +379,7 @@ def goea(genes, objanno, propagateBackground):
     return goea_results
 
 
-@app.route('/readFileHeader', methods=["POST"])
+@app.route('/api/readFileHeader', methods=["POST"])
 def read_file_header():
     """
     reads file header of enrichment file
@@ -388,19 +391,20 @@ def read_file_header():
     return json.dumps(columns)
 
 
-@app.route('/correlation', methods=["POST"])
+@app.route('/api/correlation', methods=["POST"])
 def correlation():
     """ returns numerical matrix
     performs correlation of GO terms
     """
     data = request.json["data"]
     df = pd.DataFrame(data)
-    df.drop(["goTerm"], axis=1)
+    df.drop(["goTerm"], axis=1, inplace=True)
+    #print(df)
     corr_matrix = df.corr()
     return corr_matrix.to_json(orient="values")
 
 
-@app.route("/MultiREVIGO", methods=["POST"])
+@app.route("/api/MultiREVIGO", methods=["POST"])
 def multi_revigo():
     """
     Performs multi revigo for custom input files
@@ -631,7 +635,7 @@ def go_list_revigo(go_enrichment_file, background_anno, gene_list_files, method,
     return perform_revigo(background_anno, go_enrichment, gene_list_files, method, pvalue_filter)
 
 
-@app.route("/load_mus_musculus", methods=["GET"])
+@app.route("/api/load_mus_musculus", methods=["GET"])
 def load_mus_musculus():
     """
     Loads mouse example data
@@ -650,7 +654,7 @@ def load_mus_musculus():
     return go_list_revigo(go_enrichment_file, background_anno, gene_lists, "Wang", pvalue_filter)
 
 
-@app.route("/load_treponema_pallidum", methods=["GET"])
+@app.route("/api/load_treponema_pallidum", methods=["GET"])
 def load_treponema_pallidum():
     """
     Loads evidente example data
@@ -667,7 +671,7 @@ def load_treponema_pallidum():
     return go_list_revigo(go_enrichment_file, background_anno, gene_lists, "Wang", pvalue_filter)
 
 
-@app.route("/load_streptomyces", methods=["GET"])
+@app.route("/api/load_streptomyces", methods=["GET"])
 def load_streptomyces():
     """
     Loads streptomyces example data

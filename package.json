@@ -1,5 +1,6 @@
 {
   "name": "go-compass",
+  "type": "module",
   "version": "0.1.0",
   "homepage": ".",
   "private": true,
@@ -15,7 +16,10 @@
     "@upsetjs/react": "^1.6.2",
     "@visdesignlab/trrack": "^2.0.0",
     "@visdesignlab/trrack-vis": "^2.0.0",
-    "axios": "^0.21.2",
+    "@vitejs/plugin-react": "^4.2.1",
+    "vite": "^5.0.11",
+    "vite-tsconfig-paths": "^4.2.3",
+    "axios": "^1.6.5",
     "d3": "^5.16.0",
     "html2canvas": "^1.4.1",
     "jspdf": "^2.5.1",
@@ -30,15 +34,10 @@
     "uuid": "^9.0.0"
   },
   "scripts": {
-    "dev": "concurrently \"npm run server\" \"npm run start\"",
-    "server": "run-script-os",
-    "server:win32": "cd gocompass && venv\\Scripts\\flask run --no-debugger",
-    "server:default": "cd gocompass && venv/bin/flask run --no-debugger",
-    "start": "cross-env NODE_OPTIONS=--openssl-legacy-provider react-scripts start -FAST_REFRESH=true",
-    "build": "cross-env NODE_OPTIONS=--openssl-legacy-provider react-scripts build",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject",
-    "postinstall": "patch-package"
+    "dev": "concurrently \"yarn run server\" \"yarn run start\"",
+    "server": "cd gocompass && flask run",
+    "start": "vite",
+    "build": "vite build"
   },
   "eslintConfig": {
     "extends": "react-app"

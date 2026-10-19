@@ -3,7 +3,7 @@ import Plots from "./modules/Plots";
 import Toolbar from "@material-ui/core/Toolbar";
 import AppBar from "@material-ui/core/AppBar";
 import Typography from "@material-ui/core/Typography";
-import {createStyles, FormControl, InputLabel, MenuItem, Select, Theme} from "@material-ui/core";
+import {createStyles, FormControl, InputLabel, MenuItem, Select} from "@material-ui/core";
 import {makeStyles} from "@material-ui/core/styles";
 import SelectData from "./modules/SelectData";
 import {observer, Provider} from "mobx-react";
@@ -28,7 +28,7 @@ import ProvenanceGraph from "./modules/ProvenanceGraph";
 
 
 const App = observer((props) => {
-    const useStyles = makeStyles((theme: Theme) =>
+    const useStyles = makeStyles((theme) =>
         createStyles({
             root: {
                 flexGrow: 1,
