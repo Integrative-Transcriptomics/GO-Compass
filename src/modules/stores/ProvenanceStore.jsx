@@ -15,8 +15,8 @@ export function createGoCompassProvenance(initialOntology, initialSignificanceTh
         ontology: initialOntology,
         sigThreshold: initialSignificanceThreshold,
         ...initialOntologyDependentStates,
-    }, { loadFromUrl: true });
-    // provenance.done(); (This had to removed when { loadFromUrl: true } was added. Turn it back on if you disable URL-sharing)
+    }, { loadFromUrl: false });
+    // provenance.done(); // (This had to removed when { loadFromUrl: true } was added. Turn it back on if you disable URL-sharing)
     return provenance;
 }
 

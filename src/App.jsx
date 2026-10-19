@@ -16,9 +16,11 @@ import UndoIcon from "@material-ui/icons/Undo";
 import RedoIcon from "@material-ui/icons/Redo";
 import GetAppIcon from "@material-ui/icons/GetApp";
 import PublishIcon from "@material-ui/icons/Publish";
-import LinkIcon from "@material-ui/icons/Link";
-// import ShareIcon from "@material-ui/icons/Share";
-import {Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Link} from "@material-ui/core"
+import { Link } from "@material-ui/core"
+// When enabling URL sharing, include the import statements below.
+// import { Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from "@material-ui/core"
+// import LinkIcon from "@material-ui/icons/Link"; Enable import for URL sharing.
+
 
 // Additional icons for the side drawer and the provenance graph rendering component
 import AccountTreeIcon from "@material-ui/icons/AccountTree";
@@ -61,7 +63,8 @@ const App = observer((props) => {
     const appBar = React.createRef();
 
     // Is React currently displaying the shareDialog to the user? Default: false
-    const [shareDialogOpen, setShareDialogOpen] = useState(false);
+    // URL sharing dialog state is currently disabled as it is not a very robust solution.
+    // const [shareDialogOpen, setShareDialogOpen] = useState(false);
 
     // Is the Provenance Graph currently being displayed to the user? Default: false
     const [provenanceGraphOpen, setProvenanceGraphOpen] = useState(false);
@@ -186,6 +189,7 @@ const App = observer((props) => {
                                     <span style={{ fontSize: "0.65rem" }}>Export Session</span>
                                 </span>
                             </Button>
+                            {/* UI element for URL sharing dialog. This is currently disabled as it is not a very robust solution.
                             <Button disabled={!props.rootStore.provenance}
                                 style={{ color: props.rootStore.provenance ? "white" : "rgba(255, 255, 255, 0.3)" }} // white if provenance data is found, otherwise gray
                                 onClick={() => setShareDialogOpen(true)}>
@@ -193,9 +197,9 @@ const App = observer((props) => {
                                     <LinkIcon style={{ color: props.rootStore.provenance ? "white" : "rgba(255, 255, 255, 0.3)" }} />
                                     <span style={{ fontSize: "0.65rem" }}>Share State via URL</span>
                                 </span>
-                            </Button>
+                            </Button> */}
                         </div>
-                        <div style={ {flexGrow: 1 }} />
+                        <div style={{ flexGrow: 1 }} />
                         
                         {/* Mini provenance timeline found in the center of the title bar */}
                         <div style={ {flexGrow: 1 }} />
@@ -287,6 +291,7 @@ const App = observer((props) => {
 
                 {/* URL SHARING INSTRUCTIONS DIALOG
                 A popup dialog that informs the user about the URL sharing feature and its nuances */}
+                {/* URL sharing dialog is currently disabled as it is not a very robust solution.
                 <Dialog open={shareDialogOpen} onClose={() => setShareDialogOpen(false)}>
                     <DialogTitle>Please read carefully</DialogTitle>
                     <DialogContent>
@@ -310,7 +315,7 @@ const App = observer((props) => {
                         }}>Copy Link</Button>
                         <Button onClick={() => setShareDialogOpen(false)}>Cancel</Button>
                     </DialogActions>
-                </Dialog>
+                </Dialog> */}
 
                 {/* PROVENANCE GRAPH DRAWER
                 Drawer that slides in from the right side of the screen when the user presses the graph (history) button in the top panel [see Button key={"history"} above] */}
