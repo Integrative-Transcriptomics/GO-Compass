@@ -1,0 +1,31 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+authors:
+- family-names: "Harbig"
+  given-names: "Theresa"
+- family-names: "Witte-Paz"
+  given-names: "Mathias"
+- family-names: "Nieselt"
+  given-names: "Kay"
+title: "GO-Compass: Visual Navigation of Multiple Lists of GO terms"
+version: 2.0
+date-released: 2026-10-21
+url: "https://github.com/Integrative-Transcriptomics/GO-Compass"
+preferred-citation:
+  type: article
+  authors:
+  - family-names: "Harbig"
+    given-names: "Theresa"
+  - family-names: "Witte-Paz"
+    given-names: "Mathias"
+  - family-names: "Nieselt"
+    given-names: "Kay"
+  doi: "https://doi.org/10.1111/cgf.14829"
+  journal: "Computer Graphics Forum"
+  month: 6
+  start: 271
+  end: 281
+  title: "GO-Compass: Visual Navigation of Multiple Lists of GO terms"
+  volume: 42
+  number: 3
+  year: 2023
