@@ -23,7 +23,7 @@ COPY setup.py /app/
 # Install dependencies and application.
 RUN python -m pip install --no-cache-dir \
         -r gocompass/requirements.txt \
-    && python -m pip install --no-cache-dir --no-deps -e . \
+    && python -m pip install --no-cache-dir --no-deps . \
     && python -m pip check
 
 # Verify important imports.
