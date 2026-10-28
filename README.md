@@ -47,6 +47,30 @@ Two summary visualizations show the similarity of GO terms between the lists. Th
 
 By hovering over a cell in the correlation heatmap or over an intersection of the Venn diagram or UpSet plot, the GO terms can be compared in more detail in vertically juxtaposed bar charts, where each bar chart corresponds to one list.
 
+## Provenance Tracking and Session Management
+
+GO-Compass supports provenance tracking based on the [trrack-vis](https://www.npmjs.com/package/@visdesignlab/trrack-vis) library. This functionality allows users to import and export sessions, track their analysis steps and decisions, and navigate their action history, enhancing reproducibility and transparency in their research workflow.
+
+### Session Import and Export
+   - Export the current session using the **Export Session** button in the title bar (left side).
+   - Restore a previously saved session using the **Import Session** button.
+
+### Action History Timeline
+   - An action recovery bar in the center of the title bar displays the current position in the action history.
+   - The timeline follows the pattern: `Previous Action → Current Action → Next Action`.
+
+### Undo and Redo
+   - Navigate through the action history using the dedicated **Undo** and **Redo** buttons in the title bar.
+   - Alternatively, use the following keyboard shortcuts:
+     - **Undo:** `Ctrl + Z`
+     - **Redo:** `Ctrl + Y`
+
+### Interactive Provenance Graph
+   - Visualize the recorded action history as an interactive graph.
+   - Open the graph using the **Graph** button in the title bar or by pressing `G`.
+   - The graph appears in a drawer along the right edge of the screen.
+   - Each node represents the application state reached after a provenance-enabled action and is labeled with the same descriptive text displayed in the action history timeline.
+
 ## Running GO-Compass Locally
 
 ### Docker

@@ -11,6 +11,11 @@ import PropTypes from "prop-types";
 import HelpIcon from '@material-ui/icons/Help';
 import HomeIcon from '@material-ui/icons/Home';
 import GitHubIcon from '@material-ui/icons/GitHub';
+import GetAppIcon from '@material-ui/icons/GetApp';
+import PublishIcon from "@material-ui/icons/Publish";
+import UndoIcon from '@material-ui/icons/Undo';
+import RedoIcon from '@material-ui/icons/Redo';
+import AccountTreeIcon from '@material-ui/icons/AccountTree';
 import RefreshIcon from '@material-ui/icons/Refresh';
 import {
     Backdrop,
@@ -156,11 +161,9 @@ const SelectData = (props) => {
             </Tabs>
             <div role="tabpanel" hidden={tab !== 0}>
                 <Container>
-                    <Typography variant={"h5"}> Welcome to GO-Compass!
-                    </Typography>
                     <img src={schematic} alt={"Workflow Schematic"} width={"100%"}/>
                     <Typography>
-                        GO-Compass (Gene Ontology list comparison using Semantic Similarity) is a visual analytics tool
+                        <b>GO-Compass</b> (<b>G</b>ene <b>O</b>ntology list <b>compa</b>rison using <b>S</b>emantic <b>S</b>imilarity) is a visual analytics tool
                         for the dispensability reduction and visual comparison of lists of GO terms.
                         GO-Compass performs the analysis in multiple steps:
                     </Typography>
@@ -183,29 +186,49 @@ const SelectData = (props) => {
                             heatmap, UpSet plots, and bar charts.
                         </li>
                     </ol>
-                    <Typography variant={"subtitle1"}>More information:
-                        <Link href="https://tuevis.cs.uni-tuebingen.de/go-compass/" target="_blank"
-                              rel="noopener noreferrer"
-                              style={{marginRight: "10px"}}>https://tuevis.cs.uni-tuebingen.de/go-compass/</Link>
-                        <Link href="https://github.com/Integrative-Transcriptomics/GO-Compass" className={classes.link}
-                              target="_blank" rel="noopener noreferrer">
-                            <GitHubIcon/>
-                        </Link>
+                    <Typography>
+                        With release of GO-Compass v2, the software supports provenance tracking functionality based on the
+                        <Link href="https://www.npmjs.com/package/@visdesignlab/trrack-vis" target="_blank" rel="noopener noreferrer"> trrack-vis </Link>
+                        library. This allows users to import and export sessions, and to track their analysis steps and decisions,
+                        enhancing reproducibility and transparency in their research workflow.
                     </Typography>
-                    <Alert severity={"info"}>Looking for example data? Get started <Link
-                        component="button"
-                        variant="body2"
-                        onClick={() => {
-                            setTab(2);
-                        }}
-                    >
-                        here
-                    </Link> </Alert>
+                    <ol>
+                        <li>
+                            Users can now export their session using the Export Session button (<GetAppIcon style={{ color: "DimGray", position: "relative", top: "5px" }} />)
+                            on the left hand side of the title bar. Exported sessions can be reopened using the Import Session
+                            button (<PublishIcon style={{ color: "DimGray", position: "relative", top: "5px" }} />), respectively.
+                        </li>
+                        <li>
+                            An action recovery bar located in the center of the title bar displays the user's current position in the action
+                            history according to the pattern: Previous Action → Current Action → Next Action.
+                        </li>
+                        <li>
+                            Action recovery is available through dedicated Undo (<UndoIcon style={{ color: "DimGray", position: "relative", top: "5px" }} />)
+                            and Redo (<RedoIcon style={{ color: "DimGray", position: "relative", top: "5px" }} />) buttons in the title bar, bound to the CTRL+Z and CTRL+Y keyboard
+                            shortcuts.
+                        </li>
+                        <li>
+                            GO-Compass can now visualize its recorded action history as an interactive graph.
+                            The graph can be opened via the dedicated Graph button (<AccountTreeIcon style={{ color: "DimGray", position: "relative", top: "5px" }} />)
+                            in the title bar or the keyboard shortcut G. The graph slides in as a drawer along the right edge of the screen.
+                            Each node represents the application state reached after a provenance-enabled action and is labeled using the
+                            same descriptive text shown in the mini timeline.
+                        </li>
+                    </ol>
+                    <Typography variant={"overline"}>
+                        More information about GO-Compass on <Link href="https://tuevis.cs.uni-tuebingen.de/go-compass/" target="_blank"
+                            rel="noopener noreferrer"> TueVis </Link>
+                        &bull;
+                        Source code on <Link href="https://github.com/Integrative-Transcriptomics/GO-Compass" target="_blank"
+                            rel="noopener noreferrer"> GitHub </Link>
+                        &bull;
+                        Looking for example data? Get started <Link component="button" variant="button" onClick={() => { setTab(2); }}>
+                            here </Link>.
+                    </Typography>
                     <div style={ {height: 10} } />
                     <Alert severity={"warning"}>Some browsers do not fully reset GO-Compass when reloading the webpage via <RefreshIcon fontSize="small" style={{verticalAlign: "middle"}}/> or by pressing F5.
-                    <br />You can instead simply click on the GO-Compass text in the top left corner to reset the app.
+                    You can instead simply click on the GO-Compass text in the top left corner to reset the app.
                     </Alert>
-
                 </Container>
             </div>
             <div

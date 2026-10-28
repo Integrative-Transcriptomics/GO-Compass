@@ -17,6 +17,7 @@ import RedoIcon from "@material-ui/icons/Redo";
 import GetAppIcon from "@material-ui/icons/GetApp";
 import PublishIcon from "@material-ui/icons/Publish";
 import { Link } from "@material-ui/core"
+import GOCompassLogo from "../public/go-compass-logo-white.png";
 // When enabling URL sharing, include the import statements below.
 // import { Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from "@material-ui/core"
 // import LinkIcon from "@material-ui/icons/Link"; Enable import for URL sharing.
@@ -160,7 +161,7 @@ const App = observer((props) => {
                         <div className={classes.title} style={ {display: "flex", alignItems: "center"} }>
                             <Link component="button" variant="h6" onClick={() => props.rootStore.goBackToUpload()}
                                 style={{ textDecoration: "none", color: "white" }}>
-                                GO-Compass
+                                <img src={GOCompassLogo} style={{ position: "relative", top: "4px" }} alt={"GO-Compass Logo"} height={"32px"}/>
                             </Link>
                             <div style={{width: 20}} />
                             <Button component="label" style={{ color: "white" }}>
