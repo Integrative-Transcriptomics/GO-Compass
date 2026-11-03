@@ -17,7 +17,7 @@
     "@visdesignlab/trrack": "^2.0.0",
     "@visdesignlab/trrack-vis": "^2.0.0",
     "@vitejs/plugin-react": "^4.2.1",
-    "vite": "^5.0.11",
+    "vite": "^6.4.4",
     "vite-tsconfig-paths": "^4.2.3",
     "axios": "^1.6.5",
     "d3": "^5.16.0",
